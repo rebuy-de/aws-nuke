@@ -1,0 +1,5 @@
+golang:
+   mailerRecipients:
+     - 'dl-scb-tech-platform@rebuy.de'
+   command:
+     - 'hack/build.sh'

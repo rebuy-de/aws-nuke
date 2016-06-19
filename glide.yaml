@@ -1,0 +1,4 @@
+package: github.com/rebuy-de/aws-nuke
+import:
+- package: github.com/aws/aws-sdk-go
+  version: ^v1.1.35
