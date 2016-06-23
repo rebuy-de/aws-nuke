@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/vendor/github.com/aws/aws-sdk-go/service/autoscaling"
 )
 
 var (
@@ -34,38 +35,8 @@ func assertNoError(err error) {
 
 func nukeSession(sess *session.Session) {
 	ec2svc := ec2.New(sess)
+	autoscalingSvc := autoscaling.New(sess)
+
+	nukeAutoScalingGroups(autoscalingSvc)
 	nukeEC2Instances(ec2svc)
-}
-
-func nukeEC2Instances(ec2svc *ec2.EC2) {
-	dii := &ec2.DescribeInstancesInput{}
-	dio, err := ec2svc.DescribeInstances(dii)
-	assertNoError(err)
-
-	tii := &ec2.TerminateInstancesInput{
-		InstanceIds: []*string{},
-	}
-
-	log.Printf("Found these EC2 instances:")
-
-	for _, reservation := range dio.Reservations {
-		for _, instance := range reservation.Instances {
-			log.Printf("\t%s (KeyName=%s, InstanceType=%s, State=%s)",
-				*instance.InstanceId, *instance.KeyName,
-				*instance.InstanceType, *instance.State.Name)
-
-			if *instance.State.Name == "running" {
-				tii.InstanceIds = append(tii.InstanceIds, aws.String(*instance.InstanceId))
-			}
-		}
-	}
-
-	if len(tii.InstanceIds) == 0 {
-		log.Printf("Did not find any running instance.")
-		return
-	}
-
-	log.Printf("Going to terminate these running EC2 instances: %v", tii.InstanceIds)
-	_, err = ec2svc.TerminateInstances(tii)
-	assertNoError(err)
 }
