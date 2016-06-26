@@ -1,28 +1,57 @@
 package main
 
 import (
-	"fmt"
-	"log"
-
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/rebuy-de/aws-nuke/vendor/github.com/aws/aws-sdk-go/aws"
 )
 
-func nukeAutoScalingGroups(svc *autoscaling.AutoScaling) {
-	describeParams := &autoscaling.DescribeAutoScalingGroupsInput{}
-	describeResp, err := svc.DescribeAutoScalingGroups(describeParams)
-	assertNoError(err)
+type AutoScalingNuke struct {
+	svc *autoscaling.AutoScaling
+}
 
-	for _, asg := range describeResp.AutoScalingGroups {
-		fmt.Printf("autoscaling.AutoScalingGroup %s", *asg.AutoScalingGroupName)
-
-		delParams := &autoscaling.DeleteAutoScalingGroupInput{
-			AutoScalingGroupName: asg.AutoScalingGroupName,
-			ForceDelete:          aws.Bool(true),
-		}
-
-		_, err := svc.DeleteAutoScalingGroup(delParams)
-		assertNoError(err)
-		log.Println(" ... delete requested")
+func (n *AutoScalingNuke) ListGroups() ([]Resource, error) {
+	params := &autoscaling.DescribeAutoScalingGroupsInput{}
+	resp, err := n.svc.DescribeAutoScalingGroups(params)
+	if err != nil {
+		return nil, err
 	}
+
+	resources := make([]Resource, 0)
+	for _, asg := range resp.AutoScalingGroups {
+		resources = append(resources, &AutoScalingGroup{
+			svc:  n.svc,
+			name: asg.AutoScalingGroupName,
+		})
+	}
+	return resources, nil
+}
+
+type AutoScalingGroup struct {
+	svc  *autoscaling.AutoScaling
+	name *string
+}
+
+func (g AutoScalingGroup) Remove() error {
+	params := &autoscaling.DeleteAutoScalingGroupInput{
+		AutoScalingGroupName: g.name,
+		ForceDelete:          aws.Bool(true),
+	}
+
+	_, err := g.svc.DeleteAutoScalingGroup(params)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g AutoScalingGroup) Wait() error {
+	params := &autoscaling.DescribeAutoScalingGroupsInput{
+		AutoScalingGroupNames: []*string{g.name},
+	}
+	return g.svc.WaitUntilGroupNotExists(params)
+}
+
+func (g AutoScalingGroup) String() string {
+	return *g.name
 }

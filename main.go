@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/vendor/github.com/aws/aws-sdk-go/service/autoscaling"
 )
 
 var (
@@ -27,16 +29,50 @@ func main() {
 	nukeSession(sess)
 }
 
-func assertNoError(err error) {
-	if err != nil {
-		panic(err)
-	}
+func nukeSession(sess *session.Session) {
+	ec2Nuke := EC2Nuke{ec2.New(sess)}
+	autoscalingNuke := AutoScalingNuke{autoscaling.New(sess)}
+
+	nukeResource(autoscalingNuke.ListGroups)
+	nukeResource(ec2Nuke.ListInstances)
 }
 
-func nukeSession(sess *session.Session) {
-	ec2svc := ec2.New(sess)
-	autoscalingSvc := autoscaling.New(sess)
+func nukeResource(lister ResourceLister) error {
+	var resources []Resource
+	var err error
 
-	nukeAutoScalingGroups(autoscalingSvc)
-	nukeEC2Instances(ec2svc)
+	resources, err = lister()
+	if err != nil {
+		return err
+	}
+
+	for i, resource := range resources {
+		fmt.Printf("%T %s", resource, resource.String())
+		err = resource.Remove()
+		if err != nil {
+			return err
+		}
+		fmt.Printf(" [%d]\n", i)
+	}
+
+	if len(resources) > 0 {
+		fmt.Printf("Waiting for %d resources: ", len(resources))
+		var wg sync.WaitGroup
+
+		for i, resource := range resources {
+			wg.Add(1)
+			go func(i int, resource Resource) {
+				defer wg.Done()
+				resource.Wait()
+				fmt.Printf("[%d] ", i)
+			}(i, resource)
+		}
+
+		wg.Wait()
+		fmt.Println()
+	}
+
+	fmt.Println()
+
+	return nil
 }
