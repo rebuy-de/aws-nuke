@@ -54,6 +54,7 @@ func nukeSession(sess *session.Session, dry bool, wait bool) {
 		autoscalingNuke.ListGroups,
 		ec2Nuke.ListInstances,
 		ec2Nuke.ListSecurityGroups,
+		route53Nuke.ListResourceRecords,
 		route53Nuke.ListHostedZones,
 	}
 
@@ -81,7 +82,7 @@ func nukeResource(lister ResourceLister, dry bool, wait bool) error {
 
 		err = resource.Check()
 		if err != nil {
-			fmt.Printf(" ... %s\n", err.Error())
+			fmt.Fprintf(os.Stderr, " ... %s\n", err.Error())
 			continue
 		}
 
@@ -92,7 +93,7 @@ func nukeResource(lister ResourceLister, dry bool, wait bool) error {
 
 		err = resource.Remove()
 		if err != nil {
-			fmt.Printf(" ... %s\n", err.Error())
+			fmt.Fprintf(os.Stderr, " ... %s\n", err.Error())
 			continue
 		}
 
@@ -101,7 +102,7 @@ func nukeResource(lister ResourceLister, dry bool, wait bool) error {
 	}
 
 	if wait && len(queue) > 0 {
-		fmt.Printf("Waiting, until %d resources get removed.", len(queue))
+		fmt.Printf("Waiting, until %d resources get removed.\n", len(queue))
 		var wg sync.WaitGroup
 		for i, resource := range queue {
 			wg.Add(1)
