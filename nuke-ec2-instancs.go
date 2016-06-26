@@ -1,10 +1,15 @@
 package main
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2Instance struct {
-	svc *ec2.EC2
-	id  *string
+	svc   *ec2.EC2
+	id    *string
+	state string
 }
 
 func (n *EC2Nuke) ListInstances() ([]Resource, error) {
@@ -18,13 +23,21 @@ func (n *EC2Nuke) ListInstances() ([]Resource, error) {
 	for _, reservation := range resp.Reservations {
 		for _, instance := range reservation.Instances {
 			resources = append(resources, &EC2Instance{
-				svc: n.svc,
-				id:  instance.InstanceId,
+				svc:   n.svc,
+				id:    instance.InstanceId,
+				state: *instance.State.Name,
 			})
 		}
 	}
 
 	return resources, nil
+}
+
+func (i *EC2Instance) Check() error {
+	if i.state == "terminated" {
+		return fmt.Errorf("already terminated")
+	}
+	return nil
 }
 
 func (i *EC2Instance) Remove() error {

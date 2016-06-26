@@ -31,13 +31,17 @@ type AutoScalingGroup struct {
 	name *string
 }
 
-func (g AutoScalingGroup) Remove() error {
+func (asg *AutoScalingGroup) Check() error {
+	return nil
+}
+
+func (asg *AutoScalingGroup) Remove() error {
 	params := &autoscaling.DeleteAutoScalingGroupInput{
-		AutoScalingGroupName: g.name,
+		AutoScalingGroupName: asg.name,
 		ForceDelete:          aws.Bool(true),
 	}
 
-	_, err := g.svc.DeleteAutoScalingGroup(params)
+	_, err := asg.svc.DeleteAutoScalingGroup(params)
 	if err != nil {
 		return err
 	}
@@ -45,13 +49,13 @@ func (g AutoScalingGroup) Remove() error {
 	return nil
 }
 
-func (g AutoScalingGroup) Wait() error {
+func (asg *AutoScalingGroup) Wait() error {
 	params := &autoscaling.DescribeAutoScalingGroupsInput{
-		AutoScalingGroupNames: []*string{g.name},
+		AutoScalingGroupNames: []*string{asg.name},
 	}
-	return g.svc.WaitUntilGroupNotExists(params)
+	return asg.svc.WaitUntilGroupNotExists(params)
 }
 
-func (g AutoScalingGroup) String() string {
-	return *g.name
+func (asg *AutoScalingGroup) String() string {
+	return *asg.name
 }
