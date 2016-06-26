@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/route53"
 )
 
 var (
@@ -47,11 +48,13 @@ func main() {
 func nukeSession(sess *session.Session, dry bool, wait bool) {
 	ec2Nuke := EC2Nuke{ec2.New(sess)}
 	autoscalingNuke := AutoScalingNuke{autoscaling.New(sess)}
+	route53Nuke := Route53Nuke{route53.New(sess)}
 
 	listers := []ResourceLister{
 		autoscalingNuke.ListGroups,
 		ec2Nuke.ListInstances,
 		ec2Nuke.ListSecurityGroups,
+		route53Nuke.ListHostedZones,
 	}
 
 	for _, lister := range listers {
