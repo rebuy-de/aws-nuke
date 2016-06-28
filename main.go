@@ -24,14 +24,15 @@ func main() {
 
 	var (
 		noDryRun = flag.Bool("no-dry-run", false,
-			"actualy delete found resources")
+			"Actualy delete found resources.")
 		noWait = flag.Bool("no-wait", false,
-			"do not wait for resource removal")
+			"Do not wait for resource removal. This is faster, "+
+				"but you may have to run the nuke multiple times.")
 	)
 	flag.Parse()
 
 	if !*noDryRun {
-		fmt.Printf("Dry running nuke. Do real delete with '--no-dry-run'.\n")
+		fmt.Printf("Dry run: do real delete with '--no-dry-run'.\n")
 	}
 
 	fmt.Println()
@@ -54,6 +55,7 @@ func nukeSession(sess *session.Session, dry bool, wait bool) {
 		autoscalingNuke.ListGroups,
 		ec2Nuke.ListInstances,
 		ec2Nuke.ListSecurityGroups,
+		ec2Nuke.ListVpcs,
 		route53Nuke.ListResourceRecords,
 		route53Nuke.ListHostedZones,
 	}
@@ -82,7 +84,7 @@ func nukeResource(lister ResourceLister, dry bool, wait bool) error {
 
 		err = resource.Check()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, " ... %s\n", err.Error())
+			fmt.Printf(" ... %s\n", err.Error())
 			continue
 		}
 
