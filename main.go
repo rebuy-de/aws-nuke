@@ -113,6 +113,7 @@ func (n *Nuke) GetListers() []ResourceLister {
 		ec2.ListInstances,
 		ec2.ListSecurityGroups,
 		ec2.ListSubnets,
+		ec2.ListRouteTables,
 		ec2.ListVpcs,
 		route53.ListResourceRecords,
 		route53.ListHostedZones,
