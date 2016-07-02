@@ -112,6 +112,7 @@ func (n *Nuke) GetListers() []ResourceLister {
 		autoscaling.ListGroups,
 		ec2.ListInstances,
 		ec2.ListSecurityGroups,
+		ec2.ListSubnets,
 		ec2.ListVpcs,
 		route53.ListResourceRecords,
 		route53.ListHostedZones,
