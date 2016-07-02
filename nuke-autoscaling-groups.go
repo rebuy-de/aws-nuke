@@ -5,10 +5,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 )
 
-type AutoScalingNuke struct {
-	svc *autoscaling.AutoScaling
-}
-
 func (n *AutoScalingNuke) ListGroups() ([]Resource, error) {
 	params := &autoscaling.DescribeAutoScalingGroupsInput{}
 	resp, err := n.svc.DescribeAutoScalingGroups(params)

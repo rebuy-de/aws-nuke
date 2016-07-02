@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/fatih/color"
 )
@@ -24,7 +25,7 @@ var (
 var (
 	ReasonSkip            = *color.New(color.FgYellow)
 	ReasonError           = *color.New(color.FgRed)
-	ReasonRemoveTriggered = *color.New()
+	ReasonRemoveTriggered = *color.New(color.FgGreen)
 	ReasonWaitPending     = *color.New()
 	ReasonSuccess         = *color.New(color.FgGreen)
 	ColorID               = *color.New(color.Bold)
@@ -57,7 +58,7 @@ func main() {
 
 	fmt.Println()
 
-	nuke := &Nuke{
+	n := &Nuke{
 		session: session.New(&aws.Config{
 			Region:      aws.String("eu-central-1"),
 			Credentials: credentials.NewSharedCredentials("", "svenwltr"),
@@ -68,18 +69,23 @@ func main() {
 		queue:    []Resource{},
 		waiting:  []Resource{},
 		skipped:  []Resource{},
-		errored:  []Resource{},
+		failed:   []Resource{},
 		finished: []Resource{},
 	}
 
-	listers := nuke.GetListers()
+	listers := n.GetListers()
 
 	for _, lister := range listers {
-		nuke.Scan(lister)
-		nuke.CheckQueue()
-		nuke.HandleQueue()
-		nuke.Wait()
+		n.Scan(lister)
+		n.CheckQueue()
+		n.HandleQueue()
+		n.Wait()
 	}
+
+	fmt.Println()
+	fmt.Printf("Nuke complete: %d finished, %d failed, %d skipped.",
+		len(n.finished), len(n.failed), len(n.skipped))
+	fmt.Println()
 }
 
 type Nuke struct {
@@ -91,16 +97,18 @@ type Nuke struct {
 	queue    []Resource
 	waiting  []Resource
 	skipped  []Resource
-	errored  []Resource
+	failed   []Resource
 	finished []Resource
 }
 
 func (n *Nuke) GetListers() []ResourceLister {
-	ec2 := EC2Nuke{ec2.New(n.session)}
 	autoscaling := AutoScalingNuke{autoscaling.New(n.session)}
+	ec2 := EC2Nuke{ec2.New(n.session)}
+	elb := ElbNuke{elb.New(n.session)}
 	route53 := Route53Nuke{route53.New(n.session)}
 
 	return []ResourceLister{
+		elb.ListELBs,
 		autoscaling.ListGroups,
 		ec2.ListInstances,
 		ec2.ListSecurityGroups,
@@ -156,7 +164,7 @@ func (n *Nuke) HandleQueue() {
 
 		err := resource.Remove()
 		if err != nil {
-			n.errored = append(n.errored, resource)
+			n.failed = append(n.failed, resource)
 			Log(resource, ReasonError, err.Error())
 			continue
 		}
@@ -188,7 +196,7 @@ func (n *Nuke) Wait() {
 			defer wg.Done()
 			err := waiter.Wait()
 			if err != nil {
-				n.errored = append(n.errored, resource)
+				n.failed = append(n.failed, resource)
 				Log(resource, ReasonError, err.Error())
 				return
 			}
@@ -199,5 +207,4 @@ func (n *Nuke) Wait() {
 	}
 
 	wg.Wait()
-
 }
