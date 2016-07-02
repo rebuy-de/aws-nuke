@@ -2,7 +2,7 @@ package main
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
-type EC2InternetGateways struct {
+type EC2InternetGateway struct {
 	svc *ec2.EC2
 	id  *string
 }
@@ -15,7 +15,7 @@ func (n *EC2Nuke) ListInternetGateways() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.InternetGateways {
-		resources = append(resources, &EC2InternetGateways{
+		resources = append(resources, &EC2InternetGateway{
 			svc: n.svc,
 			id:  out.InternetGatewayId,
 		})
@@ -24,7 +24,7 @@ func (n *EC2Nuke) ListInternetGateways() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *EC2InternetGateways) Remove() error {
+func (e *EC2InternetGateway) Remove() error {
 	params := &ec2.DeleteInternetGatewayInput{
 		InternetGatewayId: e.id,
 	}
@@ -37,6 +37,6 @@ func (e *EC2InternetGateways) Remove() error {
 	return nil
 }
 
-func (e *EC2InternetGateways) String() string {
+func (e *EC2InternetGateway) String() string {
 	return *e.id
 }
