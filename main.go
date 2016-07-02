@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -12,12 +13,31 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/fatih/color"
 )
 
 var (
 	// will be overwritten on build
 	version = "unknown"
 )
+
+var (
+	ReasonSkip            = *color.New(color.FgYellow)
+	ReasonError           = *color.New(color.FgRed)
+	ReasonRemoveTriggered = *color.New()
+	ReasonWaitPending     = *color.New()
+	ReasonSuccess         = *color.New(color.FgGreen)
+	ColorID               = *color.New(color.Bold)
+)
+
+func Log(r Resource, c color.Color, msg string) {
+	fmt.Printf("[%s] ", time.Now().Format(time.RFC3339))
+	fmt.Print(strings.Split(fmt.Sprintf("%T", r), ".")[1]) // hackey
+	fmt.Printf(" - ")
+	ColorID.Printf("'%s'", r.String())
+	fmt.Printf(" - ")
+	c.Printf("%s\n", msg)
+}
 
 func main() {
 	fmt.Printf("Running aws-nuke version %s.\n", version)
@@ -37,93 +57,147 @@ func main() {
 
 	fmt.Println()
 
-	credentials := credentials.NewSharedCredentials("", "svenwltr")
-	sess := session.New(&aws.Config{
-		Region:      aws.String("eu-central-1"),
-		Credentials: credentials,
-	})
+	nuke := &Nuke{
+		session: session.New(&aws.Config{
+			Region:      aws.String("eu-central-1"),
+			Credentials: credentials.NewSharedCredentials("", "svenwltr"),
+		}),
+		dry:  !*noDryRun,
+		wait: !*noWait,
 
-	nukeSession(sess, !*noDryRun, !*noWait)
-}
-
-func nukeSession(sess *session.Session, dry bool, wait bool) {
-	ec2Nuke := EC2Nuke{ec2.New(sess)}
-	autoscalingNuke := AutoScalingNuke{autoscaling.New(sess)}
-	route53Nuke := Route53Nuke{route53.New(sess)}
-
-	listers := []ResourceLister{
-		autoscalingNuke.ListGroups,
-		ec2Nuke.ListInstances,
-		ec2Nuke.ListSecurityGroups,
-		ec2Nuke.ListVpcs,
-		route53Nuke.ListResourceRecords,
-		route53Nuke.ListHostedZones,
+		queue:    []Resource{},
+		waiting:  []Resource{},
+		skipped:  []Resource{},
+		errored:  []Resource{},
+		finished: []Resource{},
 	}
+
+	listers := nuke.GetListers()
 
 	for _, lister := range listers {
-		err := nukeResource(lister, dry, wait)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "\n%s\n", err.Error())
-		}
+		nuke.Scan(lister)
+		nuke.CheckQueue()
+		nuke.HandleQueue()
+		nuke.Wait()
 	}
 }
 
-func nukeResource(lister ResourceLister, dry bool, wait bool) error {
-	var resources []Resource
-	var err error
+type Nuke struct {
+	session *session.Session
 
-	resources, err = lister()
+	dry  bool
+	wait bool
+
+	queue    []Resource
+	waiting  []Resource
+	skipped  []Resource
+	errored  []Resource
+	finished []Resource
+}
+
+func (n *Nuke) GetListers() []ResourceLister {
+	ec2 := EC2Nuke{ec2.New(n.session)}
+	autoscaling := AutoScalingNuke{autoscaling.New(n.session)}
+	route53 := Route53Nuke{route53.New(n.session)}
+
+	return []ResourceLister{
+		autoscaling.ListGroups,
+		ec2.ListInstances,
+		ec2.ListSecurityGroups,
+		ec2.ListVpcs,
+		route53.ListResourceRecords,
+		route53.ListHostedZones,
+	}
+}
+
+func (n *Nuke) Scan(lister ResourceLister) error {
+	resources, err := lister()
 	if err != nil {
 		return err
 	}
 
-	queue := make([]Resource, 0)
-	for _, resource := range resources {
-		fmt.Printf("%T %s", resource, resource.String())
-
-		checker, ok := resource.(Checker)
-		if ok {
-			err := checker.Check()
-			if err != nil {
-				fmt.Printf(" ... %s\n", err.Error())
-				continue
-			}
-		}
-
-		if dry {
-			fmt.Printf(" ... would be removed\n")
-			continue
-		}
-
-		err = resource.Remove()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, " ... %s\n", err.Error())
-			continue
-		}
-
-		fmt.Printf(" ... delete requested [%d]\n", len(queue))
-		queue = append(queue, resource)
-	}
-
-	if wait && len(queue) > 0 {
-		fmt.Printf("Waiting, until %d resources get removed.\n", len(queue))
-		var wg sync.WaitGroup
-		for i, resource := range queue {
-			waiter, ok := resource.(Waiter)
-			if !ok {
-				continue
-			}
-			wg.Add(1)
-			go func(i int, resource Resource) {
-				defer wg.Done()
-				waiter.Wait()
-				fmt.Printf("%T %s ... deleted\n", resource, resource.String())
-			}(i, resource)
-		}
-
-		wg.Wait()
-	}
+	n.queue = append(n.queue, resources...)
 
 	return nil
+}
+
+func (n *Nuke) CheckQueue() {
+	temp := n.queue[:]
+	n.queue = n.queue[0:0]
+
+	for _, resource := range temp {
+		checker, ok := resource.(Checker)
+		if !ok {
+			n.queue = append(n.queue, resource)
+			continue
+		}
+
+		err := checker.Check()
+		if err == nil {
+			n.queue = append(n.queue, resource)
+			continue
+		}
+
+		Log(resource, ReasonSkip, err.Error())
+		n.skipped = append(n.skipped, resource)
+	}
+}
+
+func (n *Nuke) HandleQueue() {
+	temp := n.queue[:]
+	n.queue = n.queue[0:0]
+
+	for _, resource := range temp {
+		if n.dry {
+			n.skipped = append(n.skipped, resource)
+			Log(resource, ReasonSuccess, "would remove")
+			continue
+		}
+
+		err := resource.Remove()
+		if err != nil {
+			n.errored = append(n.errored, resource)
+			Log(resource, ReasonError, err.Error())
+			continue
+		}
+
+		n.waiting = append(n.waiting, resource)
+		Log(resource, ReasonRemoveTriggered, "triggered remove")
+	}
+}
+
+func (n *Nuke) Wait() {
+	if !n.wait {
+		n.finished = n.waiting
+		n.waiting = []Resource{}
+		return
+	}
+
+	temp := n.waiting[:]
+	n.waiting = n.waiting[0:0]
+
+	var wg sync.WaitGroup
+	for i, resource := range temp {
+		waiter, ok := resource.(Waiter)
+		if !ok {
+			continue
+		}
+		wg.Add(1)
+		Log(resource, ReasonWaitPending, "waiting")
+		go func(i int, resource Resource) {
+			defer wg.Done()
+			err := waiter.Wait()
+			if err != nil {
+				n.errored = append(n.errored, resource)
+				Log(resource, ReasonError, err.Error())
+				return
+			}
+
+			n.finished = append(n.finished, resource)
+			Log(resource, ReasonSuccess, "removed")
+		}(i, resource)
+	}
+
+	wg.Wait()
+
 }

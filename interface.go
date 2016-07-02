@@ -8,9 +8,11 @@ type Resource interface {
 }
 
 type Waiter interface {
+	Resource
 	Wait() error
 }
 
 type Checker interface {
+	Resource
 	Check() error
 }
