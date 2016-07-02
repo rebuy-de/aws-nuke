@@ -82,10 +82,13 @@ func nukeResource(lister ResourceLister, dry bool, wait bool) error {
 	for _, resource := range resources {
 		fmt.Printf("%T %s", resource, resource.String())
 
-		err = resource.Check()
-		if err != nil {
-			fmt.Printf(" ... %s\n", err.Error())
-			continue
+		checker, ok := resource.(Checker)
+		if ok {
+			err := checker.Check()
+			if err != nil {
+				fmt.Printf(" ... %s\n", err.Error())
+				continue
+			}
 		}
 
 		if dry {
@@ -107,10 +110,14 @@ func nukeResource(lister ResourceLister, dry bool, wait bool) error {
 		fmt.Printf("Waiting, until %d resources get removed.\n", len(queue))
 		var wg sync.WaitGroup
 		for i, resource := range queue {
+			waiter, ok := resource.(Waiter)
+			if !ok {
+				continue
+			}
 			wg.Add(1)
 			go func(i int, resource Resource) {
 				defer wg.Done()
-				resource.Wait()
+				waiter.Wait()
 				fmt.Printf("%T %s ... deleted\n", resource, resource.String())
 			}(i, resource)
 		}

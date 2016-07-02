@@ -30,10 +30,6 @@ type Route53HostedZone struct {
 	name *string
 }
 
-func (hz *Route53HostedZone) Check() error {
-	return nil
-}
-
 func (hz *Route53HostedZone) Remove() error {
 	params := &route53.DeleteHostedZoneInput{
 		Id: hz.id,
@@ -44,10 +40,6 @@ func (hz *Route53HostedZone) Remove() error {
 		return err
 	}
 
-	return nil
-}
-
-func (hz *Route53HostedZone) Wait() error {
 	return nil
 }
 

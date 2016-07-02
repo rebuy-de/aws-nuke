@@ -25,10 +25,6 @@ func (n *EC2Nuke) ListVpcs() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *EC2Vpc) Check() error {
-	return nil
-}
-
 func (e *EC2Vpc) Remove() error {
 	params := &ec2.DeleteVpcInput{
 		VpcId: e.id,
@@ -39,10 +35,6 @@ func (e *EC2Vpc) Remove() error {
 		return err
 	}
 
-	return nil
-}
-
-func (e *EC2Vpc) Wait() error {
 	return nil
 }
 

@@ -52,10 +52,6 @@ func (sg *EC2SecurityGroup) Remove() error {
 	return nil
 }
 
-func (sg *EC2SecurityGroup) Wait() error {
-	return nil
-}
-
 func (sg *EC2SecurityGroup) String() string {
 	return *sg.id
 }

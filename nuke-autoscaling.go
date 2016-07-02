@@ -31,10 +31,6 @@ type AutoScalingGroup struct {
 	name *string
 }
 
-func (asg *AutoScalingGroup) Check() error {
-	return nil
-}
-
 func (asg *AutoScalingGroup) Remove() error {
 	params := &autoscaling.DeleteAutoScalingGroupInput{
 		AutoScalingGroupName: asg.name,
