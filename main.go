@@ -128,6 +128,8 @@ func (n *Nuke) GetListers() []ResourceLister {
 		ec2.ListInstances,
 		ec2.ListSecurityGroups,
 		ec2.ListCustomerGateways,
+		ec2.ListVpnGatewayAttachements,
+		ec2.ListVpnGateways,
 		ec2.ListNetworkACLs,
 		ec2.ListDhcpOptions,
 		ec2.ListSubnets,
