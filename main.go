@@ -124,6 +124,7 @@ func (n *Nuke) GetListers() []ResourceLister {
 	return []ResourceLister{
 		elb.ListELBs,
 		autoscaling.ListGroups,
+		ec2.ListKeyPairs,
 		ec2.ListInstances,
 		ec2.ListSecurityGroups,
 		ec2.ListCustomerGateways,
