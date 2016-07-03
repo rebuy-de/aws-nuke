@@ -8,8 +8,7 @@ type EC2Vpc struct {
 }
 
 func (n *EC2Nuke) ListVpcs() ([]Resource, error) {
-	params := &ec2.DescribeVpcsInput{}
-	resp, err := n.svc.DescribeVpcs(params)
+	resp, err := n.svc.DescribeVpcs(nil)
 	if err != nil {
 		return nil, err
 	}
