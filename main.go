@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/fatih/color"
 )
 
@@ -38,6 +39,13 @@ func Log(r Resource, c color.Color, msg string) {
 	ColorID.Printf("'%s'", r.String())
 	fmt.Printf(" - ")
 	c.Printf("%s\n", msg)
+}
+
+func LogErrorf(err error) {
+	out := color.New(color.FgRed)
+	trace := fmt.Sprintf("%+v", err)
+	out.Println(trace)
+	out.Println("")
 }
 
 func main() {
@@ -76,7 +84,12 @@ func main() {
 	listers := n.GetListers()
 
 	for _, lister := range listers {
-		n.Scan(lister)
+		err := n.Scan(lister)
+		if err != nil {
+			LogErrorf(err)
+			continue
+		}
+
 		n.CheckQueue()
 		n.HandleQueue()
 		n.Wait()
@@ -106,6 +119,7 @@ func (n *Nuke) GetListers() []ResourceLister {
 	ec2 := EC2Nuke{ec2.New(n.session)}
 	elb := ElbNuke{elb.New(n.session)}
 	route53 := Route53Nuke{route53.New(n.session)}
+	s3 := S3Nuke{s3.New(n.session)}
 
 	return []ResourceLister{
 		elb.ListELBs,
@@ -119,6 +133,8 @@ func (n *Nuke) GetListers() []ResourceLister {
 		ec2.ListInternetGateways,
 		ec2.ListRouteTables,
 		ec2.ListVpcs,
+		s3.ListObjects,
+		s3.ListBuckets,
 		route53.ListResourceRecords,
 		route53.ListHostedZones,
 	}
@@ -194,6 +210,7 @@ func (n *Nuke) Wait() {
 	for i, resource := range temp {
 		waiter, ok := resource.(Waiter)
 		if !ok {
+			n.finished = append(n.finished, resource)
 			continue
 		}
 		wg.Add(1)
