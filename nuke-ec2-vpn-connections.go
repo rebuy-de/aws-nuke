@@ -1,10 +1,15 @@
 package main
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2VpnConnection struct {
-	svc *ec2.EC2
-	id  *string
+	svc   *ec2.EC2
+	id    string
+	state string
 }
 
 func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
@@ -17,17 +22,25 @@ func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.VpnConnections {
 		resources = append(resources, &EC2VpnConnection{
-			svc: n.svc,
-			id:  out.VpnConnectionId,
+			svc:   n.svc,
+			id:    *out.VpnConnectionId,
+			state: *out.State,
 		})
 	}
 
 	return resources, nil
 }
 
+func (i *EC2VpnConnection) Check() error {
+	if i.state == "deleted" {
+		return fmt.Errorf("already deleted")
+	}
+	return nil
+}
+
 func (e *EC2VpnConnection) Remove() error {
 	params := &ec2.DeleteVpnConnectionInput{
-		VpnConnectionId: e.id,
+		VpnConnectionId: &e.id,
 	}
 
 	_, err := e.svc.DeleteVpnConnection(params)
@@ -39,5 +52,5 @@ func (e *EC2VpnConnection) Remove() error {
 }
 
 func (e *EC2VpnConnection) String() string {
-	return *e.id
+	return e.id
 }

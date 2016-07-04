@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -57,6 +58,9 @@ func main() {
 		noWait = flag.Bool("no-wait", false,
 			"Do not wait for resource removal. This is faster, "+
 				"but you may have to run the nuke multiple times.")
+		exitOnError = flag.Bool("exit-on-error", false,
+			"Immediately exit, when an error orccurs. Otherwise "+
+				"it would continue with other resources.")
 	)
 	flag.Parse()
 
@@ -71,8 +75,9 @@ func main() {
 			Region:      aws.String("eu-central-1"),
 			Credentials: credentials.NewSharedCredentials("", "svenwltr"),
 		}),
-		dry:  !*noDryRun,
-		wait: !*noWait,
+		dry:       !*noDryRun,
+		wait:      !*noWait,
+		earlyExit: *exitOnError,
 
 		queue:    []Resource{},
 		waiting:  []Resource{},
@@ -104,8 +109,9 @@ func main() {
 type Nuke struct {
 	session *session.Session
 
-	dry  bool
-	wait bool
+	dry       bool
+	wait      bool
+	earlyExit bool
 
 	queue    []Resource
 	waiting  []Resource
@@ -124,23 +130,26 @@ func (n *Nuke) GetListers() []ResourceLister {
 	return []ResourceLister{
 		elb.ListELBs,
 		autoscaling.ListGroups,
+		route53.ListResourceRecords,
+		route53.ListHostedZones,
 		ec2.ListKeyPairs,
 		ec2.ListInstances,
 		ec2.ListSecurityGroups,
-		ec2.ListCustomerGateways,
 		ec2.ListVpnGatewayAttachements,
-		ec2.ListVpnGateways,
 		ec2.ListVpnConnections,
 		ec2.ListNetworkACLs,
-		ec2.ListDhcpOptions,
 		ec2.ListSubnets,
+		ec2.ListCustomerGateways,
+		ec2.ListVpnGateways,
+		ec2.ListInternetGatewayAttachements,
 		ec2.ListInternetGateways,
+
 		ec2.ListRouteTables,
+		ec2.ListDhcpOptions,
 		ec2.ListVpcs,
+
 		s3.ListObjects,
 		s3.ListBuckets,
-		route53.ListResourceRecords,
-		route53.ListHostedZones,
 	}
 }
 
@@ -192,7 +201,11 @@ func (n *Nuke) HandleQueue() {
 		if err != nil {
 			n.failed = append(n.failed, resource)
 			Log(resource, ReasonError, err.Error())
-			continue
+			if n.earlyExit {
+				os.Exit(1)
+			} else {
+				continue
+			}
 		}
 
 		n.waiting = append(n.waiting, resource)
