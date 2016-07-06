@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -26,4 +27,8 @@ type ElbNuke struct {
 
 type S3Nuke struct {
 	svc *s3.S3
+}
+
+type IamNuke struct {
+	svc *iam.IAM
 }
