@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -46,6 +47,8 @@ func main() {
 	fmt.Printf("Running aws-nuke version %s.\n", version)
 
 	var (
+		profile  = flag.String("profile", "", "profile to nuke")
+		region   = flag.String("region", "eu-west-1", "profile to nuke")
 		noDryRun = flag.Bool("no-dry-run", false,
 			"Actualy delete found resources.")
 		noWait = flag.Bool("no-wait", false,
@@ -61,6 +64,16 @@ func main() {
 
 	flag.Parse()
 
+	if *profile == "" {
+		fmt.Printf("You have to specify -profile.\n")
+		os.Exit(1)
+	}
+
+	if strings.Contains(strings.ToLower(*profile), "prod") {
+		fmt.Printf("The profile name contains the substring 'prod'. Refusing to nuke it.\n")
+		os.Exit(1)
+	}
+
 	if !*noDryRun {
 		fmt.Printf("Dry run: do real delete with '--no-dry-run'.\n")
 	}
@@ -69,8 +82,8 @@ func main() {
 
 	n := &Nuke{
 		session: session.New(&aws.Config{
-			Region:      aws.String("eu-central-1"),
-			Credentials: credentials.NewSharedCredentials("", "svenwltr"),
+			Region:      region,
+			Credentials: credentials.NewSharedCredentials("", *profile),
 		}),
 		dry:       !*noDryRun,
 		wait:      !*noWait,
