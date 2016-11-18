@@ -56,5 +56,5 @@ func (e *IamRolePolicyAttachement) Remove() error {
 }
 
 func (e *IamRolePolicyAttachement) String() string {
-	return fmt.Sprintf("%s->%s", e.roleName, e.policyName)
+	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
 }

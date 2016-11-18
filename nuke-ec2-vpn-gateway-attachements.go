@@ -58,5 +58,5 @@ func (e *EC2VpnGatewayAttachement) Remove() error {
 }
 
 func (e *EC2VpnGatewayAttachement) String() string {
-	return fmt.Sprintf("%s->%s", e.vpnId, e.vpcId)
+	return fmt.Sprintf("%s -> %s", e.vpnId, e.vpcId)
 }

@@ -62,5 +62,5 @@ func (e *EC2InternetGatewayAttachement) Remove() error {
 }
 
 func (e *EC2InternetGatewayAttachement) String() string {
-	return fmt.Sprintf("%s->%s", *e.igwId, *e.vpcId)
+	return fmt.Sprintf("%s -> %s", *e.igwId, *e.vpcId)
 }

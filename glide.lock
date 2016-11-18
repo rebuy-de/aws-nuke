@@ -1,8 +1,8 @@
-hash: 21acae7c7bbb972c34c2615c6d6936ce9f19a2ae24b871dee1afbd264f4a8932
-updated: 2016-11-08T16:46:02.458756747+01:00
+hash: 4202e41887eaa920696ff6cb19551a0e51de690ba7b939c031a81be684cad6e6
+updated: 2016-11-18T18:32:11.690512642+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 45d21707a58c6bfdf7cf12197d054769d88f7d13
+  version: f6fb76affb07a2797d4adde9162d4feb5a436f4a
   subpackages:
   - aws
   - aws/awserr
@@ -45,8 +45,12 @@ imports:
   version: d228849504861217f796da67fae4f6e347643f15
 - name: github.com/mattn/go-isatty
   version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+- name: github.com/ogier/pflag
+  version: 32a05c62658bd1d7c7e75cbc8195de5d585fde0f
 - name: golang.org/x/sys
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
   - unix
+- name: gopkg.in/yaml.v2
+  version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
 testImports: []

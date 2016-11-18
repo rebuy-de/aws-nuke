@@ -1,0 +1,12 @@
+---
+region: eu-west-1
+account-blacklist:
+- 1234567890
+
+accounts:
+  555133742:
+    filters:
+      IamRole:
+      - "uber.admin"
+      IamRolePolicyAttachement:
+      - "uber.admin -> AdministratorAccess"

@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"io/ioutil"
 	"sync"
 
+	yaml "gopkg.in/yaml.v2"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -15,18 +19,91 @@ import (
 )
 
 type Nuke struct {
+	Parameters NukeParameters
+
+	Config  *NukeConfig
 	session *session.Session
 
-	dry       bool
-	wait      bool
-	earlyExit bool
-	retry     bool
+	retry bool
+	wait  bool
 
 	queue    []Resource
 	waiting  []Resource
 	skipped  []Resource
 	failed   []Resource
 	finished []Resource
+}
+
+func NewNuke(params NukeParameters) *Nuke {
+	n := Nuke{
+		Parameters: params,
+
+		retry: true,
+		wait:  true,
+
+		queue:    []Resource{},
+		waiting:  []Resource{},
+		skipped:  []Resource{},
+		failed:   []Resource{},
+		finished: []Resource{},
+	}
+
+	return &n
+}
+
+func (n *Nuke) LoadConfig() error {
+	var err error
+
+	raw, err := ioutil.ReadFile(n.Parameters.ConfigPath)
+	if err != nil {
+		return err
+	}
+
+	config := new(NukeConfig)
+	err = yaml.Unmarshal(raw, config)
+	if err != nil {
+		return err
+	}
+
+	n.Config = config
+
+	return nil
+}
+
+func (n *Nuke) StartSession() error {
+	if n.Parameters.Profile != "" {
+		s := session.New(&aws.Config{
+			Region:      &n.Config.Region,
+			Credentials: credentials.NewSharedCredentials("", n.Parameters.Profile),
+		})
+
+		if s == nil {
+			return fmt.Errorf("Unable to create session with profile '%s'.", n.Parameters.Profile)
+		}
+
+		n.session = s
+		return nil
+	}
+
+	if n.Parameters.AccessKeyID != "" && n.Parameters.SecretAccessKey != "" {
+		s := session.New(&aws.Config{
+			Region: &n.Config.Region,
+			Credentials: credentials.NewStaticCredentials(
+				n.Parameters.AccessKeyID,
+				n.Parameters.SecretAccessKey,
+				"",
+			),
+		})
+
+		if s == nil {
+			return fmt.Errorf("Unable to create session with secrets.")
+		}
+
+		n.session = s
+		return nil
+	}
+
+	return fmt.Errorf("You have to specify a profile or credentials.")
 }
 
 func (n *Nuke) Run() {
@@ -146,7 +223,7 @@ func (n *Nuke) HandleQueue() {
 	n.queue = n.queue[0:0]
 
 	for _, resource := range temp {
-		if n.dry {
+		if !n.Parameters.NoDryRun {
 			n.skipped = append(n.skipped, resource)
 			Log(resource, ReasonSuccess, "would remove")
 			continue
@@ -156,11 +233,7 @@ func (n *Nuke) HandleQueue() {
 		if err != nil {
 			n.failed = append(n.failed, resource)
 			Log(resource, ReasonError, err.Error())
-			if n.earlyExit {
-				os.Exit(1)
-			} else {
-				continue
-			}
+			continue
 		}
 
 		n.waiting = append(n.waiting, resource)

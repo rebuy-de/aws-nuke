@@ -46,5 +46,5 @@ func (e *IamInstanceProfileRole) Remove() error {
 }
 
 func (e *IamInstanceProfileRole) String() string {
-	return fmt.Sprintf("%s->%s", e.profile, e.role)
+	return fmt.Sprintf("%s -> %s", e.profile, e.role)
 }
