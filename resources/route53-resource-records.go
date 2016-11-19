@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -39,7 +39,7 @@ func (n *Route53Nuke) ListResourceRecordsForZone(zoneId *string) ([]Resource, er
 	params := &route53.ListResourceRecordSetsInput{
 		HostedZoneId: zoneId,
 	}
-	resp, err := n.svc.ListResourceRecordSets(params)
+	resp, err := n.Service.ListResourceRecordSets(params)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (n *Route53Nuke) ListResourceRecordsForZone(zoneId *string) ([]Resource, er
 	resources := make([]Resource, 0)
 	for _, rrs := range resp.ResourceRecordSets {
 		resources = append(resources, &Route53ResourceRecordSet{
-			svc:          n.svc,
+			svc:          n.Service,
 			hostedZoneId: zoneId,
 			data:         rrs,
 		})

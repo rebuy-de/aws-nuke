@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type EC2CustomerGateway struct {
 
 func (n *EC2Nuke) ListCustomerGateways() ([]Resource, error) {
 	params := &ec2.DescribeCustomerGatewaysInput{}
-	resp, err := n.svc.DescribeCustomerGateways(params)
+	resp, err := n.Service.DescribeCustomerGateways(params)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (n *EC2Nuke) ListCustomerGateways() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.CustomerGateways {
 		resources = append(resources, &EC2CustomerGateway{
-			svc:   n.svc,
+			svc:   n.Service,
 			id:    *out.CustomerGatewayId,
 			state: *out.State,
 		})

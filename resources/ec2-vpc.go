@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
@@ -8,7 +8,7 @@ type EC2Vpc struct {
 }
 
 func (n *EC2Nuke) ListVpcs() ([]Resource, error) {
-	resp, err := n.svc.DescribeVpcs(nil)
+	resp, err := n.Service.DescribeVpcs(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (n *EC2Nuke) ListVpcs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, vpc := range resp.Vpcs {
 		resources = append(resources, &EC2Vpc{
-			svc: n.svc,
+			svc: n.Service,
 			id:  vpc.VpcId,
 		})
 	}

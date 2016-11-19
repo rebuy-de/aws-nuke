@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
@@ -8,7 +8,7 @@ type EC2InternetGateway struct {
 }
 
 func (n *EC2Nuke) ListInternetGateways() ([]Resource, error) {
-	resp, err := n.svc.DescribeInternetGateways(nil)
+	resp, err := n.Service.DescribeInternetGateways(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (n *EC2Nuke) ListInternetGateways() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.InternetGateways {
 		resources = append(resources, &EC2InternetGateway{
-			svc: n.svc,
+			svc: n.Service,
 			id:  out.InternetGatewayId,
 		})
 	}

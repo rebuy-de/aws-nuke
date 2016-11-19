@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
@@ -8,7 +8,7 @@ type EC2KeyPair struct {
 }
 
 func (n *EC2Nuke) ListKeyPairs() ([]Resource, error) {
-	resp, err := n.svc.DescribeKeyPairs(nil)
+	resp, err := n.Service.DescribeKeyPairs(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (n *EC2Nuke) ListKeyPairs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.KeyPairs {
 		resources = append(resources, &EC2KeyPair{
-			svc:  n.svc,
+			svc:  n.Service,
 			name: *out.KeyName,
 		})
 	}

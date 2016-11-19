@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
@@ -9,7 +9,7 @@ type EC2Subnet struct {
 
 func (n *EC2Nuke) ListSubnets() ([]Resource, error) {
 	params := &ec2.DescribeSubnetsInput{}
-	resp, err := n.svc.DescribeSubnets(params)
+	resp, err := n.Service.DescribeSubnets(params)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +17,7 @@ func (n *EC2Nuke) ListSubnets() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Subnets {
 		resources = append(resources, &EC2Subnet{
-			svc: n.svc,
+			svc: n.Service,
 			id:  out.SubnetId,
 		})
 	}

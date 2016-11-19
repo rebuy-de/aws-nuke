@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
@@ -8,7 +8,7 @@ type EC2DhcpOption struct {
 }
 
 func (n *EC2Nuke) ListDhcpOptions() ([]Resource, error) {
-	resp, err := n.svc.DescribeDhcpOptions(nil)
+	resp, err := n.Service.DescribeDhcpOptions(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +17,7 @@ func (n *EC2Nuke) ListDhcpOptions() ([]Resource, error) {
 	for _, out := range resp.DhcpOptions {
 
 		resources = append(resources, &EC2DhcpOption{
-			svc: n.svc,
+			svc: n.Service,
 			id:  out.DhcpOptionsId,
 		})
 	}

@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/iam"
 
@@ -8,7 +8,7 @@ type IamInstanceProfile struct {
 }
 
 func (n *IamNuke) ListInstanceProfiles() ([]Resource, error) {
-	resp, err := n.svc.ListInstanceProfiles(nil)
+	resp, err := n.Service.ListInstanceProfiles(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (n *IamNuke) ListInstanceProfiles() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.InstanceProfiles {
 		resources = append(resources, &IamInstanceProfile{
-			svc:  n.svc,
+			svc:  n.Service,
 			name: *out.InstanceProfileName,
 		})
 	}

@@ -1,4 +1,4 @@
-package main
+package resources
 
 type ResourceLister func() ([]Resource, error)
 

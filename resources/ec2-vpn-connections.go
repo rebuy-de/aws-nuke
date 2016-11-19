@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type EC2VpnConnection struct {
 
 func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 	params := &ec2.DescribeVpnConnectionsInput{}
-	resp, err := n.svc.DescribeVpnConnections(params)
+	resp, err := n.Service.DescribeVpnConnections(params)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.VpnConnections {
 		resources = append(resources, &EC2VpnConnection{
-			svc:   n.svc,
+			svc:   n.Service,
 			id:    *out.VpnConnectionId,
 			state: *out.State,
 		})

@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type IamInstanceProfileRole struct {
 }
 
 func (n *IamNuke) ListInstanceProfileRoles() ([]Resource, error) {
-	resp, err := n.svc.ListInstanceProfiles(nil)
+	resp, err := n.Service.ListInstanceProfiles(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (n *IamNuke) ListInstanceProfileRoles() ([]Resource, error) {
 	for _, out := range resp.InstanceProfiles {
 		for _, role := range out.Roles {
 			resources = append(resources, &IamInstanceProfileRole{
-				svc:     n.svc,
+				svc:     n.Service,
 				profile: *out.InstanceProfileName,
 				role:    *role.RoleName,
 			})

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/rebuy-de/aws-nuke/resources"
 )
 
 var (
@@ -17,7 +18,7 @@ var (
 	ColorID               = *color.New(color.Bold)
 )
 
-func Log(r Resource, c color.Color, msg string) {
+func Log(r resources.Resource, c color.Color, msg string) {
 	fmt.Printf("[%s] ", time.Now().Format(time.RFC3339))
 	fmt.Print(strings.Split(fmt.Sprintf("%T", r), ".")[1]) // hackey
 	fmt.Printf(" - ")

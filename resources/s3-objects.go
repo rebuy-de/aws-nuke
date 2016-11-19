@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -25,14 +25,14 @@ func (n *S3Nuke) ListObjects() ([]Resource, error) {
 			Bucket: &name,
 		}
 
-		resp, err := n.svc.ListObjects(params)
+		resp, err := n.Service.ListObjects(params)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, out := range resp.Contents {
 			resources = append(resources, &S3Object{
-				svc:    n.svc,
+				svc:    n.Service,
 				bucket: name,
 				key:    *out.Key,
 			})

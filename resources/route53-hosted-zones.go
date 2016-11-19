@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 func (n *Route53Nuke) ListHostedZones() ([]Resource, error) {
 	params := &route53.ListHostedZonesInput{}
-	resp, err := n.svc.ListHostedZones(params)
+	resp, err := n.Service.ListHostedZones(params)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (n *Route53Nuke) ListHostedZones() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, hz := range resp.HostedZones {
 		resources = append(resources, &Route53HostedZone{
-			svc:  n.svc,
+			svc:  n.Service,
 			id:   hz.Id,
 			name: hz.Name,
 		})

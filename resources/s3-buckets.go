@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ type S3Bucket struct {
 }
 
 func (n *S3Nuke) DescribeBuckets() ([]string, error) {
-	resp, err := n.svc.ListBuckets(nil)
+	resp, err := n.Service.ListBuckets(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (n *S3Nuke) ListBuckets() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, name := range buckets {
 		resources = append(resources, &S3Bucket{
-			svc:  n.svc,
+			svc:  n.Service,
 			name: name,
 		})
 	}

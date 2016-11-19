@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -14,14 +14,14 @@ type IamRolePolicyAttachement struct {
 }
 
 func (n *IamNuke) ListRolePolicyAttachements() ([]Resource, error) {
-	resp, err := n.svc.ListRoles(nil)
+	resp, err := n.Service.ListRoles(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	resources := make([]Resource, 0)
 	for _, role := range resp.Roles {
-		resp, err := n.svc.ListAttachedRolePolicies(
+		resp, err := n.Service.ListAttachedRolePolicies(
 			&iam.ListAttachedRolePoliciesInput{
 				RoleName: role.RoleName,
 			})
@@ -31,7 +31,7 @@ func (n *IamNuke) ListRolePolicyAttachements() ([]Resource, error) {
 
 		for _, pol := range resp.AttachedPolicies {
 			resources = append(resources, &IamRolePolicyAttachement{
-				svc:        n.svc,
+				svc:        n.Service,
 				policyArn:  *pol.PolicyArn,
 				policyName: *pol.PolicyName,
 				roleName:   *role.RoleName,

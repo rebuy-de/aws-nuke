@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type EC2InternetGatewayAttachement struct {
 }
 
 func (n *EC2Nuke) ListInternetGatewayAttachements() ([]Resource, error) {
-	resp, err := n.svc.DescribeVpcs(nil)
+	resp, err := n.Service.DescribeVpcs(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -30,14 +30,14 @@ func (n *EC2Nuke) ListInternetGatewayAttachements() ([]Resource, error) {
 			},
 		}
 
-		resp, err := n.svc.DescribeInternetGateways(params)
+		resp, err := n.Service.DescribeInternetGateways(params)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, out := range resp.InternetGateways {
 			resources = append(resources, &EC2InternetGatewayAttachement{
-				svc:   n.svc,
+				svc:   n.Service,
 				vpcId: vpc.VpcId,
 				igwId: out.InternetGatewayId,
 			})

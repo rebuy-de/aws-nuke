@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type EC2VpnGatewayAttachement struct {
 
 func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
 
-	resp, err := n.svc.DescribeVpnGateways(nil)
+	resp, err := n.Service.DescribeVpnGateways(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
 	for _, vgw := range resp.VpnGateways {
 		for _, att := range vgw.VpcAttachments {
 			resources = append(resources, &EC2VpnGatewayAttachement{
-				svc:   n.svc,
+				svc:   n.Service,
 				vpcId: *att.VpcId,
 				vpnId: *vgw.VpnGatewayId,
 				state: *att.State,

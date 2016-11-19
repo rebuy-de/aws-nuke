@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/elb"
 
@@ -8,7 +8,7 @@ type ELB struct {
 }
 
 func (n *ElbNuke) ListELBs() ([]Resource, error) {
-	resp, err := n.svc.DescribeLoadBalancers(nil)
+	resp, err := n.Service.DescribeLoadBalancers(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (n *ElbNuke) ListELBs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, elb := range resp.LoadBalancerDescriptions {
 		resources = append(resources, &ELB{
-			svc:  n.svc,
+			svc:  n.Service,
 			name: elb.LoadBalancerName,
 		})
 	}

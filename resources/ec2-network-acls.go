@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type EC2NetworkACL struct {
 }
 
 func (n *EC2Nuke) ListNetworkACLs() ([]Resource, error) {
-	resp, err := n.svc.DescribeNetworkAcls(nil)
+	resp, err := n.Service.DescribeNetworkAcls(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (n *EC2Nuke) ListNetworkACLs() ([]Resource, error) {
 	for _, out := range resp.NetworkAcls {
 
 		resources = append(resources, &EC2NetworkACL{
-			svc:       n.svc,
+			svc:       n.Service,
 			id:        out.NetworkAclId,
 			isDefault: out.IsDefault,
 		})

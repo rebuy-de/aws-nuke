@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type EC2Instance struct {
 
 func (n *EC2Nuke) ListInstances() ([]Resource, error) {
 	params := &ec2.DescribeInstancesInput{}
-	resp, err := n.svc.DescribeInstances(params)
+	resp, err := n.Service.DescribeInstances(params)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (n *EC2Nuke) ListInstances() ([]Resource, error) {
 	for _, reservation := range resp.Reservations {
 		for _, instance := range reservation.Instances {
 			resources = append(resources, &EC2Instance{
-				svc:   n.svc,
+				svc:   n.Service,
 				id:    instance.InstanceId,
 				state: *instance.State.Name,
 			})

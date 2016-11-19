@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/rebuy-de/aws-nuke/resources"
 )
 
 type Nuke struct {
@@ -27,11 +28,11 @@ type Nuke struct {
 	retry bool
 	wait  bool
 
-	queue    []Resource
-	waiting  []Resource
-	skipped  []Resource
-	failed   []Resource
-	finished []Resource
+	queue    []resources.Resource
+	waiting  []resources.Resource
+	skipped  []resources.Resource
+	failed   []resources.Resource
+	finished []resources.Resource
 }
 
 func NewNuke(params NukeParameters) *Nuke {
@@ -41,11 +42,11 @@ func NewNuke(params NukeParameters) *Nuke {
 		retry: true,
 		wait:  true,
 
-		queue:    []Resource{},
-		waiting:  []Resource{},
-		skipped:  []Resource{},
-		failed:   []Resource{},
-		finished: []Resource{},
+		queue:    []resources.Resource{},
+		waiting:  []resources.Resource{},
+		skipped:  []resources.Resource{},
+		failed:   []resources.Resource{},
+		finished: []resources.Resource{},
 	}
 
 	return &n
@@ -138,15 +139,15 @@ func (n *Nuke) Run() {
 	fmt.Println()
 }
 
-func (n *Nuke) GetListers() []ResourceLister {
-	autoscaling := AutoScalingNuke{autoscaling.New(n.session)}
-	ec2 := EC2Nuke{ec2.New(n.session)}
-	elb := ElbNuke{elb.New(n.session)}
-	route53 := Route53Nuke{route53.New(n.session)}
-	s3 := S3Nuke{s3.New(n.session)}
-	iam := IamNuke{iam.New(n.session)}
+func (n *Nuke) GetListers() []resources.ResourceLister {
+	autoscaling := resources.AutoScalingNuke{autoscaling.New(n.session)}
+	ec2 := resources.EC2Nuke{ec2.New(n.session)}
+	elb := resources.ElbNuke{elb.New(n.session)}
+	route53 := resources.Route53Nuke{route53.New(n.session)}
+	s3 := resources.S3Nuke{s3.New(n.session)}
+	iam := resources.IamNuke{iam.New(n.session)}
 
-	return []ResourceLister{
+	return []resources.ResourceLister{
 		elb.ListELBs,
 		autoscaling.ListGroups,
 		route53.ListResourceRecords,
@@ -177,7 +178,7 @@ func (n *Nuke) GetListers() []ResourceLister {
 	}
 }
 
-func (n *Nuke) Scan(lister ResourceLister) error {
+func (n *Nuke) Scan(lister resources.ResourceLister) error {
 	resources, err := lister()
 	if err != nil {
 		return err
@@ -193,7 +194,7 @@ func (n *Nuke) CheckQueue() {
 	n.queue = n.queue[0:0]
 
 	for _, resource := range temp {
-		checker, ok := resource.(Checker)
+		checker, ok := resource.(resources.Checker)
 		if !ok {
 			n.queue = append(n.queue, resource)
 			continue
@@ -244,7 +245,7 @@ func (n *Nuke) HandleQueue() {
 func (n *Nuke) Wait() {
 	if !n.wait {
 		n.finished = n.waiting
-		n.waiting = []Resource{}
+		n.waiting = []resources.Resource{}
 		return
 	}
 
@@ -253,14 +254,14 @@ func (n *Nuke) Wait() {
 
 	var wg sync.WaitGroup
 	for i, resource := range temp {
-		waiter, ok := resource.(Waiter)
+		waiter, ok := resource.(resources.Waiter)
 		if !ok {
 			n.finished = append(n.finished, resource)
 			continue
 		}
 		wg.Add(1)
 		Log(resource, ReasonWaitPending, "waiting")
-		go func(i int, resource Resource) {
+		go func(i int, resource resources.Resource) {
 			defer wg.Done()
 			err := waiter.Wait()
 			if err != nil {

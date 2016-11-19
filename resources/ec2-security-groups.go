@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type EC2SecurityGroup struct {
 
 func (n *EC2Nuke) ListSecurityGroups() ([]Resource, error) {
 	params := &ec2.DescribeSecurityGroupsInput{}
-	resp, err := n.svc.DescribeSecurityGroups(params)
+	resp, err := n.Service.DescribeSecurityGroups(params)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (n *EC2Nuke) ListSecurityGroups() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, group := range resp.SecurityGroups {
 		resources = append(resources, &EC2SecurityGroup{
-			svc:  n.svc,
+			svc:  n.Service,
 			id:   group.GroupId,
 			name: group.GroupName,
 		})

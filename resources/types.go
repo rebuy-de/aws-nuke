@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -10,25 +10,25 @@ import (
 )
 
 type EC2Nuke struct {
-	svc *ec2.EC2
+	Service *ec2.EC2
 }
 
 type Route53Nuke struct {
-	svc *route53.Route53
+	Service *route53.Route53
 }
 
 type AutoScalingNuke struct {
-	svc *autoscaling.AutoScaling
+	Service *autoscaling.AutoScaling
 }
 
 type ElbNuke struct {
-	svc *elb.ELB
+	Service *elb.ELB
 }
 
 type S3Nuke struct {
-	svc *s3.S3
+	Service *s3.S3
 }
 
 type IamNuke struct {
-	svc *iam.IAM
+	Service *iam.IAM
 }

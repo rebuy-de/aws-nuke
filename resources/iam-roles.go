@@ -1,4 +1,4 @@
-package main
+package resources
 
 import "github.com/aws/aws-sdk-go/service/iam"
 
@@ -8,7 +8,7 @@ type IamRole struct {
 }
 
 func (n *IamNuke) ListRoles() ([]Resource, error) {
-	resp, err := n.svc.ListRoles(nil)
+	resp, err := n.Service.ListRoles(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func (n *IamNuke) ListRoles() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Roles {
 		resources = append(resources, &IamRole{
-			svc:  n.svc,
+			svc:  n.Service,
 			name: *out.RoleName,
 		})
 	}
