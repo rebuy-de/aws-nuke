@@ -10,12 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/elb"
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/route53"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
@@ -72,7 +66,7 @@ func (n *Nuke) LoadConfig() error {
 }
 
 func (n *Nuke) StartSession() error {
-	if n.Parameters.Profile != "" {
+	if n.Parameters.hasProfile() {
 		s := session.New(&aws.Config{
 			Region:      &n.Config.Region,
 			Credentials: credentials.NewSharedCredentials("", n.Parameters.Profile),
@@ -86,7 +80,7 @@ func (n *Nuke) StartSession() error {
 		return nil
 	}
 
-	if n.Parameters.AccessKeyID != "" && n.Parameters.SecretAccessKey != "" {
+	if n.Parameters.hasKeys() {
 		s := session.New(&aws.Config{
 			Region: &n.Config.Region,
 			Credentials: credentials.NewStaticCredentials(
@@ -107,20 +101,17 @@ func (n *Nuke) StartSession() error {
 	return fmt.Errorf("You have to specify a profile or credentials.")
 }
 
-func (n *Nuke) Run() {
-	listers := n.GetListers()
+func (n *Nuke) Run() error {
+	var err error
 
-	for _, lister := range listers {
-		err := n.Scan(lister)
-		if err != nil {
-			LogErrorf(err)
-			continue
-		}
-
-		n.CheckQueue()
-		n.HandleQueue()
-		n.Wait()
+	n.queue, err = n.Scan()
+	if err != nil {
+		return err
 	}
+
+	n.CheckQueue()
+	n.HandleQueue()
+	n.Wait()
 
 	if n.retry {
 		for len(n.failed) > 0 {
@@ -137,56 +128,24 @@ func (n *Nuke) Run() {
 	fmt.Printf("Nuke complete: %d finished, %d failed, %d skipped.",
 		len(n.finished), len(n.failed), len(n.skipped))
 	fmt.Println()
+
+	return err
 }
 
-func (n *Nuke) GetListers() []resources.ResourceLister {
-	autoscaling := resources.AutoScalingNuke{autoscaling.New(n.session)}
-	ec2 := resources.EC2Nuke{ec2.New(n.session)}
-	elb := resources.ElbNuke{elb.New(n.session)}
-	route53 := resources.Route53Nuke{route53.New(n.session)}
-	s3 := resources.S3Nuke{s3.New(n.session)}
-	iam := resources.IamNuke{iam.New(n.session)}
+func (n *Nuke) Scan() ([]resources.Resource, error) {
+	listers := resources.GetListers(n.session)
+	result := []resources.Resource{}
 
-	return []resources.ResourceLister{
-		elb.ListELBs,
-		autoscaling.ListGroups,
-		route53.ListResourceRecords,
-		route53.ListHostedZones,
-		ec2.ListKeyPairs,
-		ec2.ListInstances,
-		ec2.ListSecurityGroups,
-		ec2.ListVpnGatewayAttachements,
-		ec2.ListVpnConnections,
-		ec2.ListNetworkACLs,
-		ec2.ListSubnets,
-		ec2.ListCustomerGateways,
-		ec2.ListVpnGateways,
-		ec2.ListInternetGatewayAttachements,
-		ec2.ListInternetGateways,
+	for _, lister := range listers {
+		resources, err := lister()
+		if err != nil {
+			return nil, err
+		}
 
-		ec2.ListRouteTables,
-		ec2.ListDhcpOptions,
-		ec2.ListVpcs,
-
-		iam.ListInstanceProfileRoles,
-		iam.ListInstanceProfiles,
-		iam.ListRolePolicyAttachements,
-		iam.ListRoles,
-
-		s3.ListObjects,
-		s3.ListBuckets,
-	}
-}
-
-func (n *Nuke) Scan(lister resources.ResourceLister) error {
-	resources, err := lister()
-	if err != nil {
-		return err
+		result = append(result, resources...)
 	}
 
-	n.queue = append(n.queue, resources...)
-
-	return nil
+	return result, nil
 }
 
 func (n *Nuke) CheckQueue() {

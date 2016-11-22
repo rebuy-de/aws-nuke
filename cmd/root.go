@@ -33,9 +33,7 @@ func NewRootCommand() *cobra.Command {
 			return err
 		}
 
-		n.Run()
-
-		return nil
+		return n.Run()
 	}
 
 	command.PersistentFlags().StringVarP(
