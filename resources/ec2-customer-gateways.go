@@ -31,7 +31,7 @@ func (n *EC2Nuke) ListCustomerGateways() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2CustomerGateway) Check() error {
+func (i *EC2CustomerGateway) Filter() error {
 	if i.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}

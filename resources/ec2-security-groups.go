@@ -31,7 +31,7 @@ func (n *EC2Nuke) ListSecurityGroups() ([]Resource, error) {
 	return resources, nil
 }
 
-func (sg *EC2SecurityGroup) Check() error {
+func (sg *EC2SecurityGroup) Filter() error {
 	if *sg.name == "default" {
 		return fmt.Errorf("cannot delete group 'default'")
 	}

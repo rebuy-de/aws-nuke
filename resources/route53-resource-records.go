@@ -55,7 +55,7 @@ func (n *Route53Nuke) ListResourceRecordsForZone(zoneId *string) ([]Resource, er
 	return resources, nil
 }
 
-func (r *Route53ResourceRecordSet) Check() error {
+func (r *Route53ResourceRecordSet) Filter() error {
 	if *r.data.Type == "NS" {
 		return fmt.Errorf("cannot delete NS record")
 	}

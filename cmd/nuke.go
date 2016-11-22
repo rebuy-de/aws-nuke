@@ -109,7 +109,7 @@ func (n *Nuke) Run() error {
 		return err
 	}
 
-	n.CheckQueue()
+	n.FilterQueue()
 	n.HandleQueue()
 	n.Wait()
 
@@ -148,18 +148,18 @@ func (n *Nuke) Scan() ([]resources.Resource, error) {
 	return result, nil
 }
 
-func (n *Nuke) CheckQueue() {
+func (n *Nuke) FilterQueue() {
 	temp := n.queue[:]
 	n.queue = n.queue[0:0]
 
 	for _, resource := range temp {
-		checker, ok := resource.(resources.Checker)
+		checker, ok := resource.(resources.Filter)
 		if !ok {
 			n.queue = append(n.queue, resource)
 			continue
 		}
 
-		err := checker.Check()
+		err := checker.Filter()
 		if err == nil {
 			n.queue = append(n.queue, resource)
 			continue

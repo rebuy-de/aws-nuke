@@ -36,7 +36,7 @@ func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2VpnGatewayAttachement) Check() error {
+func (i *EC2VpnGatewayAttachement) Filter() error {
 	if i.state == "detached" {
 		return fmt.Errorf("already detached")
 	}

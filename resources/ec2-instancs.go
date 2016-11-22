@@ -33,7 +33,7 @@ func (n *EC2Nuke) ListInstances() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2Instance) Check() error {
+func (i *EC2Instance) Filter() error {
 	if i.state == "terminated" {
 		return fmt.Errorf("already terminated")
 	}

@@ -31,7 +31,7 @@ func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2VpnConnection) Check() error {
+func (i *EC2VpnConnection) Filter() error {
 	if i.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}

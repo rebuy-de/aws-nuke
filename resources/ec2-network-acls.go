@@ -31,7 +31,7 @@ func (n *EC2Nuke) ListNetworkACLs() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *EC2NetworkACL) Check() error {
+func (e *EC2NetworkACL) Filter() error {
 	if *e.isDefault {
 		return fmt.Errorf("cannot delete default VPC")
 	}

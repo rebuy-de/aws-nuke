@@ -12,7 +12,7 @@ type Waiter interface {
 	Wait() error
 }
 
-type Checker interface {
+type Filter interface {
 	Resource
-	Check() error
+	Filter() error
 }
