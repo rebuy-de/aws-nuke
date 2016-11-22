@@ -88,12 +88,16 @@ func (n *Nuke) Run() error {
 		return err
 	}
 
-	n.queue, err = n.Scan()
+	err = n.Scan()
 	if err != nil {
 		return err
 	}
 
-	n.FilterQueue()
+	fmt.Printf("\nScan complete: %d total, %d nukeable, %d filtered.\n\n",
+		len(n.queue)+len(n.skipped), len(n.queue), len(n.skipped))
+
+	return nil
+
 	n.HandleQueue()
 	n.Wait()
 
@@ -137,40 +141,42 @@ func (n *Nuke) ValidateAccount() error {
 	return AskContinue("Do you really want to nuke the account with the ID %s?", accountID)
 }
 
-func (n *Nuke) Scan() ([]resources.Resource, error) {
+func (n *Nuke) Scan() error {
 	listers := resources.GetListers(n.session)
-	result := []resources.Resource{}
 
 	for _, lister := range listers {
 		resources, err := lister()
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		result = append(result, resources...)
-	}
-
-	return result, nil
-}
-
-func (n *Nuke) FilterQueue() {
-	temp := n.queue[:]
-	n.queue = n.queue[0:0]
-
-	for _, resource := range temp {
-		checker, ok := resource.(resources.Filter)
-		if ok {
-			err := checker.Filter()
-			if err != nil {
-				Log(resource, ReasonSkip, err.Error())
-				n.skipped = append(n.skipped, resource)
+		for _, r := range resources {
+			reason := n.CheckFilters(r)
+			if reason != nil {
+				Log(r, ReasonSkip, reason.Error())
+				n.skipped = append(n.skipped, r)
 				continue
 			}
+
+			Log(r, ReasonSuccess, "would remove")
+			n.queue = append(n.queue, r)
 		}
 
-		Log(resource, ReasonSuccess, "would remove")
-		n.queue = append(n.queue, resource)
 	}
+
+	return nil
+}
+
+func (n *Nuke) CheckFilters(r resources.Resource) error {
+	checker, ok := r.(resources.Filter)
+	if ok {
+		err := checker.Filter()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (n *Nuke) Retry() {

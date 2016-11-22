@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
 	"github.com/rebuy-de/aws-nuke/resources"
@@ -19,7 +18,6 @@ var (
 )
 
 func Log(r resources.Resource, c color.Color, msg string) {
-	fmt.Printf("[%s] ", time.Now().Format(time.RFC3339))
 	fmt.Print(strings.Split(fmt.Sprintf("%T", r), ".")[1]) // hackey
 	fmt.Printf(" - ")
 	ColorID.Printf("'%s'", r.String())

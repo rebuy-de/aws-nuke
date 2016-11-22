@@ -22,6 +22,7 @@ func AskContinue(message string, opts ...interface{}) error {
 	if strings.TrimSpace(text) != "yes" {
 		return fmt.Errorf("aborted")
 	}
+	fmt.Println()
 
 	return nil
 }
