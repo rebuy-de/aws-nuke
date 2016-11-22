@@ -30,3 +30,17 @@ func LoadConfig(path string) (*NukeConfig, error) {
 
 	return config, nil
 }
+
+func (c *NukeConfig) HasBlacklist() bool {
+	return c.AccountBlacklist != nil && len(c.AccountBlacklist) >= 0
+}
+
+func (c *NukeConfig) InBlacklist(searchID string) bool {
+	for _, blacklistID := range c.AccountBlacklist {
+		if blacklistID == searchID {
+			return true
+		}
+	}
+
+	return false
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
@@ -82,6 +83,11 @@ func (n *Nuke) StartSession() error {
 func (n *Nuke) Run() error {
 	var err error
 
+	err = n.ValidateAccount()
+	if err != nil {
+		return err
+	}
+
 	n.queue, err = n.Scan()
 	if err != nil {
 		return err
@@ -110,6 +116,27 @@ func (n *Nuke) Run() error {
 	return err
 }
 
+func (n *Nuke) ValidateAccount() error {
+	ident, err := sts.New(n.session).GetCallerIdentity(nil)
+	if err != nil {
+		return err
+	}
+	accountID := *ident.Account
+
+	if !n.Config.HasBlacklist() {
+		return fmt.Errorf("The config file contains an empty blacklist. " +
+			"For safety reasons you need to specify at least one account ID. " +
+			"This should be you production account.")
+	}
+
+	if n.Config.InBlacklist(accountID) {
+		return fmt.Errorf("You are trying to nuke the account with the ID %s, "+
+			"but it is blacklisted. Aborting.", accountID)
+	}
+
+	return AskContinue("Do you really want to nuke the account with the ID %s?", accountID)
+}
+
 func (n *Nuke) Scan() ([]resources.Resource, error) {
 	listers := resources.GetListers(n.session)
 	result := []resources.Resource{}
@@ -132,19 +159,17 @@ func (n *Nuke) FilterQueue() {
 
 	for _, resource := range temp {
 		checker, ok := resource.(resources.Filter)
-		if !ok {
-			n.queue = append(n.queue, resource)
-			continue
+		if ok {
+			err := checker.Filter()
+			if err != nil {
+				Log(resource, ReasonSkip, err.Error())
+				n.skipped = append(n.skipped, resource)
+				continue
+			}
 		}
 
-		err := checker.Filter()
-		if err == nil {
-			n.queue = append(n.queue, resource)
-			continue
-		}
-
-		Log(resource, ReasonSkip, err.Error())
-		n.skipped = append(n.skipped, resource)
+		Log(resource, ReasonSuccess, "would remove")
+		n.queue = append(n.queue, resource)
 	}
 }
 
@@ -163,7 +188,6 @@ func (n *Nuke) HandleQueue() {
 	for _, resource := range temp {
 		if !n.Parameters.NoDryRun {
 			n.skipped = append(n.skipped, resource)
-			Log(resource, ReasonSuccess, "would remove")
 			continue
 		}
 
