@@ -1,4 +1,4 @@
-package main
+package cmd
 
 type NukeConfig struct {
 	AccountBlacklist []string `yaml:"account-blacklist"`
