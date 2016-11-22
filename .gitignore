@@ -1,3 +1,4 @@
 /vendor
 /target
 /partial-deployment-cleanup
+/aws-nuke

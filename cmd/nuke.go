@@ -2,10 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"sync"
-
-	yaml "gopkg.in/yaml.v2"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -46,25 +43,6 @@ func NewNuke(params NukeParameters) *Nuke {
 	return &n
 }
 
-func (n *Nuke) LoadConfig() error {
-	var err error
-
-	raw, err := ioutil.ReadFile(n.Parameters.ConfigPath)
-	if err != nil {
-		return err
-	}
-
-	config := new(NukeConfig)
-	err = yaml.Unmarshal(raw, config)
-	if err != nil {
-		return err
-	}
-
-	n.Config = config
-
-	return nil
-}
-
 func (n *Nuke) StartSession() error {
 	if n.Parameters.hasProfile() {
 		s := session.New(&aws.Config{
@@ -91,7 +69,7 @@ func (n *Nuke) StartSession() error {
 		})
 
 		if s == nil {
-			return fmt.Errorf("Unable to create session with secrets.")
+			return fmt.Errorf("Unable to create session with key ID '%s'.", n.Parameters.AccessKeyID)
 		}
 
 		n.session = s

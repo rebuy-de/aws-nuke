@@ -23,7 +23,7 @@ func NewRootCommand() *cobra.Command {
 
 		n := NewNuke(params)
 
-		err = n.LoadConfig()
+		n.Config, err = LoadConfig(n.Parameters.ConfigPath)
 		if err != nil {
 			return err
 		}
