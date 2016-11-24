@@ -6,11 +6,6 @@ import (
 	"github.com/rebuy-de/aws-nuke/cmd"
 )
 
-var (
-	// will be overwritten on build
-	version = "unknown"
-)
-
 type NukeParameters struct {
 	ConfigPath string
 

@@ -1,6 +1,9 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/rebuy-de/aws-nuke/cmd/version"
+	"github.com/spf13/cobra"
+)
 
 func NewRootCommand() *cobra.Command {
 	params := NukeParameters{}
@@ -54,6 +57,8 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().BoolVar(
 		&params.Force, "force", false,
 		"don't ask for confirmation")
+
+	command.AddCommand(version.NewCommand())
 
 	return command
 }
