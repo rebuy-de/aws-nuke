@@ -15,9 +15,11 @@ import (
 
 type Nuke struct {
 	Parameters NukeParameters
+	Config     *NukeConfig
 
-	Config        *NukeConfig
 	accountConfig NukeConfigAccount
+	accountID     string
+	accountAlias  string
 	session       *session.Session
 
 	retry bool
@@ -91,6 +93,12 @@ func (n *Nuke) Run() error {
 		return err
 	}
 
+	err = AskContinue("Do you really want to nuke the account with "+
+		"the ID %s and the alias '%s'?", n.accountID, n.accountAlias)
+	if err != nil {
+		return err
+	}
+
 	err = n.Scan()
 	if err != nil {
 		return err
@@ -98,6 +106,12 @@ func (n *Nuke) Run() error {
 
 	fmt.Printf("\nScan complete: %d total, %d nukeable, %d filtered.\n\n",
 		len(n.queue)+len(n.skipped), len(n.queue), len(n.skipped))
+
+	err = AskContinue("Do you really want to nuke these resources on the account with "+
+		"the ID %s and the alias '%s'?", n.accountID, n.accountAlias)
+	if err != nil {
+		return err
+	}
 
 	return nil
 
@@ -166,13 +180,9 @@ func (n *Nuke) ValidateAccount() error {
 			"Aborting.", accountID)
 	}
 
-	err = AskContinue("Do you really want to nuke the account with "+
-		"the ID %s and the alias '%s'?", accountID, *aliases[0])
-	if err != nil {
-		return err
-	}
-
 	n.accountConfig = n.Config.Accounts[accountID]
+	n.accountID = accountID
+	n.accountAlias = *aliases[0]
 
 	return nil
 }
