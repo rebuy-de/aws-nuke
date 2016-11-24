@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/rebuy-de/aws-nuke/resources"
@@ -18,7 +17,7 @@ var (
 )
 
 func Log(r resources.Resource, c color.Color, msg string) {
-	fmt.Print(strings.Split(fmt.Sprintf("%T", r), ".")[1]) // hackey
+	fmt.Print(resources.GetCategory(r))
 	fmt.Printf(" - ")
 	ColorID.Printf("'%s'", r.String())
 	fmt.Printf(" - ")

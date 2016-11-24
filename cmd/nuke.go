@@ -16,8 +16,9 @@ import (
 type Nuke struct {
 	Parameters NukeParameters
 
-	Config  *NukeConfig
-	session *session.Session
+	Config        *NukeConfig
+	accountConfig NukeConfigAccount
+	session       *session.Session
 
 	retry bool
 	wait  bool
@@ -165,8 +166,15 @@ func (n *Nuke) ValidateAccount() error {
 			"Aborting.", accountID)
 	}
 
-	return AskContinue("Do you really want to nuke the account with "+
+	err = AskContinue("Do you really want to nuke the account with "+
 		"the ID %s and the alias '%s'?", accountID, *aliases[0])
+	if err != nil {
+		return err
+	}
+
+	n.accountConfig = n.Config.Accounts[accountID]
+
+	return nil
 }
 
 func (n *Nuke) Scan() error {
@@ -201,6 +209,20 @@ func (n *Nuke) CheckFilters(r resources.Resource) error {
 		err := checker.Filter()
 		if err != nil {
 			return err
+		}
+	}
+
+	cat := resources.GetCategory(r)
+	name := r.String()
+
+	filters, ok := n.accountConfig.Filters[cat]
+	if !ok {
+		return nil
+	}
+
+	for _, filter := range filters {
+		if filter == name {
+			return fmt.Errorf("filtered by config")
 		}
 	}
 
