@@ -21,34 +21,30 @@ func GetListers(sess *session.Session) []ResourceLister {
 	)
 
 	return []ResourceLister{
-		elb.ListELBs,
-
 		autoscaling.ListGroups,
-
-		route53.ListResourceRecords,
-		route53.ListHostedZones,
-
-		ec2.ListKeyPairs,
-		ec2.ListInstances,
-		ec2.ListSecurityGroups,
-		ec2.ListVpnGatewayAttachements,
-		ec2.ListVpnConnections,
-		ec2.ListNetworkACLs,
-		ec2.ListSubnets,
 		ec2.ListCustomerGateways,
-		ec2.ListVpnGateways,
+		ec2.ListDhcpOptions,
+		ec2.ListInstances,
 		ec2.ListInternetGatewayAttachements,
 		ec2.ListInternetGateways,
+		ec2.ListKeyPairs,
+		ec2.ListNatGateways,
+		ec2.ListNetworkACLs,
 		ec2.ListRouteTables,
-		ec2.ListDhcpOptions,
+		ec2.ListSecurityGroups,
+		ec2.ListSubnets,
 		ec2.ListVpcs,
-
+		ec2.ListVpnConnections,
+		ec2.ListVpnGatewayAttachements,
+		ec2.ListVpnGateways,
+		elb.ListELBs,
 		iam.ListInstanceProfileRoles,
 		iam.ListInstanceProfiles,
 		iam.ListRolePolicyAttachements,
 		iam.ListRoles,
-
-		s3.ListObjects,
+		route53.ListHostedZones,
+		route53.ListResourceRecords,
 		s3.ListBuckets,
+		s3.ListObjects,
 	}
 }

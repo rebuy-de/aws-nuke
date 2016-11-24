@@ -123,13 +123,18 @@ func (n *Nuke) Run() error {
 	}
 
 	for len(n.queue) != 0 {
-
 		n.NukeQueue()
+
+		fmt.Println()
+		fmt.Println("Waiting until resources are removed ...")
+		fmt.Println()
+
 		n.WaitQueue()
 
 		fmt.Println()
 		fmt.Printf("Removal requested: %d failed, %d skipped, %d finished",
 			len(n.failed), len(n.skipped), len(n.finished))
+		fmt.Println()
 		fmt.Println()
 
 		n.queue = n.failed
