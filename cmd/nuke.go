@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -107,34 +108,39 @@ func (n *Nuke) Run() error {
 	fmt.Printf("\nScan complete: %d total, %d nukeable, %d filtered.\n\n",
 		len(n.queue)+len(n.skipped), len(n.queue), len(n.skipped))
 
+	if len(n.queue) == 0 {
+		fmt.Println("No resource to delete.")
+		return nil
+	}
+
 	err = AskContinue("Do you really want to nuke these resources on the account with "+
 		"the ID %s and the alias '%s'?", n.accountID, n.accountAlias)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	for len(n.queue) != 0 {
 
-	n.HandleQueue()
-	n.Wait()
+		n.NukeQueue()
+		n.WaitQueue()
 
-	if n.retry {
-		for len(n.failed) > 0 {
-			fmt.Println()
-			fmt.Printf("Retrying: %d finished, %d failed, %d skipped.",
-				len(n.finished), len(n.failed), len(n.skipped))
-			fmt.Println()
-			fmt.Println()
-			n.Retry()
-		}
+		fmt.Println()
+		fmt.Printf("Removal requested: %d failed, %d skipped, %d finished",
+			len(n.failed), len(n.skipped), len(n.finished))
+		fmt.Println()
+
+		n.queue = n.failed
+		n.failed = []resources.Resource{}
+
+		time.Sleep(5 * time.Second)
 	}
 
 	fmt.Println()
-	fmt.Printf("Nuke complete: %d finished, %d failed, %d skipped.",
-		len(n.finished), len(n.failed), len(n.skipped))
+	fmt.Printf("Nuke complete: %d failed, %d skipped, %d finished.",
+		len(n.failed), len(n.skipped), len(n.finished))
 	fmt.Println()
 
-	return err
+	return nil
 }
 
 func (n *Nuke) ValidateAccount() error {
@@ -239,24 +245,8 @@ func (n *Nuke) CheckFilters(r resources.Resource) error {
 	return nil
 }
 
-func (n *Nuke) Retry() {
-	n.queue = n.failed[:]
-	n.failed = n.failed[0:0]
-
-	n.HandleQueue()
-	n.Wait()
-}
-
-func (n *Nuke) HandleQueue() {
-	temp := n.queue[:]
-	n.queue = n.queue[0:0]
-
-	for _, resource := range temp {
-		if !n.Parameters.NoDryRun {
-			n.skipped = append(n.skipped, resource)
-			continue
-		}
-
+func (n *Nuke) NukeQueue() {
+	for _, resource := range n.queue {
 		err := resource.Remove()
 		if err != nil {
 			n.failed = append(n.failed, resource)
@@ -267,28 +257,25 @@ func (n *Nuke) HandleQueue() {
 		n.waiting = append(n.waiting, resource)
 		Log(resource, ReasonRemoveTriggered, "triggered remove")
 	}
+
+	n.queue = []resources.Resource{}
 }
 
-func (n *Nuke) Wait() {
-	if !n.wait {
-		n.finished = n.waiting
-		n.waiting = []resources.Resource{}
-		return
-	}
-
-	temp := n.waiting[:]
-	n.waiting = n.waiting[0:0]
-
+func (n *Nuke) WaitQueue() {
 	var wg sync.WaitGroup
-	for i, resource := range temp {
+
+	for _, resource := range n.waiting {
 		waiter, ok := resource.(resources.Waiter)
 		if !ok {
 			n.finished = append(n.finished, resource)
+			Log(resource, ReasonSuccess, "deleted")
 			continue
 		}
+
 		wg.Add(1)
 		Log(resource, ReasonWaitPending, "waiting")
-		go func(i int, resource resources.Resource) {
+
+		go func(resource resources.Resource) {
 			defer wg.Done()
 			err := waiter.Wait()
 			if err != nil {
@@ -299,8 +286,8 @@ func (n *Nuke) Wait() {
 
 			n.finished = append(n.finished, resource)
 			Log(resource, ReasonSuccess, "removed")
-		}(i, resource)
+		}(resource)
 	}
 
-	wg.Wait()
+	n.waiting = []resources.Resource{}
 }
