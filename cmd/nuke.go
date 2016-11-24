@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
@@ -121,11 +123,18 @@ func (n *Nuke) Run() error {
 }
 
 func (n *Nuke) ValidateAccount() error {
-	ident, err := sts.New(n.session).GetCallerIdentity(nil)
+	identOutput, err := sts.New(n.session).GetCallerIdentity(nil)
 	if err != nil {
 		return err
 	}
-	accountID := *ident.Account
+
+	aliasesOutput, err := iam.New(n.session).ListAccountAliases(nil)
+	if err != nil {
+		return err
+	}
+
+	accountID := *identOutput.Account
+	aliases := aliasesOutput.AccountAliases
 
 	if !n.Config.HasBlacklist() {
 		return fmt.Errorf("The config file contains an empty blacklist. " +
@@ -138,7 +147,26 @@ func (n *Nuke) ValidateAccount() error {
 			"but it is blacklisted. Aborting.", accountID)
 	}
 
-	return AskContinue("Do you really want to nuke the account with the ID %s?", accountID)
+	if len(aliases) == 0 {
+		return fmt.Errorf("The specified account doesn't have an alias. " +
+			"For safety reasons you need to specify an account alias. " +
+			"Your production account should contain the term 'prod'.")
+	}
+
+	for _, alias := range aliases {
+		if strings.Contains(strings.ToLower(*alias), "prod") {
+			return fmt.Errorf("You are trying to nuke a account with the alias '%s', "+
+				"but it has the substring 'prod' in it. Aborting.", *aliases[0])
+		}
+	}
+
+	if _, ok := n.Config.Accounts[accountID]; !ok {
+		return fmt.Errorf("Your account ID '%s' isn't listed in the config. "+
+			"Aborting.", accountID)
+	}
+
+	return AskContinue("Do you really want to nuke the account with "+
+		"the ID %s and the alias '%s'?", accountID, *aliases[0])
 }
 
 func (n *Nuke) Scan() error {

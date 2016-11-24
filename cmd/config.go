@@ -7,11 +7,13 @@ import (
 )
 
 type NukeConfig struct {
-	AccountBlacklist []string `yaml:"account-blacklist"`
-	Region           string   `yaml:"region"`
-	Accounts         struct {
-		Filters map[string][]string `yaml:"filters"`
-	}
+	AccountBlacklist []string                     `yaml:"account-blacklist"`
+	Region           string                       `yaml:"region"`
+	Accounts         map[string]NukeConfigAccount `yaml:"accounts"`
+}
+
+type NukeConfigAccount struct {
+	Filters map[string][]string `yaml:"filters"`
 }
 
 func LoadConfig(path string) (*NukeConfig, error) {
