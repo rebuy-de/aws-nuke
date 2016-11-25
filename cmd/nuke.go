@@ -91,14 +91,17 @@ func (n *Nuke) Run() error {
 	var err error
 
 	version.Print()
+	fmt.Println()
 
 	err = n.ValidateAccount()
 	if err != nil {
 		return err
 	}
 
-	err = AskContinue("Do you really want to nuke the account with "+
-		"the ID %s and the alias '%s'?", n.accountID, n.accountAlias)
+	fmt.Printf("Do you really want to nuke the account with "+
+		"the ID %s and the alias '%s'?\n", n.accountID, n.accountAlias)
+	fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
+	err = Prompt(n.accountAlias)
 	if err != nil {
 		return err
 	}
@@ -116,8 +119,10 @@ func (n *Nuke) Run() error {
 		return nil
 	}
 
-	err = AskContinue("Do you really want to nuke these resources on the account with "+
-		"the ID %s and the alias '%s'?", n.accountID, n.accountAlias)
+	fmt.Printf("Do you really want to nuke these resources on the account with "+
+		"the ID %s and the alias '%s'?\n", n.accountID, n.accountAlias)
+	fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
+	err = Prompt(n.accountAlias)
 	if err != nil {
 		return err
 	}

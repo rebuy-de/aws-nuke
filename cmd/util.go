@@ -7,19 +7,15 @@ import (
 	"strings"
 )
 
-func AskContinue(message string, opts ...interface{}) error {
-	fmt.Println()
-	fmt.Printf(message, opts...)
-	fmt.Println()
-	fmt.Println("Do you want to continue? (type 'yes')")
-
+func Prompt(expect string) error {
+	fmt.Print("> ")
 	reader := bufio.NewReader(os.Stdin)
 	text, err := reader.ReadString('\n')
 	if err != nil {
 		return err
 	}
 
-	if strings.TrimSpace(text) != "yes" {
+	if strings.TrimSpace(text) != expect {
 		return fmt.Errorf("aborted")
 	}
 	fmt.Println()
