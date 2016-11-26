@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -27,25 +26,12 @@ type Nuke struct {
 	retry bool
 	wait  bool
 
-	queue    []resources.Resource
-	waiting  []resources.Resource
-	skipped  []resources.Resource
-	failed   []resources.Resource
-	finished []resources.Resource
+	items Queue
 }
 
 func NewNuke(params NukeParameters) *Nuke {
 	n := Nuke{
 		Parameters: params,
-
-		retry: true,
-		wait:  true,
-
-		queue:    []resources.Resource{},
-		waiting:  []resources.Resource{},
-		skipped:  []resources.Resource{},
-		failed:   []resources.Resource{},
-		finished: []resources.Resource{},
 	}
 
 	return &n
@@ -111,10 +97,7 @@ func (n *Nuke) Run() error {
 		return err
 	}
 
-	fmt.Printf("\nScan complete: %d total, %d nukeable, %d filtered.\n\n",
-		len(n.queue)+len(n.skipped), len(n.queue), len(n.skipped))
-
-	if len(n.queue) == 0 {
+	if n.items.Count(ItemStateNew) == 0 {
 		fmt.Println("No resource to delete.")
 		return nil
 	}
@@ -127,31 +110,29 @@ func (n *Nuke) Run() error {
 		return err
 	}
 
-	for len(n.queue) != 0 {
-		n.NukeQueue()
+	failCount := 0
 
-		fmt.Println()
-		fmt.Println("Waiting until resources are removed ...")
-		fmt.Println()
+	for {
+		n.HandleQueue()
 
-		n.WaitQueue()
+		if n.items.Count(ItemStatePending, ItemStateWaiting, ItemStateNew) == 0 && n.items.Count(ItemStateFailed) > 0 {
+			if failCount >= 2 {
+				return fmt.Errorf("There are resources in failed state, but none are ready for deletion, anymore.")
+			}
+			failCount = failCount + 1
+		} else {
+			failCount = 0
+		}
 
-		fmt.Println()
-		fmt.Printf("Removal requested: %d failed, %d skipped, %d finished",
-			len(n.failed), len(n.skipped), len(n.finished))
-		fmt.Println()
-		fmt.Println()
-
-		n.queue = n.failed
-		n.failed = []resources.Resource{}
+		if n.items.Count(ItemStateNew, ItemStatePending, ItemStateFailed, ItemStateWaiting) == 0 {
+			break
+		}
 
 		time.Sleep(5 * time.Second)
 	}
 
-	fmt.Println()
-	fmt.Printf("Nuke complete: %d failed, %d skipped, %d finished.",
-		len(n.failed), len(n.skipped), len(n.finished))
-	fmt.Println()
+	fmt.Printf("Nuke complete: %d failed, %d skipped, %d finished.\n\n",
+		n.items.Count(ItemStateFailed), n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished))
 
 	return nil
 }
@@ -207,100 +188,123 @@ func (n *Nuke) ValidateAccount() error {
 }
 
 func (n *Nuke) Scan() error {
-	listers := resources.GetListers(n.session)
+	scanner := Scan(n.session)
+	queue := make(Queue, 0)
 
-	for _, lister := range listers {
-		resources, err := lister()
-		if err != nil {
-			return err
-		}
-
-		for _, r := range resources {
-			reason := n.CheckFilters(r)
-			if reason != nil {
-				Log(r, ReasonSkip, reason.Error())
-				n.skipped = append(n.skipped, r)
-				continue
-			}
-
-			Log(r, ReasonSuccess, "would remove")
-			n.queue = append(n.queue, r)
-		}
-
+	for item := range scanner.Items {
+		queue = append(queue, item)
+		n.Filter(item)
+		item.Print()
 	}
+
+	if scanner.Error != nil {
+		return scanner.Error
+	}
+
+	fmt.Printf("Scan complete: %d total, %d nukeable, %d filtered.\n\n",
+		queue.CountTotal(), queue.Count(ItemStateNew), queue.Count(ItemStateFiltered))
+
+	n.items = queue
 
 	return nil
 }
 
-func (n *Nuke) CheckFilters(r resources.Resource) error {
-	checker, ok := r.(resources.Filter)
+func (n *Nuke) Filter(item *Item) {
+	checker, ok := item.Resource.(resources.Filter)
 	if ok {
 		err := checker.Filter()
 		if err != nil {
-			return err
+			item.State = ItemStateFiltered
+			item.Reason = err.Error()
+			return
 		}
 	}
 
-	cat := resources.GetCategory(r)
-	name := r.String()
-
-	filters, ok := n.accountConfig.Filters[cat]
+	filters, ok := n.accountConfig.Filters[item.Service]
 	if !ok {
-		return nil
+		return
 	}
 
 	for _, filter := range filters {
-		if filter == name {
-			return fmt.Errorf("filtered by config")
+		if filter == item.Resource.String() {
+			item.State = ItemStateFiltered
+			item.Reason = "filtered by config"
+			return
 		}
 	}
 
-	return nil
+	return
 }
 
-func (n *Nuke) NukeQueue() {
-	for _, resource := range n.queue {
-		err := resource.Remove()
+func (n *Nuke) HandleQueue() {
+	listCache := make(map[string][]resources.Resource)
+
+	for _, item := range n.items {
+		switch item.State {
+		case ItemStateNew:
+			n.HandleRemove(item)
+			item.Print()
+		case ItemStateFailed:
+			n.HandleRemove(item)
+			n.HandleWait(item, listCache)
+			item.Print()
+		case ItemStatePending:
+			n.HandleWait(item, listCache)
+			item.State = ItemStateWaiting
+			item.Print()
+		case ItemStateWaiting:
+			n.HandleWait(item, listCache)
+			item.Print()
+		}
+
+	}
+
+	fmt.Println()
+	fmt.Printf("Removal requested: %d waiting, %d failed, %d skipped, %d finished\n\n",
+		n.items.Count(ItemStateWaiting, ItemStatePending), n.items.Count(ItemStateFailed),
+		n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished))
+}
+
+func (n *Nuke) HandleRemove(item *Item) {
+	err := item.Resource.Remove()
+	if err != nil {
+		item.State = ItemStateFailed
+		item.Reason = err.Error()
+		return
+	}
+
+	item.State = ItemStatePending
+	item.Reason = ""
+}
+
+func (n *Nuke) HandleWait(item *Item, cache map[string][]resources.Resource) {
+	var err error
+
+	left, ok := cache[item.Service]
+	if !ok {
+		left, err = item.Lister()
 		if err != nil {
-			n.failed = append(n.failed, resource)
-			Log(resource, ReasonError, err.Error())
-			continue
+			item.State = ItemStateFailed
+			item.Reason = err.Error()
+			return
 		}
-
-		n.waiting = append(n.waiting, resource)
-		Log(resource, ReasonRemoveTriggered, "triggered remove")
+		cache[item.Service] = left
 	}
 
-	n.queue = []resources.Resource{}
-}
-
-func (n *Nuke) WaitQueue() {
-	var wg sync.WaitGroup
-
-	for _, resource := range n.waiting {
-		waiter, ok := resource.(resources.Waiter)
-		if !ok {
-			n.finished = append(n.finished, resource)
-			Log(resource, ReasonSuccess, "deleted")
-			continue
-		}
-
-		wg.Add(1)
-		Log(resource, ReasonWaitPending, "waiting")
-
-		go func(resource resources.Resource) {
-			defer wg.Done()
-			err := waiter.Wait()
-			if err != nil {
-				n.failed = append(n.failed, resource)
-				Log(resource, ReasonError, err.Error())
-				return
+	for _, r := range left {
+		if r.String() == item.Resource.String() {
+			checker, ok := r.(resources.Filter)
+			if ok {
+				err := checker.Filter()
+				if err != nil {
+					break
+				}
 			}
 
-			n.finished = append(n.finished, resource)
-			Log(resource, ReasonSuccess, "removed")
-		}(resource)
+			return
+		}
 	}
 
-	n.waiting = []resources.Resource{}
+	item.State = ItemStateFinished
+	item.Reason = ""
 }

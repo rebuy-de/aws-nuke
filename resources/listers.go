@@ -22,6 +22,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 
 	return []ResourceLister{
 		autoscaling.ListGroups,
+		ec2.ListAddresses,
 		ec2.ListCustomerGateways,
 		ec2.ListDhcpOptions,
 		ec2.ListInstances,
