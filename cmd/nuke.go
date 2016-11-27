@@ -23,8 +23,7 @@ type Nuke struct {
 	accountAlias  string
 	session       *session.Session
 
-	retry bool
-	wait  bool
+	ForceSleep time.Duration
 
 	items Queue
 }
@@ -32,6 +31,7 @@ type Nuke struct {
 func NewNuke(params NukeParameters) *Nuke {
 	n := Nuke{
 		Parameters: params,
+		ForceSleep: 15 * time.Second,
 	}
 
 	return &n
@@ -86,10 +86,15 @@ func (n *Nuke) Run() error {
 
 	fmt.Printf("Do you really want to nuke the account with "+
 		"the ID %s and the alias '%s'?\n", n.accountID, n.accountAlias)
-	fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
-	err = Prompt(n.accountAlias)
-	if err != nil {
-		return err
+	if n.Parameters.Force {
+		fmt.Printf("Waiting %v before continuing.\n", n.ForceSleep)
+		time.Sleep(n.ForceSleep)
+	} else {
+		fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
+		err = Prompt(n.accountAlias)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = n.Scan()
@@ -102,12 +107,22 @@ func (n *Nuke) Run() error {
 		return nil
 	}
 
+	if !n.Parameters.NoDryRun {
+		fmt.Println("Would delete these resources. Provide --no-dry-run to actually destroy resources.")
+		return nil
+	}
+
 	fmt.Printf("Do you really want to nuke these resources on the account with "+
 		"the ID %s and the alias '%s'?\n", n.accountID, n.accountAlias)
-	fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
-	err = Prompt(n.accountAlias)
-	if err != nil {
-		return err
+	if n.Parameters.Force {
+		fmt.Printf("Waiting %v before continuing.\n", n.ForceSleep)
+		time.Sleep(n.ForceSleep)
+	} else {
+		fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
+		err = Prompt(n.accountAlias)
+		if err != nil {
+			return err
+		}
 	}
 
 	failCount := 0

@@ -11,7 +11,7 @@ build: vendor
 		$(BUILD_FLAGS) \
 		-o aws-nuke-$(VERSION)
 
-test: build
+test: vendor
 	go test $(shell glide nv)
 
 
