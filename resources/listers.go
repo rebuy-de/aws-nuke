@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -15,9 +16,10 @@ func GetListers(sess *session.Session) []ResourceLister {
 		autoscaling = AutoScalingNuke{autoscaling.New(sess)}
 		ec2         = EC2Nuke{ec2.New(sess)}
 		elb         = ElbNuke{elb.New(sess)}
+		iam         = IamNuke{iam.New(sess)}
+		rds         = RDSNuke{rds.New(sess)}
 		route53     = Route53Nuke{route53.New(sess)}
 		s3          = S3Nuke{s3.New(sess)}
-		iam         = IamNuke{iam.New(sess)}
 	)
 
 	return []ResourceLister{
@@ -51,6 +53,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		iam.ListUserGroupAttachements,
 		iam.ListUserPolicyAttachements,
 		iam.ListUsers,
+		rds.ListInstances,
 		route53.ListHostedZones,
 		route53.ListResourceRecords,
 		s3.ListBuckets,

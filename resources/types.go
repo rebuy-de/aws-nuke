@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -31,4 +32,8 @@ type S3Nuke struct {
 
 type IamNuke struct {
 	Service *iam.IAM
+}
+
+type RDSNuke struct {
+	Service *rds.RDS
 }
