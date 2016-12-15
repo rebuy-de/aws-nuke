@@ -59,6 +59,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		rds.ListInstances,
 		rds.ListSnapshots,
 		rds.ListParameterGroups,
+		rds.ListSubnetGroups,
 		route53.ListHostedZones,
 		route53.ListResourceRecords,
 		s3.ListBuckets,
