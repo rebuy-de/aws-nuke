@@ -66,6 +66,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		route53.ListResourceRecords,
 		s3.ListBuckets,
 		s3.ListObjects,
+		elasticache.ListCacheClusters,
 		elasticache.ListSubnetGroups,
 	}
 }
