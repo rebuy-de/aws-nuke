@@ -57,6 +57,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		iam.ListUserPolicyAttachements,
 		iam.ListUsers,
 		rds.ListInstances,
+		rds.ListSnapshots,
 		route53.ListHostedZones,
 		route53.ListResourceRecords,
 		s3.ListBuckets,
