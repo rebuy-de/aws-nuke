@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -20,6 +21,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		rds         = RDSNuke{rds.New(sess)}
 		route53     = Route53Nuke{route53.New(sess)}
 		s3          = S3Nuke{s3.New(sess)}
+		ecr         = ECRNuke{ecr.New(sess)}
 	)
 
 	return []ResourceLister{
@@ -40,6 +42,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		ec2.ListVpnConnections,
 		ec2.ListVpnGatewayAttachements,
 		ec2.ListVpnGateways,
+		ecr.ListRepos,
 		elb.ListELBs,
 		iam.ListGroupPolicyAttachements,
 		iam.ListGroups,
