@@ -1,3 +1,4 @@
 /vendor
 /aws-nuke
 /aws-nuke-*
+.glide
