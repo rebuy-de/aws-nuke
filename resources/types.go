@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
+	"github.com/aws/aws-sdk-go/service/elasticache"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -41,4 +42,8 @@ type RDSNuke struct {
 
 type ECRNuke struct {
 	Service *ecr.ECR
+}
+
+type ElasticacheNuke struct {
+	Service *elasticache.ElastiCache
 }

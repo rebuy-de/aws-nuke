@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
+	"github.com/aws/aws-sdk-go/service/elasticache"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -22,6 +23,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		route53     = Route53Nuke{route53.New(sess)}
 		s3          = S3Nuke{s3.New(sess)}
 		ecr         = ECRNuke{ecr.New(sess)}
+		elasticache = ElasticacheNuke{elasticache.New(sess)}
 	)
 
 	return []ResourceLister{
@@ -57,9 +59,14 @@ func GetListers(sess *session.Session) []ResourceLister {
 		iam.ListUserPolicyAttachements,
 		iam.ListUsers,
 		rds.ListInstances,
+		rds.ListSnapshots,
+		rds.ListParameterGroups,
+		rds.ListSubnetGroups,
 		route53.ListHostedZones,
 		route53.ListResourceRecords,
 		s3.ListBuckets,
 		s3.ListObjects,
+		elasticache.ListCacheClusters,
+		elasticache.ListSubnetGroups,
 	}
 }
