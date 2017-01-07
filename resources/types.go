@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
+	"github.com/aws/aws-sdk-go/service/efs"
 	"github.com/aws/aws-sdk-go/service/elasticache"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -46,4 +47,8 @@ type ECRNuke struct {
 
 type ElasticacheNuke struct {
 	Service *elasticache.ElastiCache
+}
+
+type EFSNuke struct {
+	Service *efs.EFS
 }
