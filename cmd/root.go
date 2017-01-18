@@ -51,6 +51,9 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().StringVar(
 		&params.SecretAccessKey, "secret-access-key", "",
 		"AWS secret-access-key")
+	command.PersistentFlags().StringSliceVarP(
+		&params.Targets, "target", "t", []string{},
+		"limit nuking to certain resource types (eg IamServerCertificate)")
 	command.PersistentFlags().BoolVar(
 		&params.NoDryRun, "no-dry-run", false,
 		"actualy delete found resources")

@@ -12,6 +12,8 @@ type NukeParameters struct {
 	AccessKeyID     string
 	SecretAccessKey string
 
+	Targets []string
+
 	NoDryRun bool
 	Force    bool
 }
@@ -36,4 +38,18 @@ func (p *NukeParameters) hasProfile() bool {
 func (p *NukeParameters) hasKeys() bool {
 	return strings.TrimSpace(p.AccessKeyID) != "" &&
 		strings.TrimSpace(p.SecretAccessKey) != ""
+}
+
+func (p *NukeParameters) WantsTarget(name string) bool {
+	if p.Targets == nil || len(p.Targets) < 1 {
+		return true
+	}
+
+	for _, wants := range p.Targets {
+		if wants == name {
+			return true
+		}
+	}
+
+	return false
 }

@@ -207,6 +207,10 @@ func (n *Nuke) Scan() error {
 	queue := make(Queue, 0)
 
 	for item := range scanner.Items {
+		if !n.Parameters.WantsTarget(item.Service) {
+			continue
+		}
+
 		queue = append(queue, item)
 		n.Filter(item)
 		item.Print()
