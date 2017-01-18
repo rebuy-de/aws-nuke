@@ -59,6 +59,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		iam.ListPolicies,
 		iam.ListRolePolicyAttachements,
 		iam.ListRoles,
+		iam.ListServerCertificates,
 		iam.ListUserAccessKeys,
 		iam.ListUserGroupAttachements,
 		iam.ListUserGroupAttachements,
