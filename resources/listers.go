@@ -42,6 +42,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		ec2.ListRouteTables,
 		ec2.ListSecurityGroups,
 		ec2.ListSubnets,
+		ec2.ListVolumes,
 		ec2.ListVpcs,
 		ec2.ListVpnConnections,
 		ec2.ListVpnGatewayAttachements,
