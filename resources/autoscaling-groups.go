@@ -41,13 +41,6 @@ func (asg *AutoScalingGroup) Remove() error {
 	return nil
 }
 
-func (asg *AutoScalingGroup) Wait() error {
-	params := &autoscaling.DescribeAutoScalingGroupsInput{
-		AutoScalingGroupNames: []*string{asg.name},
-	}
-	return asg.svc.WaitUntilGroupNotExists(params)
-}
-
 func (asg *AutoScalingGroup) String() string {
 	return *asg.name
 }

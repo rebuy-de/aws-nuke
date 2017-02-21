@@ -67,11 +67,6 @@ func (r *ECRrepository) Remove() error {
 	return err
 }
 
-func (r *ECRrepository) Wait() error {
-
-	return nil
-}
-
 func (r *ECRrepository) String() string {
 	return fmt.Sprintf("Repository: %s", *r.name)
 }

@@ -7,11 +7,6 @@ type Resource interface {
 	String() string
 }
 
-type Waiter interface {
-	Resource
-	Wait() error
-}
-
 type Filter interface {
 	Resource
 	Filter() error
