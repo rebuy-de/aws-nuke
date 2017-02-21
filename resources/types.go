@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/efs"
@@ -13,24 +14,32 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-type EC2Nuke struct {
-	Service *ec2.EC2
-}
-
-type Route53Nuke struct {
-	Service *route53.Route53
-}
-
 type AutoScalingNuke struct {
 	Service *autoscaling.AutoScaling
 }
 
-type ElbNuke struct {
-	Service *elb.ELB
+type CloudFormationNuke struct {
+	Service *cloudformation.CloudFormation
 }
 
-type S3Nuke struct {
-	Service *s3.S3
+type EC2Nuke struct {
+	Service *ec2.EC2
+}
+
+type ECRNuke struct {
+	Service *ecr.ECR
+}
+
+type EFSNuke struct {
+	Service *efs.EFS
+}
+
+type ElasticacheNuke struct {
+	Service *elasticache.ElastiCache
+}
+
+type ElbNuke struct {
+	Service *elb.ELB
 }
 
 type IamNuke struct {
@@ -41,14 +50,10 @@ type RDSNuke struct {
 	Service *rds.RDS
 }
 
-type ECRNuke struct {
-	Service *ecr.ECR
+type Route53Nuke struct {
+	Service *route53.Route53
 }
 
-type ElasticacheNuke struct {
-	Service *elasticache.ElastiCache
-}
-
-type EFSNuke struct {
-	Service *efs.EFS
+type S3Nuke struct {
+	Service *s3.S3
 }
