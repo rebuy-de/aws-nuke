@@ -53,13 +53,6 @@ func (i *EC2Instance) Remove() error {
 	return nil
 }
 
-func (i *EC2Instance) Wait() error {
-	params := &ec2.DescribeInstancesInput{
-		InstanceIds: []*string{i.id},
-	}
-	return i.svc.WaitUntilInstanceTerminated(params)
-}
-
 func (i *EC2Instance) String() string {
 	return *i.id
 }

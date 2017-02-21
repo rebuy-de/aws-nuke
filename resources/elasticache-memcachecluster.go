@@ -44,11 +44,3 @@ func (i *ElasticacheCacheCluster) Remove() error {
 func (i *ElasticacheCacheCluster) String() string {
 	return *i.clusterID
 }
-
-func (i *ElasticacheCacheCluster) Wait() error {
-
-	params := &elasticache.DescribeCacheClustersInput{
-		CacheClusterId: i.clusterID,
-	}
-	return i.svc.WaitUntilCacheClusterDeleted(params)
-}

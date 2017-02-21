@@ -90,13 +90,6 @@ func (r *Route53ResourceRecordSet) Remove() error {
 	return nil
 }
 
-func (r *Route53ResourceRecordSet) Wait() error {
-	params := &route53.GetChangeInput{
-		Id: r.changeId,
-	}
-	return r.svc.WaitUntilResourceRecordSetsChanged(params)
-}
-
 func (rrs *Route53ResourceRecordSet) String() string {
 	return *rrs.data.Name
 }
