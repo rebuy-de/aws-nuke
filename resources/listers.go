@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/efs"
@@ -16,20 +17,22 @@ import (
 
 func GetListers(sess *session.Session) []ResourceLister {
 	var (
-		autoscaling = AutoScalingNuke{autoscaling.New(sess)}
-		ec2         = EC2Nuke{ec2.New(sess)}
-		ecr         = ECRNuke{ecr.New(sess)}
-		efs         = EFSNuke{efs.New(sess)}
-		elasticache = ElasticacheNuke{elasticache.New(sess)}
-		elb         = ElbNuke{elb.New(sess)}
-		iam         = IamNuke{iam.New(sess)}
-		rds         = RDSNuke{rds.New(sess)}
-		route53     = Route53Nuke{route53.New(sess)}
-		s3          = S3Nuke{s3.New(sess)}
+		autoscaling    = AutoScalingNuke{autoscaling.New(sess)}
+		cloudformation = CloudFormationNuke{cloudformation.New(sess)}
+		ec2            = EC2Nuke{ec2.New(sess)}
+		ecr            = ECRNuke{ecr.New(sess)}
+		efs            = EFSNuke{efs.New(sess)}
+		elasticache    = ElasticacheNuke{elasticache.New(sess)}
+		elb            = ElbNuke{elb.New(sess)}
+		iam            = IamNuke{iam.New(sess)}
+		rds            = RDSNuke{rds.New(sess)}
+		route53        = Route53Nuke{route53.New(sess)}
+		s3             = S3Nuke{s3.New(sess)}
 	)
 
 	return []ResourceLister{
 		autoscaling.ListGroups,
+		cloudformation.ListStacks,
 		ec2.ListAddresses,
 		ec2.ListCustomerGateways,
 		ec2.ListDhcpOptions,
