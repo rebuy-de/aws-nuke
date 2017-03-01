@@ -1,5 +1,4 @@
-shell:
+docker:
+  repository: 'aws-nuke'
   mailerRecipients:
-    - 'dl-scb-tech-platform@rebuy.com'
-  command:
-    - 'hack/build.sh'
+    - 'DL-SCB-Tech-Platform@rebuy.com'

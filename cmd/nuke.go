@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/rebuy-de/aws-nuke/cmd/version"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
@@ -76,8 +75,7 @@ func (n *Nuke) StartSession() error {
 func (n *Nuke) Run() error {
 	var err error
 
-	version.Print()
-	fmt.Println()
+	fmt.Printf("aws-nuke version %s - %s - %s\n\n", BuildVersion, BuildDate, BuildHash)
 
 	err = n.ValidateAccount()
 	if err != nil {
