@@ -18,8 +18,8 @@ WORKDIR /go/src/github.com/Masterminds/glide
 RUN git checkout v0.12.3
 RUN go install
 
-COPY . /go/src/github.com/rebuy-de/golang-template/example
-WORKDIR /go/src/github.com/rebuy-de/golang-template/example
+COPY . /go/src/github.com/rebuy-de/aws-nuke
+WORKDIR /go/src/github.com/rebuy-de/aws-nuke
 RUN make install
 
-ENTRYPOINT ["/go/bin/example"]
+ENTRYPOINT ["/go/bin/aws-nuke"]
