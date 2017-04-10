@@ -2,7 +2,7 @@ package resources
 
 import (
 	"fmt"
-
+	"strings"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
@@ -31,7 +31,7 @@ func (n *RDSNuke) ListParameterGroups() ([]Resource, error) {
 }
 
 func (i *RDSDBParameterGroup) Filter() error {
-	if *i.name == "default.postgres9.5" {
+	if strings.HasPrefix(*i.name, "default.") {
 		return fmt.Errorf("Cannot delete default parameter group")
 	}
 	return nil
