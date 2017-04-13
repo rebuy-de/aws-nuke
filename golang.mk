@@ -1,5 +1,5 @@
 # Source: https://github.com/rebuy-de/golang-template
-# Version: 1.0.0
+# Version: 1.3.1
 # Dependencies:
 # * Glide
 # * gocov (https://github.com/axw/gocov)
@@ -7,8 +7,8 @@
 
 NAME=$(notdir $(PACKAGE))
 
-BUILD_VERSION=$(shell git describe --always --dirty | tr '-' '.' )
-BUILD_DATE=$(shell date -Iseconds)
+BUILD_VERSION=$(shell git describe --always --dirty --tags | tr '-' '.' )
+BUILD_DATE=$(shell date)
 BUILD_HASH=$(shell git rev-parse HEAD)
 BUILD_MACHINE=$(shell echo $$HOSTNAME)
 BUILD_USER=$(shell whoami)
@@ -35,11 +35,22 @@ vendor: glide.lock glide.yaml
 format:
 	gofmt -s -w $(GOFILES)
 
-test: vendor
-	go test $(GOPKGS)
-
 vet:
 	go vet $(GOPKGS)
+
+lint:
+	$(foreach pkg,$(GOPKGS),golint $(pkg);)
+
+test_gopath:
+	test $$(go list) = "$(PACKAGE)"
+
+test_packages: vendor
+	go test $(GOPKGS)
+
+test_format:
+	gofmt -l $(GOFILES)
+
+test: test_gopath test_format vet lint test_packages
 
 cov:
 	gocov test -v $(GOPKGS) \
@@ -48,9 +59,12 @@ cov:
 build: vendor
 	go build \
 		$(BUILD_FLAGS) \
-		-o $(NAME)-$(BUILD_VERSION)
-	ln -sf $(NAME)-$(BUILD_VERSION) $(NAME)
+		-o $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)
+	ln -sf $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH) $(NAME)
 
+xc:
+	GOOS=linux GOARCH=amd64 make build
+	GOOS=darwin GOARCH=amd64 make build
 
 install: test
 	go install \
