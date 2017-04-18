@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -41,15 +40,14 @@ func (n *Nuke) StartSession() error {
 	for _, region := range n.Config.Regions {
 		fmt.Printf("Create session for region %s \n", region)
 		if n.Parameters.hasProfile() {
-			n.sessions[region] = session.New(&aws.Config{
-				Region:      &region,
-				Credentials: credentials.NewSharedCredentials("", n.Parameters.Profile),
-			})
+			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
+			     Config: aws.Config{Region: aws.String(region)},
+			     Profile: n.Parameters.Profile,
+			}))
 
 			if n.sessions[region] == nil {
 				return fmt.Errorf("Unable to create session with profile '%s'.", n.Parameters.Profile)
 			}
-
 		}
 
 		if n.Parameters.hasKeys() {
