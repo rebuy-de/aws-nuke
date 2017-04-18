@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/efs"
@@ -61,4 +62,8 @@ type S3Nuke struct {
 
 type SNSNuke struct {
 	Service *sns.SNS
+}
+
+type CloudWatchEventsNuke struct {
+	Service *cloudwatchevents.CloudWatchEvents
 }
