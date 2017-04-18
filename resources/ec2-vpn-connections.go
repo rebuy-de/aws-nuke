@@ -7,9 +7,10 @@ import (
 )
 
 type EC2VpnConnection struct {
-	svc   *ec2.EC2
-	id    string
-	state string
+	svc    *ec2.EC2
+	id     string
+	state  string
+	region string
 }
 
 func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
@@ -22,9 +23,10 @@ func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.VpnConnections {
 		resources = append(resources, &EC2VpnConnection{
-			svc:   n.Service,
-			id:    *out.VpnConnectionId,
-			state: *out.State,
+			svc:    n.Service,
+			id:     *out.VpnConnectionId,
+			state:  *out.State,
+			region: *n.Service.Config.Region,
 		})
 	}
 
@@ -52,5 +54,5 @@ func (e *EC2VpnConnection) Remove() error {
 }
 
 func (e *EC2VpnConnection) String() string {
-	return e.id
+	return fmt.Sprintf("%s in %s", e.id, e.region)
 }

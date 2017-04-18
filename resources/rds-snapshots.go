@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
@@ -9,6 +11,7 @@ type RDSSnapshot struct {
 	svc        *rds.RDS
 	identifier *string
 	status     *string
+	region     *string
 }
 
 func (n *RDSNuke) ListSnapshots() ([]Resource, error) {
@@ -23,6 +26,7 @@ func (n *RDSNuke) ListSnapshots() ([]Resource, error) {
 			svc:        n.Service,
 			identifier: snapshot.DBSnapshotIdentifier,
 			status:     snapshot.Status,
+			region:     n.Service.Config.Region,
 		})
 
 	}
@@ -43,5 +47,5 @@ func (i *RDSSnapshot) Remove() error {
 }
 
 func (i *RDSSnapshot) String() string {
-	return *i.identifier
+	return fmt.Sprintf("%s in %s", *i.identifier, *i.region)
 }

@@ -1,10 +1,15 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2RouteTable struct {
-	svc *ec2.EC2
-	id  *string
+	svc    *ec2.EC2
+	id     *string
+	region *string
 }
 
 func (n *EC2Nuke) ListRouteTables() ([]Resource, error) {
@@ -16,8 +21,9 @@ func (n *EC2Nuke) ListRouteTables() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.RouteTables {
 		resources = append(resources, &EC2RouteTable{
-			svc: n.Service,
-			id:  out.RouteTableId,
+			svc:    n.Service,
+			id:     out.RouteTableId,
+			region: n.Service.Config.Region,
 		})
 	}
 
@@ -38,5 +44,5 @@ func (e *EC2RouteTable) Remove() error {
 }
 
 func (e *EC2RouteTable) String() string {
-	return *e.id
+	return fmt.Sprintf("%s in %s", *e.id, *e.region)
 }

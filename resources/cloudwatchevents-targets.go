@@ -25,6 +25,7 @@ func (n *CloudWatchEventsNuke) ListTargets() ([]Resource, error) {
 				svc:      n.Service,
 				ruleName: rule.Name,
 				targetId: target.Id,
+				region:   n.Service.Config.Region,
 			})
 		}
 	}
@@ -35,6 +36,7 @@ type CloudWatchEventsTarget struct {
 	svc      *cloudwatchevents.CloudWatchEvents
 	targetId *string
 	ruleName *string
+	region   *string
 }
 
 func (target *CloudWatchEventsTarget) Remove() error {
@@ -47,5 +49,5 @@ func (target *CloudWatchEventsTarget) Remove() error {
 }
 
 func (target *CloudWatchEventsTarget) String() string {
-	return fmt.Sprintf("Rule: %s Target ID: %s", *target.ruleName, *target.targetId)
+	return fmt.Sprintf("Rule: %s Target ID: %s in %s", *target.ruleName, *target.targetId, *target.region)
 }

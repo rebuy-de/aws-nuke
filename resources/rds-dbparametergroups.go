@@ -3,13 +3,15 @@ package resources
 import (
 	"fmt"
 	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
 type RDSDBParameterGroup struct {
-	svc  *rds.RDS
-	name *string
+	svc    *rds.RDS
+	name   *string
+	region *string
 }
 
 func (n *RDSNuke) ListParameterGroups() ([]Resource, error) {
@@ -21,8 +23,9 @@ func (n *RDSNuke) ListParameterGroups() ([]Resource, error) {
 	var resources []Resource
 	for _, parametergroup := range resp.DBParameterGroups {
 		resources = append(resources, &RDSDBParameterGroup{
-			svc:  n.Service,
-			name: parametergroup.DBParameterGroupName,
+			svc:    n.Service,
+			name:   parametergroup.DBParameterGroupName,
+			region: n.Service.Config.Region,
 		})
 
 	}
@@ -51,5 +54,5 @@ func (i *RDSDBParameterGroup) Remove() error {
 }
 
 func (i *RDSDBParameterGroup) String() string {
-	return *i.name
+	return fmt.Sprintf("%s in %s", *i.name, *i.region)
 }

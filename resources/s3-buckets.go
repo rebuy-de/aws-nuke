@@ -7,8 +7,9 @@ import (
 )
 
 type S3Bucket struct {
-	svc  *s3.S3
-	name string
+	svc    *s3.S3
+	name   string
+	region string
 }
 
 func (n *S3Nuke) DescribeBuckets() ([]string, error) {
@@ -34,8 +35,9 @@ func (n *S3Nuke) ListBuckets() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, name := range buckets {
 		resources = append(resources, &S3Bucket{
-			svc:  n.Service,
-			name: name,
+			svc:    n.Service,
+			name:   name,
+			region: *n.Service.Config.Region,
 		})
 	}
 
@@ -56,5 +58,5 @@ func (e *S3Bucket) Remove() error {
 }
 
 func (e *S3Bucket) String() string {
-	return fmt.Sprintf("s3://%s", e.name)
+	return fmt.Sprintf("s3://%s in %s", e.name, e.region)
 }

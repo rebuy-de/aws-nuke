@@ -1,14 +1,17 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
 type RDSInstance struct {
-	svc  *rds.RDS
-	id   string
-	name string
+	svc    *rds.RDS
+	id     string
+	name   string
+	region string
 }
 
 func (n *RDSNuke) ListInstances() ([]Resource, error) {
@@ -21,9 +24,10 @@ func (n *RDSNuke) ListInstances() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBInstances {
 		resources = append(resources, &RDSInstance{
-			svc:  n.Service,
-			id:   *instance.DBInstanceIdentifier,
-			name: *instance.DBName,
+			svc:    n.Service,
+			id:     *instance.DBInstanceIdentifier,
+			name:   *instance.DBName,
+			region: *n.Service.Config.Region,
 		})
 	}
 
@@ -45,5 +49,5 @@ func (i *RDSInstance) Remove() error {
 }
 
 func (i *RDSInstance) String() string {
-	return i.name
+	return fmt.Sprintf("%s in %s", i.name, i.region)
 }

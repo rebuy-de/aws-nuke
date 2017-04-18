@@ -1,11 +1,16 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/efs"
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/service/efs"
+)
 
 type EFSFileSystem struct {
-	svc  *efs.EFS
-	id   string
-	name string
+	svc    *efs.EFS
+	id     string
+	name   string
+	region string
 }
 
 func (n *EFSNuke) ListFileSystems() ([]Resource, error) {
@@ -17,9 +22,10 @@ func (n *EFSNuke) ListFileSystems() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, fs := range resp.FileSystems {
 		resources = append(resources, &EFSFileSystem{
-			svc:  n.Service,
-			id:   *fs.FileSystemId,
-			name: *fs.CreationToken,
+			svc:    n.Service,
+			id:     *fs.FileSystemId,
+			name:   *fs.CreationToken,
+			region: *n.Service.Config.Region,
 		})
 
 	}
@@ -36,5 +42,5 @@ func (e *EFSFileSystem) Remove() error {
 }
 
 func (e *EFSFileSystem) String() string {
-	return e.name
+	return fmt.Sprintf("%s in %s", e.name, e.region)
 }

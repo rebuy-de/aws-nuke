@@ -8,9 +8,10 @@ import (
 )
 
 type EC2InternetGatewayAttachement struct {
-	svc   *ec2.EC2
-	vpcId *string
-	igwId *string
+	svc    *ec2.EC2
+	vpcId  *string
+	igwId  *string
+	region *string
 }
 
 func (n *EC2Nuke) ListInternetGatewayAttachements() ([]Resource, error) {
@@ -37,9 +38,10 @@ func (n *EC2Nuke) ListInternetGatewayAttachements() ([]Resource, error) {
 
 		for _, out := range resp.InternetGateways {
 			resources = append(resources, &EC2InternetGatewayAttachement{
-				svc:   n.Service,
-				vpcId: vpc.VpcId,
-				igwId: out.InternetGatewayId,
+				svc:    n.Service,
+				vpcId:  vpc.VpcId,
+				igwId:  out.InternetGatewayId,
+				region: n.Service.Config.Region,
 			})
 		}
 	}
@@ -62,5 +64,5 @@ func (e *EC2InternetGatewayAttachement) Remove() error {
 }
 
 func (e *EC2InternetGatewayAttachement) String() string {
-	return fmt.Sprintf("%s -> %s", *e.igwId, *e.vpcId)
+	return fmt.Sprintf("%s -> %s in %s", *e.igwId, *e.vpcId, *e.region)
 }

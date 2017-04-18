@@ -7,9 +7,10 @@ import (
 )
 
 type EC2Instance struct {
-	svc   *ec2.EC2
-	id    *string
-	state string
+	svc    *ec2.EC2
+	id     *string
+	state  string
+	region *string
 }
 
 func (n *EC2Nuke) ListInstances() ([]Resource, error) {
@@ -23,9 +24,10 @@ func (n *EC2Nuke) ListInstances() ([]Resource, error) {
 	for _, reservation := range resp.Reservations {
 		for _, instance := range reservation.Instances {
 			resources = append(resources, &EC2Instance{
-				svc:   n.Service,
-				id:    instance.InstanceId,
-				state: *instance.State.Name,
+				svc:    n.Service,
+				id:     instance.InstanceId,
+				state:  *instance.State.Name,
+				region: n.Service.Config.Region,
 			})
 		}
 	}
@@ -54,5 +56,5 @@ func (i *EC2Instance) Remove() error {
 }
 
 func (i *EC2Instance) String() string {
-	return *i.id
+	return fmt.Sprintf("%s in %s", *i.id, *i.region)
 }
