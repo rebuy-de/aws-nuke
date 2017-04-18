@@ -56,7 +56,7 @@ func TestLoadExampleConfig(t *testing.T) {
 
 	expect := NukeConfig{
 		AccountBlacklist: []string{"1234567890"},
-		Region:           "eu-west-1",
+		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]NukeConfigAccount{
 			"555133742": NukeConfigAccount{
 				Filters: map[string][]string{

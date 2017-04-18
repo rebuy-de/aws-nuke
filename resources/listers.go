@@ -21,9 +21,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 	var (
 		autoscaling      = AutoScalingNuke{autoscaling.New(sess)}
 		cloudformation   = CloudFormationNuke{cloudformation.New(sess)}
-	
 		cloudwatchevents = CloudWatchEventsNuke{cloudwatchevents.New(sess)}
-		
 		ec2              = EC2Nuke{ec2.New(sess)}
 		ecr              = ECRNuke{ecr.New(sess)}
 		efs              = EFSNuke{efs.New(sess)}

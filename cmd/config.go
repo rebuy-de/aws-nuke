@@ -8,7 +8,7 @@ import (
 
 type NukeConfig struct {
 	AccountBlacklist []string                     `yaml:"account-blacklist"`
-	Region           string                       `yaml:"region"`
+	Regions          []string                     `yaml:"regions"`
 	Accounts         map[string]NukeConfigAccount `yaml:"accounts"`
 }
 
