@@ -39,22 +39,21 @@ func NewNuke(params NukeParameters) *Nuke {
 func (n *Nuke) StartSession() error {
 	n.sessions = make(map[string]*session.Session)
 	for _, region := range n.Config.Regions {
+		fmt.Printf("Create session for region %s \n", region)
 		if n.Parameters.hasProfile() {
-			s := session.New(&aws.Config{
+			n.sessions[region] = session.New(&aws.Config{
 				Region:      &region,
 				Credentials: credentials.NewSharedCredentials("", n.Parameters.Profile),
 			})
 
-			if s == nil {
+			if n.sessions[region] == nil {
 				return fmt.Errorf("Unable to create session with profile '%s'.", n.Parameters.Profile)
 			}
 
-			n.sessions[region] = s
-			return nil
 		}
 
 		if n.Parameters.hasKeys() {
-			s := session.New(&aws.Config{
+			n.sessions[region] = session.New(&aws.Config{
 				Region: &region,
 				Credentials: credentials.NewStaticCredentials(
 					n.Parameters.AccessKeyID,
@@ -63,18 +62,19 @@ func (n *Nuke) StartSession() error {
 				),
 			})
 
-			if s == nil {
+			if n.sessions[region] == nil {
 				return fmt.Errorf("Unable to create session with key ID '%s'.", n.Parameters.AccessKeyID)
 			}
 
-			n.sessions[region] = s
-
 		}
-		return nil
 
+		fmt.Printf("Create key: %s session for region %s \n", region, *n.sessions[region].Config.Region)
 	}
 
-	return fmt.Errorf("You have to specify a profile or credentials.")
+	if len(n.sessions) != 2 {
+		return fmt.Errorf("You have to specify a profile or credentials for at least one region.")
+	}
+	return nil
 }
 
 func (n *Nuke) Run() error {
@@ -141,7 +141,6 @@ func (n *Nuke) Run() error {
 		} else {
 			failCount = 0
 		}
-
 		if n.items.Count(ItemStateNew, ItemStatePending, ItemStateFailed, ItemStateWaiting) == 0 {
 			break
 		}
@@ -209,7 +208,9 @@ func (n *Nuke) ValidateAccount() error {
 func (n *Nuke) Scan() error {
 	queue := make(Queue, 0)
 
-	for _, sess := range n.sessions {
+	for _, region := range n.Config.Regions {
+		sess := n.sessions[region]
+		fmt.Printf("Key: %s Scan region %s \n", region, *sess.Config.Region)
 		scanner := Scan(sess)
 		for item := range scanner.Items {
 			if !n.Parameters.WantsTarget(item.Service) {
@@ -220,8 +221,8 @@ func (n *Nuke) Scan() error {
 			n.Filter(item)
 			item.Print()
 		}
-
 		if scanner.Error != nil {
+			fmt.Printf("Scaner found an error %s \n", scanner.Error)
 			return scanner.Error
 		}
 
