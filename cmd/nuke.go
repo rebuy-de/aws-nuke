@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -41,8 +42,8 @@ func (n *Nuke) StartSession() error {
 		fmt.Printf("Create session for region %s \n", region)
 		if n.Parameters.hasProfile() {
 			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
-			     Config: aws.Config{Region: aws.String(region)},
-			     Profile: n.Parameters.Profile,
+				Config:  aws.Config{Region: aws.String(region)},
+				Profile: n.Parameters.Profile,
 			}))
 
 			if n.sessions[region] == nil {
@@ -51,14 +52,14 @@ func (n *Nuke) StartSession() error {
 		}
 
 		if n.Parameters.hasKeys() {
-			n.sessions[region] = session.New(&aws.Config{
-				Region: &region,
-				Credentials: credentials.NewStaticCredentials(
-					n.Parameters.AccessKeyID,
-					n.Parameters.SecretAccessKey,
-					"",
-				),
-			})
+			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
+				Config: aws.Config{
+					Region: aws.String(region),
+					Credentials: credentials.NewStaticCredentials(
+						n.Parameters.AccessKeyID,
+						n.Parameters.SecretAccessKey,
+						"",
+					)}}))
 
 			if n.sessions[region] == nil {
 				return fmt.Errorf("Unable to create session with key ID '%s'.", n.Parameters.AccessKeyID)
