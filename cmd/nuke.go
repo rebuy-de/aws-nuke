@@ -39,7 +39,6 @@ func NewNuke(params NukeParameters) *Nuke {
 func (n *Nuke) StartSession() error {
 	n.sessions = make(map[string]*session.Session)
 	for _, region := range n.Config.Regions {
-		fmt.Printf("Create session for region %s \n", region)
 		if n.Parameters.hasProfile() {
 			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
 				Config:  aws.Config{Region: aws.String(region)},
@@ -67,7 +66,6 @@ func (n *Nuke) StartSession() error {
 
 		}
 
-		fmt.Printf("Create key: %s session for region %s \n", region, *n.sessions[region].Config.Region)
 	}
 
 	if len(n.sessions) != 2 {
@@ -209,7 +207,6 @@ func (n *Nuke) Scan() error {
 
 	for _, region := range n.Config.Regions {
 		sess := n.sessions[region]
-		fmt.Printf("Key: %s Scan region %s \n", region, *sess.Config.Region)
 		scanner := Scan(sess)
 		for item := range scanner.Items {
 			if !n.Parameters.WantsTarget(item.Service) {
@@ -251,7 +248,7 @@ func (n *Nuke) Filter(item *Item) {
 	}
 
 	for _, filter := range filters {
-		if filter == item.Resource.String() {
+		if strings.HasPrefix(item.Resource.String(), filter) {
 			item.State = ItemStateFiltered
 			item.Reason = "filtered by config"
 			return
