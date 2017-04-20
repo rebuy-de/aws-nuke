@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elasticache"
 )
@@ -11,7 +9,6 @@ type ElasticacheCacheCluster struct {
 	svc       *elasticache.ElastiCache
 	clusterID *string
 	status    *string
-	region    *string
 }
 
 func (n *ElasticacheNuke) ListCacheClusters() ([]Resource, error) {
@@ -26,7 +23,6 @@ func (n *ElasticacheNuke) ListCacheClusters() ([]Resource, error) {
 			svc:       n.Service,
 			clusterID: cacheCluster.CacheClusterId,
 			status:    cacheCluster.CacheClusterStatus,
-			region:    n.Service.Config.Region,
 		})
 
 	}
@@ -46,5 +42,5 @@ func (i *ElasticacheCacheCluster) Remove() error {
 }
 
 func (i *ElasticacheCacheCluster) String() string {
-	return fmt.Sprintf("%s in %s", *i.clusterID, *i.region)
+	return *i.clusterID
 }

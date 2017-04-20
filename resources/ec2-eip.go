@@ -1,16 +1,11 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-)
+import "github.com/aws/aws-sdk-go/service/ec2"
 
 type EC2Address struct {
-	svc    *ec2.EC2
-	id     string
-	ip     string
-	region string
+	svc *ec2.EC2
+	id  string
+	ip  string
 }
 
 func (n *EC2Nuke) ListAddresses() ([]Resource, error) {
@@ -23,10 +18,9 @@ func (n *EC2Nuke) ListAddresses() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Addresses {
 		resources = append(resources, &EC2Address{
-			svc:    n.Service,
-			id:     *out.AllocationId,
-			ip:     *out.PublicIp,
-			region: *n.Service.Config.Region,
+			svc: n.Service,
+			id:  *out.AllocationId,
+			ip:  *out.PublicIp,
 		})
 	}
 
@@ -45,5 +39,5 @@ func (e *EC2Address) Remove() error {
 }
 
 func (e *EC2Address) String() string {
-	return fmt.Sprintf("%s in %s", e.ip, e.region)
+	return e.ip
 }

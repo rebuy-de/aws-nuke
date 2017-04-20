@@ -14,9 +14,8 @@ func (n *CloudWatchEventsNuke) ListRules() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, rule := range resp.Rules {
 		resources = append(resources, &CloudWatchEventsRule{
-			svc:    n.Service,
-			name:   rule.Name,
-			region: n.Service.Config.Region,
+			svc:  n.Service,
+			name: rule.Name,
 		})
 
 	}
@@ -24,9 +23,8 @@ func (n *CloudWatchEventsNuke) ListRules() ([]Resource, error) {
 }
 
 type CloudWatchEventsRule struct {
-	svc    *cloudwatchevents.CloudWatchEvents
-	name   *string
-	region *string
+	svc  *cloudwatchevents.CloudWatchEvents
+	name *string
 }
 
 func (rule *CloudWatchEventsRule) Remove() error {
@@ -37,5 +35,5 @@ func (rule *CloudWatchEventsRule) Remove() error {
 }
 
 func (rule *CloudWatchEventsRule) String() string {
-	return fmt.Sprintf("%s in %s", *rule.name, *rule.region)
+	return fmt.Sprintf("Rule: %s", *rule.name)
 }

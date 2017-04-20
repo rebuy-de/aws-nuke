@@ -10,7 +10,6 @@ type S3Object struct {
 	svc    *s3.S3
 	bucket string
 	key    string
-	region string
 }
 
 func (n *S3Nuke) ListObjects() ([]Resource, error) {
@@ -36,7 +35,6 @@ func (n *S3Nuke) ListObjects() ([]Resource, error) {
 				svc:    n.Service,
 				bucket: name,
 				key:    *out.Key,
-				region: *n.Service.Config.Region,
 			})
 		}
 	}
@@ -59,5 +57,5 @@ func (e *S3Object) Remove() error {
 }
 
 func (e *S3Object) String() string {
-	return fmt.Sprintf("s3://%s/%s in %s", e.bucket, e.key, e.region)
+	return fmt.Sprintf("s3://%s/%s", e.bucket, e.key)
 }

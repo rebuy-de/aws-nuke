@@ -1,16 +1,13 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
 type RDSDBSubnetGroup struct {
-	svc    *rds.RDS
-	name   *string
-	region *string
+	svc  *rds.RDS
+	name *string
 }
 
 func (n *RDSNuke) ListSubnetGroups() ([]Resource, error) {
@@ -22,9 +19,8 @@ func (n *RDSNuke) ListSubnetGroups() ([]Resource, error) {
 	var resources []Resource
 	for _, subnetGroup := range resp.DBSubnetGroups {
 		resources = append(resources, &RDSDBSubnetGroup{
-			svc:    n.Service,
-			name:   subnetGroup.DBSubnetGroupName,
-			region: n.Service.Config.Region,
+			svc:  n.Service,
+			name: subnetGroup.DBSubnetGroupName,
 		})
 
 	}
@@ -46,5 +42,5 @@ func (i *RDSDBSubnetGroup) Remove() error {
 }
 
 func (i *RDSDBSubnetGroup) String() string {
-	return fmt.Sprintf("%s in %s", *i.name, *i.region)
+	return *i.name
 }

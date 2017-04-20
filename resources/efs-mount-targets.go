@@ -7,10 +7,9 @@ import (
 )
 
 type EFSMountTarget struct {
-	svc    *efs.EFS
-	id     string
-	fsid   string
-	region string
+	svc  *efs.EFS
+	id   string
+	fsid string
 }
 
 func (n *EFSNuke) ListMountTargets() ([]Resource, error) {
@@ -31,10 +30,9 @@ func (n *EFSNuke) ListMountTargets() ([]Resource, error) {
 
 		for _, t := range mt.MountTargets {
 			resources = append(resources, &EFSMountTarget{
-				svc:    n.Service,
-				id:     *t.MountTargetId,
-				fsid:   *t.FileSystemId,
-				region: *n.Service.Config.Region,
+				svc:  n.Service,
+				id:   *t.MountTargetId,
+				fsid: *t.FileSystemId,
 			})
 
 		}
@@ -52,5 +50,5 @@ func (e *EFSMountTarget) Remove() error {
 }
 
 func (e *EFSMountTarget) String() string {
-	return fmt.Sprintf("%s:%s in %s", e.fsid, e.id, e.region)
+	return fmt.Sprintf("%s:%s", e.fsid, e.id)
 }

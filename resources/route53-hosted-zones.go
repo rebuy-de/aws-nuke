@@ -16,20 +16,18 @@ func (n *Route53Nuke) ListHostedZones() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, hz := range resp.HostedZones {
 		resources = append(resources, &Route53HostedZone{
-			svc:    n.Service,
-			id:     hz.Id,
-			name:   hz.Name,
-			region: n.Service.Config.Region,
+			svc:  n.Service,
+			id:   hz.Id,
+			name: hz.Name,
 		})
 	}
 	return resources, nil
 }
 
 type Route53HostedZone struct {
-	svc    *route53.Route53
-	id     *string
-	name   *string
-	region *string
+	svc  *route53.Route53
+	id   *string
+	name *string
 }
 
 func (hz *Route53HostedZone) Remove() error {
@@ -46,5 +44,5 @@ func (hz *Route53HostedZone) Remove() error {
 }
 
 func (hz *Route53HostedZone) String() string {
-	return fmt.Sprintf("%s (%s) in %s", *hz.id, *hz.name, *hz.region)
+	return fmt.Sprintf("%s (%s)", *hz.id, *hz.name)
 }

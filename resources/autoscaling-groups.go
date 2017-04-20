@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 )
@@ -17,18 +15,16 @@ func (n *AutoScalingNuke) ListGroups() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, asg := range resp.AutoScalingGroups {
 		resources = append(resources, &AutoScalingGroup{
-			svc:    n.Service,
-			name:   asg.AutoScalingGroupName,
-			region: n.Service.Config.Region,
+			svc:  n.Service,
+			name: asg.AutoScalingGroupName,
 		})
 	}
 	return resources, nil
 }
 
 type AutoScalingGroup struct {
-	svc    *autoscaling.AutoScaling
-	name   *string
-	region *string
+	svc  *autoscaling.AutoScaling
+	name *string
 }
 
 func (asg *AutoScalingGroup) Remove() error {
@@ -46,5 +42,5 @@ func (asg *AutoScalingGroup) Remove() error {
 }
 
 func (asg *AutoScalingGroup) String() string {
-	return fmt.Sprintf("%s in %s ", *asg.name, *asg.region)
+	return *asg.name
 }

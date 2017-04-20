@@ -10,7 +10,6 @@ type EC2NetworkACL struct {
 	svc       *ec2.EC2
 	id        *string
 	isDefault *bool
-	region    *string
 }
 
 func (n *EC2Nuke) ListNetworkACLs() ([]Resource, error) {
@@ -26,7 +25,6 @@ func (n *EC2Nuke) ListNetworkACLs() ([]Resource, error) {
 			svc:       n.Service,
 			id:        out.NetworkAclId,
 			isDefault: out.IsDefault,
-			region:    n.Service.Config.Region,
 		})
 	}
 
@@ -55,5 +53,5 @@ func (e *EC2NetworkACL) Remove() error {
 }
 
 func (e *EC2NetworkACL) String() string {
-	return fmt.Sprintf("%s in %s", *e.id, *e.region)
+	return *e.id
 }

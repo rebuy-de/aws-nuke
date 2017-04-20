@@ -1,10 +1,6 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/cloudformation"
-)
+import "github.com/aws/aws-sdk-go/service/cloudformation"
 
 func (n *CloudFormationNuke) ListStacks() ([]Resource, error) {
 	resp, err := n.Service.DescribeStacks(nil)
@@ -15,18 +11,16 @@ func (n *CloudFormationNuke) ListStacks() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, stack := range resp.Stacks {
 		resources = append(resources, &CloudFormationStack{
-			svc:    n.Service,
-			name:   stack.StackName,
-			region: n.Service.Config.Region,
+			svc:  n.Service,
+			name: stack.StackName,
 		})
 	}
 	return resources, nil
 }
 
 type CloudFormationStack struct {
-	svc    *cloudformation.CloudFormation
-	name   *string
-	region *string
+	svc  *cloudformation.CloudFormation
+	name *string
 }
 
 func (cfs *CloudFormationStack) Remove() error {
@@ -37,5 +31,5 @@ func (cfs *CloudFormationStack) Remove() error {
 }
 
 func (csf *CloudFormationStack) String() string {
-	return fmt.Sprintf("%s in %s", *csf.name, *csf.region)
+	return *csf.name
 }

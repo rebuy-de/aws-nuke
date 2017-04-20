@@ -16,7 +16,8 @@ var (
 	ColorID               = *color.New(color.Bold)
 )
 
-func Log(r resources.Resource, c color.Color, msg string) {
+func Log(reg string, r resources.Resource, c color.Color, msg string) {
+	ColorID.Printf("'%s'", reg)
 	fmt.Print(resources.GetCategory(r))
 	fmt.Printf(" - ")
 	ColorID.Printf("'%s'", r.String())

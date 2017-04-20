@@ -1,15 +1,10 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-)
+import "github.com/aws/aws-sdk-go/service/ec2"
 
 type EC2InternetGateway struct {
-	svc    *ec2.EC2
-	id     *string
-	region *string
+	svc *ec2.EC2
+	id  *string
 }
 
 func (n *EC2Nuke) ListInternetGateways() ([]Resource, error) {
@@ -21,9 +16,8 @@ func (n *EC2Nuke) ListInternetGateways() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.InternetGateways {
 		resources = append(resources, &EC2InternetGateway{
-			svc:    n.Service,
-			id:     out.InternetGatewayId,
-			region: n.Service.Config.Region,
+			svc: n.Service,
+			id:  out.InternetGatewayId,
 		})
 	}
 
@@ -44,5 +38,5 @@ func (e *EC2InternetGateway) Remove() error {
 }
 
 func (e *EC2InternetGateway) String() string {
-	return fmt.Sprintf("%s in %s", *e.id, *e.region)
+	return *e.id
 }

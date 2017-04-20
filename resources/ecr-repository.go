@@ -8,9 +8,8 @@ import (
 )
 
 type ECRrepository struct {
-	svc    *ecr.ECR
-	name   *string
-	region *string
+	svc  *ecr.ECR
+	name *string
 }
 
 func (n *ECRNuke) ListRepos() ([]Resource, error) {
@@ -45,9 +44,8 @@ func (n *ECRNuke) ListRepos() ([]Resource, error) {
 		}
 		for _, repository := range resp.Repositories {
 			resources = append(resources, &ECRrepository{
-				svc:    n.Service,
-				name:   repository.RepositoryName,
-				region: n.Service.Config.Region,
+				svc:  n.Service,
+				name: repository.RepositoryName,
 			})
 		}
 	}
@@ -70,5 +68,5 @@ func (r *ECRrepository) Remove() error {
 }
 
 func (r *ECRrepository) String() string {
-	return fmt.Sprintf("Repository: %s in %s", *r.name, *r.region)
+	return fmt.Sprintf("Repository: %s", *r.name)
 }

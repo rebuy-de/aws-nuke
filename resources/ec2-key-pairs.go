@@ -1,15 +1,10 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-)
+import "github.com/aws/aws-sdk-go/service/ec2"
 
 type EC2KeyPair struct {
-	svc    *ec2.EC2
-	name   string
-	region string
+	svc  *ec2.EC2
+	name string
 }
 
 func (n *EC2Nuke) ListKeyPairs() ([]Resource, error) {
@@ -21,9 +16,8 @@ func (n *EC2Nuke) ListKeyPairs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.KeyPairs {
 		resources = append(resources, &EC2KeyPair{
-			svc:    n.Service,
-			name:   *out.KeyName,
-			region: *n.Service.Config.Region,
+			svc:  n.Service,
+			name: *out.KeyName,
 		})
 	}
 
@@ -44,5 +38,5 @@ func (e *EC2KeyPair) Remove() error {
 }
 
 func (e *EC2KeyPair) String() string {
-	return fmt.Sprintf("%s in %s", e.name, e.region)
+	return e.name
 }

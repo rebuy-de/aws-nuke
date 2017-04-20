@@ -1,15 +1,10 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/elb"
-)
+import "github.com/aws/aws-sdk-go/service/elb"
 
 type ELB struct {
-	svc    *elb.ELB
-	name   *string
-	region *string
+	svc  *elb.ELB
+	name *string
 }
 
 func (n *ElbNuke) ListELBs() ([]Resource, error) {
@@ -21,9 +16,8 @@ func (n *ElbNuke) ListELBs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, elb := range resp.LoadBalancerDescriptions {
 		resources = append(resources, &ELB{
-			svc:    n.Service,
-			name:   elb.LoadBalancerName,
-			region: n.Service.Config.Region,
+			svc:  n.Service,
+			name: elb.LoadBalancerName,
 		})
 	}
 
@@ -44,5 +38,5 @@ func (e *ELB) Remove() error {
 }
 
 func (e *ELB) String() string {
-	return fmt.Sprintf("%s in %s", *e.name, *e.region)
+	return *e.name
 }
