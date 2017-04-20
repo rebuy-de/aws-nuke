@@ -1,10 +1,6 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-)
+import "github.com/aws/aws-sdk-go/service/ec2"
 
 type EC2Subnet struct {
 	svc    *ec2.EC2
@@ -45,5 +41,5 @@ func (e *EC2Subnet) Remove() error {
 }
 
 func (e *EC2Subnet) String() string {
-	return fmt.Sprintf("%s in %s", *e.id, *e.region)
+	return *e.id
 }
