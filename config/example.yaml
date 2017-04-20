@@ -1,5 +1,6 @@
 ---
-region: eu-west-1
+regions:
+  - "eu-west-1"
 account-blacklist:
 - 1234567890
 

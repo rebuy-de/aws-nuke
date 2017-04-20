@@ -1,10 +1,15 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2Subnet struct {
-	svc *ec2.EC2
-	id  *string
+	svc    *ec2.EC2
+	id     *string
+	region *string
 }
 
 func (n *EC2Nuke) ListSubnets() ([]Resource, error) {
@@ -17,8 +22,9 @@ func (n *EC2Nuke) ListSubnets() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Subnets {
 		resources = append(resources, &EC2Subnet{
-			svc: n.Service,
-			id:  out.SubnetId,
+			svc:    n.Service,
+			id:     out.SubnetId,
+			region: n.Service.Config.Region,
 		})
 	}
 
@@ -39,5 +45,5 @@ func (e *EC2Subnet) Remove() error {
 }
 
 func (e *EC2Subnet) String() string {
-	return *e.id
+	return fmt.Sprintf("%s in %s", *e.id, *e.region)
 }

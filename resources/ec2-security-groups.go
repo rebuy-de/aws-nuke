@@ -7,9 +7,10 @@ import (
 )
 
 type EC2SecurityGroup struct {
-	svc  *ec2.EC2
-	id   *string
-	name *string
+	svc    *ec2.EC2
+	id     *string
+	name   *string
+	region *string
 }
 
 func (n *EC2Nuke) ListSecurityGroups() ([]Resource, error) {
@@ -22,9 +23,10 @@ func (n *EC2Nuke) ListSecurityGroups() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, group := range resp.SecurityGroups {
 		resources = append(resources, &EC2SecurityGroup{
-			svc:  n.Service,
-			id:   group.GroupId,
-			name: group.GroupName,
+			svc:    n.Service,
+			id:     group.GroupId,
+			name:   group.GroupName,
+			region: n.Service.Config.Region,
 		})
 	}
 
@@ -53,5 +55,5 @@ func (sg *EC2SecurityGroup) Remove() error {
 }
 
 func (sg *EC2SecurityGroup) String() string {
-	return *sg.id
+	return fmt.Sprintf("%s in %s", *sg.id, *sg.region)
 }

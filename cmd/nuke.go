@@ -20,7 +20,7 @@ type Nuke struct {
 	accountConfig NukeConfigAccount
 	accountID     string
 	accountAlias  string
-	session       *session.Session
+	sessions      map[string]*session.Session
 
 	ForceSleep time.Duration
 
@@ -37,39 +37,41 @@ func NewNuke(params NukeParameters) *Nuke {
 }
 
 func (n *Nuke) StartSession() error {
-	if n.Parameters.hasProfile() {
-		s := session.New(&aws.Config{
-			Region:      &n.Config.Region,
-			Credentials: credentials.NewSharedCredentials("", n.Parameters.Profile),
-		})
+	n.sessions = make(map[string]*session.Session)
+	for _, region := range n.Config.Regions {
+		if n.Parameters.hasProfile() {
+			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
+				Config:  aws.Config{Region: aws.String(region)},
+				Profile: n.Parameters.Profile,
+			}))
 
-		if s == nil {
-			return fmt.Errorf("Unable to create session with profile '%s'.", n.Parameters.Profile)
+			if n.sessions[region] == nil {
+				return fmt.Errorf("Unable to create session with profile '%s'.", n.Parameters.Profile)
+			}
 		}
 
-		n.session = s
-		return nil
-	}
+		if n.Parameters.hasKeys() {
+			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
+				Config: aws.Config{
+					Region: aws.String(region),
+					Credentials: credentials.NewStaticCredentials(
+						n.Parameters.AccessKeyID,
+						n.Parameters.SecretAccessKey,
+						"",
+					)}}))
 
-	if n.Parameters.hasKeys() {
-		s := session.New(&aws.Config{
-			Region: &n.Config.Region,
-			Credentials: credentials.NewStaticCredentials(
-				n.Parameters.AccessKeyID,
-				n.Parameters.SecretAccessKey,
-				"",
-			),
-		})
+			if n.sessions[region] == nil {
+				return fmt.Errorf("Unable to create session with key ID '%s'.", n.Parameters.AccessKeyID)
+			}
 
-		if s == nil {
-			return fmt.Errorf("Unable to create session with key ID '%s'.", n.Parameters.AccessKeyID)
 		}
 
-		n.session = s
-		return nil
 	}
 
-	return fmt.Errorf("You have to specify a profile or credentials.")
+	if len(n.sessions) < 1 {
+		return fmt.Errorf("You have to specify a profile or credentials for at least one region.")
+	}
+	return nil
 }
 
 func (n *Nuke) Run() error {
@@ -136,7 +138,6 @@ func (n *Nuke) Run() error {
 		} else {
 			failCount = 0
 		}
-
 		if n.items.Count(ItemStateNew, ItemStatePending, ItemStateFailed, ItemStateWaiting) == 0 {
 			break
 		}
@@ -151,12 +152,13 @@ func (n *Nuke) Run() error {
 }
 
 func (n *Nuke) ValidateAccount() error {
-	identOutput, err := sts.New(n.session).GetCallerIdentity(nil)
+	sess := n.sessions[n.Config.Regions[0]]
+	identOutput, err := sts.New(sess).GetCallerIdentity(nil)
 	if err != nil {
 		return err
 	}
 
-	aliasesOutput, err := iam.New(n.session).ListAccountAliases(nil)
+	aliasesOutput, err := iam.New(sess).ListAccountAliases(nil)
 	if err != nil {
 		return err
 	}
@@ -201,23 +203,26 @@ func (n *Nuke) ValidateAccount() error {
 }
 
 func (n *Nuke) Scan() error {
-	scanner := Scan(n.session)
 	queue := make(Queue, 0)
 
-	for item := range scanner.Items {
-		if !n.Parameters.WantsTarget(item.Service) {
-			continue
+	for _, region := range n.Config.Regions {
+		sess := n.sessions[region]
+		scanner := Scan(sess)
+		for item := range scanner.Items {
+			if !n.Parameters.WantsTarget(item.Service) {
+				continue
+			}
+
+			queue = append(queue, item)
+			n.Filter(item)
+			item.Print()
+		}
+		if scanner.Error != nil {
+			fmt.Printf("Scaner found an error %s \n", scanner.Error)
+			return scanner.Error
 		}
 
-		queue = append(queue, item)
-		n.Filter(item)
-		item.Print()
 	}
-
-	if scanner.Error != nil {
-		return scanner.Error
-	}
-
 	fmt.Printf("Scan complete: %d total, %d nukeable, %d filtered.\n\n",
 		queue.CountTotal(), queue.Count(ItemStateNew), queue.Count(ItemStateFiltered))
 
@@ -243,7 +248,7 @@ func (n *Nuke) Filter(item *Item) {
 	}
 
 	for _, filter := range filters {
-		if filter == item.Resource.String() {
+		if strings.HasPrefix(item.Resource.String(), filter) {
 			item.State = ItemStateFiltered
 			item.Reason = "filtered by config"
 			return

@@ -15,9 +15,10 @@ func (n *SNSNuke) ListSubscriptions() ([]Resource, error) {
 	for _, subscription := range resp.Subscriptions {
 		if *subscription.SubscriptionArn != "PendingConfirmation" {
 			resources = append(resources, &SNSSubscription{
-				svc:  n.Service,
-				id:   subscription.SubscriptionArn,
-				name: subscription.Owner,
+				svc:    n.Service,
+				id:     subscription.SubscriptionArn,
+				name:   subscription.Owner,
+				region: n.Service.Config.Region,
 			})
 		}
 
@@ -26,9 +27,10 @@ func (n *SNSNuke) ListSubscriptions() ([]Resource, error) {
 }
 
 type SNSSubscription struct {
-	svc  *sns.SNS
-	id   *string
-	name *string
+	svc    *sns.SNS
+	id     *string
+	name   *string
+	region *string
 }
 
 func (subs *SNSSubscription) Remove() error {
@@ -39,5 +41,5 @@ func (subs *SNSSubscription) Remove() error {
 }
 
 func (subs *SNSSubscription) String() string {
-	return fmt.Sprintf("Owner: %s ARN: %s", *subs.name, *subs.id)
+	return fmt.Sprintf("Owner: %s ARN: %s Region: %s", *subs.name, *subs.id, *subs.region)
 }
