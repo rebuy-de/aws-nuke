@@ -68,7 +68,7 @@ func (n *Nuke) StartSession() error {
 
 	}
 
-	if len(n.sessions) != 2 {
+	if len(n.sessions) < 1 {
 		return fmt.Errorf("You have to specify a profile or credentials for at least one region.")
 	}
 	return nil
