@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/cloudtrail"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
@@ -21,6 +22,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 	var (
 		autoscaling      = AutoScalingNuke{autoscaling.New(sess)}
 		cloudformation   = CloudFormationNuke{cloudformation.New(sess)}
+		cloudtrail       = CloudTrailNuke{cloudtrail.New(sess)}
 		cloudwatchevents = CloudWatchEventsNuke{cloudwatchevents.New(sess)}
 		ec2              = EC2Nuke{ec2.New(sess)}
 		ecr              = ECRNuke{ecr.New(sess)}
@@ -37,6 +39,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 	return []ResourceLister{
 		autoscaling.ListGroups,
 		cloudformation.ListStacks,
+		cloudtrail.ListTrails,
 		cloudwatchevents.ListRules,
 		cloudwatchevents.ListTargets,
 		ec2.ListAddresses,
