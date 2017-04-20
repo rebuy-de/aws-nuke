@@ -1,15 +1,10 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-)
+import "github.com/aws/aws-sdk-go/service/ec2"
 
 type EC2Volume struct {
-	svc    *ec2.EC2
-	id     string
-	region string
+	svc *ec2.EC2
+	id  string
 }
 
 func (n *EC2Nuke) ListVolumes() ([]Resource, error) {
@@ -21,9 +16,8 @@ func (n *EC2Nuke) ListVolumes() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Volumes {
 		resources = append(resources, &EC2Volume{
-			svc:    n.Service,
-			id:     *out.VolumeId,
-			region: *n.Service.Config.Region,
+			svc: n.Service,
+			id:  *out.VolumeId,
 		})
 	}
 
@@ -38,5 +32,5 @@ func (e *EC2Volume) Remove() error {
 }
 
 func (e *EC2Volume) String() string {
-	return fmt.Sprintf("%s in %s", e.id, e.region)
+	return e.id
 }

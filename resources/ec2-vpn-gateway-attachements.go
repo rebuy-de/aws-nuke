@@ -7,11 +7,10 @@ import (
 )
 
 type EC2VpnGatewayAttachement struct {
-	svc    *ec2.EC2
-	vpcId  string
-	vpnId  string
-	state  string
-	region string
+	svc   *ec2.EC2
+	vpcId string
+	vpnId string
+	state string
 }
 
 func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
@@ -26,11 +25,10 @@ func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
 	for _, vgw := range resp.VpnGateways {
 		for _, att := range vgw.VpcAttachments {
 			resources = append(resources, &EC2VpnGatewayAttachement{
-				svc:    n.Service,
-				vpcId:  *att.VpcId,
-				vpnId:  *vgw.VpnGatewayId,
-				state:  *att.State,
-				region: *n.Service.Config.Region,
+				svc:   n.Service,
+				vpcId: *att.VpcId,
+				vpnId: *vgw.VpnGatewayId,
+				state: *att.State,
 			})
 		}
 	}
@@ -60,5 +58,5 @@ func (e *EC2VpnGatewayAttachement) Remove() error {
 }
 
 func (e *EC2VpnGatewayAttachement) String() string {
-	return fmt.Sprintf("%s -> %s in %s", e.vpnId, e.vpcId, e.region)
+	return fmt.Sprintf("%s -> %s", e.vpnId, e.vpcId)
 }

@@ -1,16 +1,13 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elasticache"
 )
 
 type ElasticacheSubnetGroup struct {
-	svc    *elasticache.ElastiCache
-	name   *string
-	region *string
+	svc  *elasticache.ElastiCache
+	name *string
 }
 
 func (n *ElasticacheNuke) ListSubnetGroups() ([]Resource, error) {
@@ -22,9 +19,8 @@ func (n *ElasticacheNuke) ListSubnetGroups() ([]Resource, error) {
 	var resources []Resource
 	for _, subnetGroup := range resp.CacheSubnetGroups {
 		resources = append(resources, &ElasticacheSubnetGroup{
-			svc:    n.Service,
-			name:   subnetGroup.CacheSubnetGroupName,
-			region: n.Service.Config.Region,
+			svc:  n.Service,
+			name: subnetGroup.CacheSubnetGroupName,
 		})
 
 	}
@@ -46,5 +42,5 @@ func (i *ElasticacheSubnetGroup) Remove() error {
 }
 
 func (i *ElasticacheSubnetGroup) String() string {
-	return fmt.Sprintf("%s in %s", *i.name, *i.region)
+	return *i.name
 }

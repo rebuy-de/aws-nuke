@@ -1,15 +1,10 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-)
+import "github.com/aws/aws-sdk-go/service/ec2"
 
 type EC2Vpc struct {
-	svc    *ec2.EC2
-	id     *string
-	region *string
+	svc *ec2.EC2
+	id  *string
 }
 
 func (n *EC2Nuke) ListVpcs() ([]Resource, error) {
@@ -21,9 +16,8 @@ func (n *EC2Nuke) ListVpcs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, vpc := range resp.Vpcs {
 		resources = append(resources, &EC2Vpc{
-			svc:    n.Service,
-			id:     vpc.VpcId,
-			region: n.Service.Config.Region,
+			svc: n.Service,
+			id:  vpc.VpcId,
 		})
 	}
 
@@ -44,5 +38,5 @@ func (e *EC2Vpc) Remove() error {
 }
 
 func (e *EC2Vpc) String() string {
-	return fmt.Sprintf("%s in %s", *e.id, *e.region)
+	return *e.id
 }

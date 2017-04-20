@@ -1,15 +1,10 @@
 package resources
 
-import (
-	"fmt"
-
-	"github.com/aws/aws-sdk-go/service/ec2"
-)
+import "github.com/aws/aws-sdk-go/service/ec2"
 
 type EC2DhcpOption struct {
-	svc    *ec2.EC2
-	id     *string
-	region *string
+	svc *ec2.EC2
+	id  *string
 }
 
 func (n *EC2Nuke) ListDhcpOptions() ([]Resource, error) {
@@ -22,9 +17,8 @@ func (n *EC2Nuke) ListDhcpOptions() ([]Resource, error) {
 	for _, out := range resp.DhcpOptions {
 
 		resources = append(resources, &EC2DhcpOption{
-			svc:    n.Service,
-			id:     out.DhcpOptionsId,
-			region: n.Service.Config.Region,
+			svc: n.Service,
+			id:  out.DhcpOptionsId,
 		})
 	}
 
@@ -45,5 +39,5 @@ func (e *EC2DhcpOption) Remove() error {
 }
 
 func (e *EC2DhcpOption) String() string {
-	return fmt.Sprintf("%s in %s", *e.id, *e.region)
+	return *e.id
 }

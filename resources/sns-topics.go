@@ -14,18 +14,16 @@ func (n *SNSNuke) ListTopics() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, topic := range resp.Topics {
 		resources = append(resources, &SNSTopic{
-			svc:    n.Service,
-			id:     topic.TopicArn,
-			region: n.Service.Config.Region,
+			svc: n.Service,
+			id:  topic.TopicArn,
 		})
 	}
 	return resources, nil
 }
 
 type SNSTopic struct {
-	svc    *sns.SNS
-	id     *string
-	region *string
+	svc *sns.SNS
+	id  *string
 }
 
 func (topic *SNSTopic) Remove() error {
@@ -36,5 +34,5 @@ func (topic *SNSTopic) Remove() error {
 }
 
 func (topic *SNSTopic) String() string {
-	return fmt.Sprintf("TopicARN: %s in %s", *topic.id, *topic.region)
+	return fmt.Sprintf("TopicARN: %s", *topic.id)
 }

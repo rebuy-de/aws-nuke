@@ -12,7 +12,6 @@ type Route53ResourceRecordSet struct {
 	hostedZoneId *string
 	data         *route53.ResourceRecordSet
 	changeId     *string
-	region       *string
 }
 
 func (n *Route53Nuke) ListResourceRecords() ([]Resource, error) {
@@ -51,7 +50,6 @@ func (n *Route53Nuke) ListResourceRecordsForZone(zoneId *string) ([]Resource, er
 			svc:          n.Service,
 			hostedZoneId: zoneId,
 			data:         rrs,
-			region:       n.Service.Config.Region,
 		})
 	}
 	return resources, nil
@@ -93,5 +91,5 @@ func (r *Route53ResourceRecordSet) Remove() error {
 }
 
 func (rrs *Route53ResourceRecordSet) String() string {
-	return fmt.Sprintf("%s in %s", *rrs.data.Name, *rrs.region)
+	return *rrs.data.Name
 }

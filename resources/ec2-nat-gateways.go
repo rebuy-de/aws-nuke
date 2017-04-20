@@ -7,10 +7,9 @@ import (
 )
 
 type EC2NatGateway struct {
-	svc    *ec2.EC2
-	id     string
-	state  string
-	region string
+	svc   *ec2.EC2
+	id    string
+	state string
 }
 
 func (n *EC2Nuke) ListNatGateways() ([]Resource, error) {
@@ -23,10 +22,9 @@ func (n *EC2Nuke) ListNatGateways() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.NatGateways {
 		resources = append(resources, &EC2NatGateway{
-			svc:    n.Service,
-			id:     *out.NatGatewayId,
-			state:  *out.State,
-			region: *n.Service.Config.Region,
+			svc:   n.Service,
+			id:    *out.NatGatewayId,
+			state: *out.State,
 		})
 	}
 
@@ -54,5 +52,5 @@ func (e *EC2NatGateway) Remove() error {
 }
 
 func (e *EC2NatGateway) String() string {
-	return fmt.Sprintf("%s in %s", e.id, e.region)
+	return e.id
 }
