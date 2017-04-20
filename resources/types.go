@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/cloudtrail"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
@@ -22,6 +23,14 @@ type AutoScalingNuke struct {
 
 type CloudFormationNuke struct {
 	Service *cloudformation.CloudFormation
+}
+
+type CloudTrailNuke struct {
+	Service *cloudtrail.CloudTrail
+}
+
+type CloudWatchEventsNuke struct {
+	Service *cloudwatchevents.CloudWatchEvents
 }
 
 type EC2Nuke struct {
@@ -62,8 +71,4 @@ type S3Nuke struct {
 
 type SNSNuke struct {
 	Service *sns.SNS
-}
-
-type CloudWatchEventsNuke struct {
-	Service *cloudwatchevents.CloudWatchEvents
 }
