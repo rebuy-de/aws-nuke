@@ -20,23 +20,24 @@ type Item struct {
 	Lister  resources.ResourceLister
 
 	State  ItemState
+	Region string
 	Reason string
 }
 
 func (i *Item) Print() {
 	switch i.State {
 	case ItemStateNew:
-		Log(i.Resource, ReasonWaitPending, "would remove")
+		Log(i.Region, i.Resource, ReasonWaitPending, "would remove")
 	case ItemStatePending:
-		Log(i.Resource, ReasonWaitPending, "triggered remove")
+		Log(i.Region, i.Resource, ReasonWaitPending, "triggered remove")
 	case ItemStateWaiting:
-		Log(i.Resource, ReasonWaitPending, "waiting")
+		Log(i.Region, i.Resource, ReasonWaitPending, "waiting")
 	case ItemStateFailed:
-		Log(i.Resource, ReasonError, i.Reason)
+		Log(i.Region, i.Resource, ReasonError, i.Reason)
 	case ItemStateFiltered:
-		Log(i.Resource, ReasonSkip, i.Reason)
+		Log(i.Region, i.Resource, ReasonSkip, i.Reason)
 	case ItemStateFinished:
-		Log(i.Resource, ReasonSuccess, "removed")
+		Log(i.Region, i.Resource, ReasonSuccess, "removed")
 	}
 }
 

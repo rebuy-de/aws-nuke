@@ -26,6 +26,7 @@ func Scan(sess *session.Session) *Scanner {
 
 			for _, r := range r {
 				items <- &Item{
+					Region:   *sess.Config.Region,
 					Resource: r,
 					Service:  resources.GetCategory(r),
 					Lister:   lister,
