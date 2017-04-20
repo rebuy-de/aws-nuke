@@ -248,7 +248,7 @@ func (n *Nuke) Filter(item *Item) {
 	}
 
 	for _, filter := range filters {
-		if strings.HasPrefix(item.Resource.String(), filter) {
+		if filter == item.Resource.String() {
 			item.State = ItemStateFiltered
 			item.Reason = "filtered by config"
 			return
