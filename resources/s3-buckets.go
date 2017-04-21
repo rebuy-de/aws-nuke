@@ -19,7 +19,16 @@ func (n *S3Nuke) DescribeBuckets() ([]string, error) {
 
 	buckets := make([]string, 0)
 	for _, out := range resp.Buckets {
-		buckets = append(buckets, *out.Name)
+		bucketLocationResponse, err := n.Service.GetBucketLocation(&s3.GetBucketLocationInput{Bucket: out.Name})
+
+		if err != nil {
+			return nil, err
+		}
+
+		if *bucketLocationResponse.LocationConstraint == *n.Service.Config.Region {
+			buckets = append(buckets, *out.Name)
+		}
+
 	}
 
 	return buckets, nil
