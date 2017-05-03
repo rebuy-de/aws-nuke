@@ -30,7 +30,25 @@ func (n *IamNuke) ListPolicies() ([]Resource, error) {
 }
 
 func (e *IamPolicy) Remove() error {
-	_, err := e.svc.DeletePolicy(&iam.DeletePolicyInput{
+	resp, err := e.svc.ListPolicyVersions(&iam.ListPolicyVersionsInput{
+		PolicyArn: &e.arn,
+	})
+	if err != nil {
+		return err
+	}
+	for _, version := range resp.Versions {
+		if !*version.IsDefaultVersion {
+			_, err = e.svc.DeletePolicyVersion(&iam.DeletePolicyVersionInput{
+				PolicyArn: &e.arn,
+				VersionId: version.VersionId,
+			})
+			if err != nil {
+				return err
+			}
+
+		}
+	}
+	_, err = e.svc.DeletePolicy(&iam.DeletePolicyInput{
 		PolicyArn: &e.arn,
 	})
 	if err != nil {
