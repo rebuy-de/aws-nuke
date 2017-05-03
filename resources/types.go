@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/elasticache"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -55,6 +56,10 @@ type ElbNuke struct {
 
 type IamNuke struct {
 	Service *iam.IAM
+}
+
+type LambdaNuke struct {
+	Service *lambda.Lambda
 }
 
 type RDSNuke struct {

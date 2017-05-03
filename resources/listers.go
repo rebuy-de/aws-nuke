@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/elasticache"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -30,6 +31,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		elasticache      = ElasticacheNuke{elasticache.New(sess)}
 		elb              = ElbNuke{elb.New(sess)}
 		iam              = IamNuke{iam.New(sess)}
+		lambda           = LambdaNuke{lambda.New(sess)}
 		rds              = RDSNuke{rds.New(sess)}
 		route53          = Route53Nuke{route53.New(sess)}
 		s3               = S3Nuke{s3.New(sess)}
@@ -79,6 +81,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		iam.ListUserGroupAttachements,
 		iam.ListUserPolicyAttachements,
 		iam.ListUsers,
+		lambda.ListFunctions,
 		rds.ListInstances,
 		rds.ListParameterGroups,
 		rds.ListSnapshots,
