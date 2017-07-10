@@ -40,6 +40,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 
 	return []ResourceLister{
 		autoscaling.ListGroups,
+		autoscaling.ListLaunchConfigurations,
 		cloudformation.ListStacks,
 		cloudtrail.ListTrails,
 		cloudwatchevents.ListRules,
