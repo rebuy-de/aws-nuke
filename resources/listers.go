@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/efs"
 	"github.com/aws/aws-sdk-go/service/elasticache"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -30,6 +31,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		efs              = EFSNuke{efs.New(sess)}
 		elasticache      = ElasticacheNuke{elasticache.New(sess)}
 		elb              = ElbNuke{elb.New(sess)}
+		elbv2            = Elbv2Nuke{elbv2.New(sess)}
 		iam              = IamNuke{iam.New(sess)}
 		lambda           = LambdaNuke{lambda.New(sess)}
 		rds              = RDSNuke{rds.New(sess)}
@@ -69,6 +71,8 @@ func GetListers(sess *session.Session) []ResourceLister {
 		elasticache.ListCacheClusters,
 		elasticache.ListSubnetGroups,
 		elb.ListELBs,
+		elbv2.ListELBs,
+		elbv2.ListTargetGroups,
 		iam.ListGroupPolicyAttachements,
 		iam.ListGroups,
 		iam.ListInstanceProfileRoles,

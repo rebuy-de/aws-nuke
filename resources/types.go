@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/efs"
 	"github.com/aws/aws-sdk-go/service/elasticache"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -52,6 +53,10 @@ type ElasticacheNuke struct {
 
 type ElbNuke struct {
 	Service *elb.ELB
+}
+
+type Elbv2Nuke struct {
+	Service *elbv2.ELBV2
 }
 
 type IamNuke struct {

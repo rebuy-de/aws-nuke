@@ -1,8 +1,8 @@
-hash: 21acae7c7bbb972c34c2615c6d6936ce9f19a2ae24b871dee1afbd264f4a8932
-updated: 2017-04-18T13:35:55.873480487+02:00
+hash: 6fa91765a8814057be46a070a4ebcbe888bedeb5e38fe3dbae2de14ef1ef1ca6
+updated: 2017-07-24T12:04:43.624073528+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 7be45195c3af1b54a609812f90c05a7e492e2491
+  version: afd601335e2a72d43caa3af6bd2abe512fcc3bfd
   subpackages:
   - aws
   - aws/awserr
@@ -20,6 +20,7 @@ imports:
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/shareddefaults
   - private/protocol
   - private/protocol/ec2query
   - private/protocol/json/jsonutil
@@ -32,20 +33,23 @@ imports:
   - private/protocol/xml/xmlutil
   - service/autoscaling
   - service/cloudformation
+  - service/cloudtrail
   - service/cloudwatchevents
   - service/ec2
   - service/ecr
   - service/efs
   - service/elasticache
   - service/elb
+  - service/elbv2
   - service/iam
+  - service/lambda
   - service/rds
   - service/route53
   - service/s3
   - service/sns
   - service/sts
 - name: github.com/fatih/color
-  version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
+  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
 - name: github.com/go-ini/ini
   version: 6e4869b434bd001f6983749881c7ead3545887d8
 - name: github.com/inconshreveable/mousetrap
@@ -59,7 +63,7 @@ imports:
   version: 57fdcb988a5c543893cc61bce354a6e24ab70022
   repo: https://github.com/mattn/go-isatty
 - name: github.com/spf13/cobra
-  version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
+  version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
 - name: github.com/spf13/pflag
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: golang.org/x/sys
@@ -68,5 +72,5 @@ imports:
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
-  version: e4d366fc3c7938e2958e662b4258c7a89e1f0e3e
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 testImports: []
