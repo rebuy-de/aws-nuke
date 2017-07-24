@@ -59,10 +59,6 @@ type Elbv2Nuke struct {
 	Service *elbv2.ELBV2
 }
 
-type Elbv2TargetGroupNuke struct {
-	Service *elbv2.ELBV2
-}
-
 type IamNuke struct {
 	Service *iam.IAM
 }
