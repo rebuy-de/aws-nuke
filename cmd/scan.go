@@ -15,9 +15,9 @@ func Scan(sess *session.Session) *Scanner {
 	items := make(chan *Item, 100)
 
 	go func() {
-		listers := resources.GetListers(sess)
+		listeners := resources.GetListers(sess)
 
-		for _, lister := range listers {
+		for _, lister := range listeners {
 			var r []resources.Resource
 			r, err = lister()
 			if err != nil {
