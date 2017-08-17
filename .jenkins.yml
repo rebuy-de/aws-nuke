@@ -1,4 +1,0 @@
-docker:
-  repository: 'aws-nuke'
-  mailerRecipients:
-    - 'DL-SCB-Tech-Platform@rebuy.com'
