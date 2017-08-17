@@ -2,6 +2,10 @@
 
 Nuke a whole AWS account and delete all its resources.
 
+> **Development Status** *aws-nuke* is stable, but currently not all AWS
+resources are covered by it. Feel free to add missing resources and create a
+Pull Request.
+
 ## Caution!
 
 Be aware that *aws-nuke* is a very descructive tool, hence you have to be very
@@ -35,6 +39,7 @@ To reduce the blast radius of accidents, there are some safety precautions:
 
 Feel free to create an issue, if you have any ideas to improve the safety
 procedures.
+
 
 ## Usage
 
@@ -175,6 +180,7 @@ for debugging, if the error is not about dependencies.
 *aws-nuke* retries deleting all resources until all specified ones are deleted
 or until there are only resources with errors left.
 
+
 ## Install
 
 ### Use Released Binaries
@@ -199,4 +205,16 @@ directory or `make install` go install *aws-nuke* into `$GOPATH/bin`. With
 ### Use Docker Image
 
 TODO
+
+## Contact Channels
+
+Feel free to create a GitHub Issue for any questions, bug reports or feature
+requests.
+
+## Contribute
+
+You can contribute to *aws-nuke* by forking this repository, making your
+changes and creating a Pull Request against our repository. If you are unsure
+how to solve a problem or have other questions about a contributions, please
+create a GitHub issue.
 
