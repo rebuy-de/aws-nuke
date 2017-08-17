@@ -174,3 +174,29 @@ for debugging, if the error is not about dependencies.
 
 *aws-nuke* retries deleting all resources until all specified ones are deleted
 or until there are only resources with errors left.
+
+## Install
+
+### Use Released Binaries
+
+The easiest way of installing it, is to download the latest
+[release](https://github.com/rebuy-de/aws-nuke/releases) from GitHub.
+
+### Compile from Source
+
+To compile *aws-nuke* from source you need a working
+[Golang](https://golang.org/doc/install) development environment. The sources
+must be cloned to `$GOPATH/src/github.com/rebuy-de/aws-nuke`.
+
+Also you need to install [Glide](https://glide.sh/),
+[golint](https://github.com/golang/lint/) and [GNU
+Make](https://www.gnu.org/software/make/).
+
+Then you just need to run `make build` to compile a binary into the project
+directory or `make install` go install *aws-nuke* into `$GOPATH/bin`. With
+`make xc` you can cross compile *aws-nuke* for other platforms.
+
+### Use Docker Image
+
+TODO
+
