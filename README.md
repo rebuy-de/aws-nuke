@@ -1,5 +1,9 @@
 # aws-nuke
 
+[![Build Status](https://travis-ci.org/rebuy-de/aws-nuke.svg?branch=master)](https://travis-ci.org/rebuy-de/aws-nuke)
+[![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)]()
+[![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)]()
+
 Nuke a whole AWS account and delete all its resources.
 
 > **Development Status** *aws-nuke* is stable, but currently not all AWS
@@ -201,10 +205,6 @@ Make](https://www.gnu.org/software/make/).
 Then you just need to run `make build` to compile a binary into the project
 directory or `make install` go install *aws-nuke* into `$GOPATH/bin`. With
 `make xc` you can cross compile *aws-nuke* for other platforms.
-
-### Use Docker Image
-
-TODO
 
 ## Contact Channels
 
