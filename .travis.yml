@@ -1,0 +1,30 @@
+sudo: required
+
+language: go
+
+services:
+  - docker
+
+script:
+- docker build -t aws-nuke --no-cache .
+- >
+  docker run
+  --name aws-nuke
+  --entrypoint "sh"
+  -e CGO_ENABLED=0
+  --workdir "/go/src/github.com/rebuy-de/aws-nuke"
+  aws-nuke
+  -euxc "make xc && mkdir releases && mv aws-nuke-* releases"
+- docker cp -L aws-nuke:/go/src/github.com/rebuy-de/aws-nuke/releases ./releases
+- ls -l *
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: releases/*
+  skip_cleanup: true
+  on:
+    repo: rebuy-de/aws-nuke
+    tags: true
+
