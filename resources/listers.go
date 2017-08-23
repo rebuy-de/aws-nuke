@@ -90,6 +90,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		iam.ListUserPolicyAttachements,
 		iam.ListUsers,
 		kms.ListAliases,
+		kms.ListKeys,
 		lambda.ListFunctions,
 		rds.ListInstances,
 		rds.ListParameterGroups,
