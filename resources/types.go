@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/route53"
@@ -81,4 +82,8 @@ type S3Nuke struct {
 
 type SNSNuke struct {
 	Service *sns.SNS
+}
+
+type KMSNuke struct {
+	Service *kms.KMS
 }

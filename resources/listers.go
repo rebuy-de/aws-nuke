@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/route53"
@@ -33,6 +34,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		elb              = ElbNuke{elb.New(sess)}
 		elbv2            = Elbv2Nuke{elbv2.New(sess)}
 		iam              = IamNuke{iam.New(sess)}
+		kms              = KMSNuke{kms.New(sess)}
 		lambda           = LambdaNuke{lambda.New(sess)}
 		rds              = RDSNuke{rds.New(sess)}
 		route53          = Route53Nuke{route53.New(sess)}
@@ -87,6 +89,8 @@ func GetListers(sess *session.Session) []ResourceLister {
 		iam.ListUserGroupAttachements,
 		iam.ListUserPolicyAttachements,
 		iam.ListUsers,
+		kms.ListAliases,
+		kms.ListKeys,
 		lambda.ListFunctions,
 		rds.ListInstances,
 		rds.ListParameterGroups,
