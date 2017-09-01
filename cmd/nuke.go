@@ -40,13 +40,17 @@ func (n *Nuke) StartSession() error {
 	n.sessions = make(map[string]*session.Session)
 	for _, region := range n.Config.Regions {
 		if n.Parameters.hasProfile() {
-			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
-				Config:  aws.Config{Region: aws.String(region)},
-				Profile: n.Parameters.Profile,
-			}))
+			var err error
+			n.sessions[region], err = session.NewSessionWithOptions(session.Options{
+				Config: aws.Config{
+					Region: &region,
+				},
+				SharedConfigState: session.SharedConfigEnable,
+				Profile:           n.Parameters.Profile,
+			})
 
-			if n.sessions[region] == nil {
-				return fmt.Errorf("Unable to create session with profile '%s'.", n.Parameters.Profile)
+			if err != nil {
+				return err
 			}
 		}
 
