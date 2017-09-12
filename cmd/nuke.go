@@ -43,7 +43,7 @@ func (n *Nuke) StartSession() error {
 			var err error
 			n.sessions[region], err = session.NewSessionWithOptions(session.Options{
 				Config: aws.Config{
-					Region: &region,
+					Region: aws.String(region),
 				},
 				SharedConfigState: session.SharedConfigEnable,
 				Profile:           n.Parameters.Profile,
@@ -222,7 +222,7 @@ func (n *Nuke) Scan() error {
 			item.Print()
 		}
 		if scanner.Error != nil {
-			fmt.Printf("Scaner found an error %s \n", scanner.Error)
+			fmt.Printf("Scanner found an error %s \n", scanner.Error)
 			return scanner.Error
 		}
 
