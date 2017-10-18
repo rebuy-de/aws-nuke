@@ -12,7 +12,7 @@ Pull Request.
 
 ## Caution!
 
-Be aware that *aws-nuke* is a very descructive tool, hence you have to be very
+Be aware that *aws-nuke* is a very destructive tool, hence you have to be very
 careful while using it. Otherwise you might delete production data.
 
 To reduce the blast radius of accidents, there are some safety precautions:
@@ -90,7 +90,7 @@ Would delete these resources. Provide --no-dry-run to actually destroy resources
 
 As we see, *aws-nuke* only lists all found resources and exits. This is because
 the `--no-dry-run` flag is missing. Also it wants to delete the
-admininistrator. We don't want to do this, because we use this user to access
+administrator. We don't want to do this, because we use this user to access
 our account. Therefore we have to extend the config so it ignores this user:
 
 
@@ -176,8 +176,8 @@ Removal requested: 1 waiting, 6 failed, 5 skipped, 1 finished
 --- truncating long output ---
 ```
 
-As you see *aws-nuke* now tries to delete all resources which aren't filted,
-without caring about the dependendies between them. This results in API errors
+As you see *aws-nuke* now tries to delete all resources which aren't filtered,
+without caring about the dependencies between them. This results in API errors
 which can be ignored. They are displayed anyway, because it might be helpful
 for debugging, if the error is not about dependencies.
 
