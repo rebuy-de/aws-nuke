@@ -45,6 +45,18 @@ Feel free to create an issue, if you have any ideas to improve the safety
 procedures.
 
 
+## Use Cases
+
+* We are testing our [Terraform](https://www.terraform.io/) code with Jenkins.
+  Sometimes a Terraform run fails during development and messes up the account.
+  With *aws-nuke* we can simply clean up the failed account so it can be reused
+  for the next build.
+* Our platform developers have their own AWS Accounts where they can create
+  their own Kubernetes clusters for testing purposes. With *aws-nuke* it is
+  very easy to clean up these account at the end of the day and keep the costs
+  low.
+
+
 ## Usage
 
 At first you need to create a config file for *aws-nuke*. This is a minimal one:
