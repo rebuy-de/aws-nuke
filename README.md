@@ -7,8 +7,8 @@
 Nuke a whole AWS account and delete all its resources.
 
 > **Development Status** *aws-nuke* is stable, but currently not all AWS
-resources are covered by it. Feel free to add missing resources and create a
-Pull Request.
+resources are covered by it. Be encouraged to add missing resources and create
+a Pull Request or to create an [Issue](https://github.com/rebuy-de/aws-nuke/issues/new).
 
 ## Caution!
 
