@@ -6,9 +6,8 @@ import (
 )
 
 type RDSInstance struct {
-	svc  *rds.RDS
-	id   string
-	name string
+	svc *rds.RDS
+	id  string
 }
 
 func (n *RDSNuke) ListInstances() ([]Resource, error) {
@@ -21,9 +20,8 @@ func (n *RDSNuke) ListInstances() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBInstances {
 		resources = append(resources, &RDSInstance{
-			svc:  n.Service,
-			id:   *instance.DBInstanceIdentifier,
-			name: *instance.DBName,
+			svc: n.Service,
+			id:  *instance.DBInstanceIdentifier,
 		})
 	}
 
@@ -45,5 +43,5 @@ func (i *RDSInstance) Remove() error {
 }
 
 func (i *RDSInstance) String() string {
-	return i.name
+	return i.id
 }
