@@ -25,7 +25,7 @@ func (n *S3Nuke) DescribeBuckets() ([]string, error) {
 			return nil, err
 		}
 
-		if *bucketLocationResponse.LocationConstraint == *n.Service.Config.Region {
+		if EqualStringPtr(bucketLocationResponse.LocationConstraint, n.Service.Config.Region) {
 			buckets = append(buckets, *out.Name)
 		}
 
