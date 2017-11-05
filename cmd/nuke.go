@@ -211,8 +211,8 @@ func (n *Nuke) Scan() error {
 
 	for _, region := range n.Config.Regions {
 		sess := n.sessions[region]
-		scanner := Scan(sess)
-		for item := range scanner.Items {
+		items := Scan(sess)
+		for item := range items {
 			if !n.Parameters.WantsTarget(item.Service) {
 				continue
 			}
@@ -221,12 +221,8 @@ func (n *Nuke) Scan() error {
 			n.Filter(item)
 			item.Print()
 		}
-		if scanner.Error != nil {
-			fmt.Printf("Scanner found an error %s \n", scanner.Error)
-			return scanner.Error
-		}
-
 	}
+
 	fmt.Printf("Scan complete: %d total, %d nukeable, %d filtered.\n\n",
 		queue.CountTotal(), queue.Count(ItemStateNew), queue.Count(ItemStateFiltered))
 
