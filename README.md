@@ -93,7 +93,7 @@ eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
 eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - would remove
 eu-west-1 - IamUserAccessKeys - 'my-user -> ABCDEFGHIJKLMNOPQRST' - would remove
-eu-west-1 - IamUserPolicyAttachement - 'my-user -> AdministratorAccess' - would remove
+eu-west-1 - IamUserPolicyAttachment - 'my-user -> AdministratorAccess' - would remove
 eu-west-1 - IamUser - 'my-user' - would remove
 Scan complete: 13 total, 11 nukeable, 2 filtered.
 
@@ -118,7 +118,7 @@ accounts:
     filters:
       IamUser:
       - "my-user"
-      IamUserPolicyAttachement:
+      IamUserPolicyAttachment:
       - "my-user -> AdministratorAccess"
       IamUserAccessKeys:
       - "my-user -> ABCDEFGHIJKLMNOPQRST"
@@ -143,7 +143,7 @@ eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
 eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - would remove
 eu-west-1 - IamUserAccessKeys - 'my-user -> ABCDEFGHIJKLMNOPQRST' - filtered by config
-eu-west-1 - IamUserPolicyAttachement - 'my-user -> AdministratorAccess' - filtered by config
+eu-west-1 - IamUserPolicyAttachment - 'my-user -> AdministratorAccess' - filtered by config
 eu-west-1 - IamUser - 'my-user' - filtered by config
 Scan complete: 13 total, 8 nukeable, 5 filtered.
 

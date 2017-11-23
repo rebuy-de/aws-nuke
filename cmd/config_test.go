@@ -63,7 +63,7 @@ func TestLoadExampleConfig(t *testing.T) {
 					"IamRole": []string{
 						"uber.admin",
 					},
-					"IamRolePolicyAttachement": []string{
+					"IamRolePolicyAttachment": []string{
 						"uber.admin -> AdministratorAccess",
 					},
 				},

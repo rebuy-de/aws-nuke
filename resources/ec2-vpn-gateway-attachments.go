@@ -6,14 +6,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type EC2VpnGatewayAttachement struct {
+type EC2VpnGatewayAttachment struct {
 	svc   *ec2.EC2
 	vpcId string
 	vpnId string
 	state string
 }
 
-func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
+func (n *EC2Nuke) ListVpnGatewayAttachments() ([]Resource, error) {
 
 	resp, err := n.Service.DescribeVpnGateways(nil)
 	if err != nil {
@@ -24,7 +24,7 @@ func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
 
 	for _, vgw := range resp.VpnGateways {
 		for _, att := range vgw.VpcAttachments {
-			resources = append(resources, &EC2VpnGatewayAttachement{
+			resources = append(resources, &EC2VpnGatewayAttachment{
 				svc:   n.Service,
 				vpcId: *att.VpcId,
 				vpnId: *vgw.VpnGatewayId,
@@ -36,14 +36,14 @@ func (n *EC2Nuke) ListVpnGatewayAttachements() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2VpnGatewayAttachement) Filter() error {
+func (i *EC2VpnGatewayAttachment) Filter() error {
 	if i.state == "detached" {
 		return fmt.Errorf("already detached")
 	}
 	return nil
 }
 
-func (e *EC2VpnGatewayAttachement) Remove() error {
+func (e *EC2VpnGatewayAttachment) Remove() error {
 	params := &ec2.DetachVpnGatewayInput{
 		VpcId:        &e.vpcId,
 		VpnGatewayId: &e.vpnId,
@@ -57,6 +57,6 @@ func (e *EC2VpnGatewayAttachement) Remove() error {
 	return nil
 }
 
-func (e *EC2VpnGatewayAttachement) String() string {
+func (e *EC2VpnGatewayAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.vpnId, e.vpcId)
 }

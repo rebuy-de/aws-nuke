@@ -9,5 +9,5 @@ accounts:
     filters:
       IamRole:
       - "uber.admin"
-      IamRolePolicyAttachement:
+      IamRolePolicyAttachment:
       - "uber.admin -> AdministratorAccess"
