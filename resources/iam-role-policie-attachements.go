@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/service/iam"
 )
@@ -40,6 +41,13 @@ func (n *IamNuke) ListRolePolicyAttachements() ([]Resource, error) {
 	}
 
 	return resources, nil
+}
+
+func (e *IamRolePolicyAttachement) Filter() error {
+	if strings.HasPrefix(e.policyArn, "arn:aws:iam::aws:policy/aws-service-role/") {
+		return fmt.Errorf("cannot detach from service roles")
+	}
+	return nil
 }
 
 func (e *IamRolePolicyAttachement) Remove() error {
