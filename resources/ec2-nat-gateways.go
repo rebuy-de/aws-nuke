@@ -31,19 +31,19 @@ func (n *EC2Nuke) ListNatGateways() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2NatGateway) Filter() error {
-	if i.state == "deleted" {
+func (n *EC2NatGateway) Filter() error {
+	if n.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
 }
 
-func (e *EC2NatGateway) Remove() error {
+func (n *EC2NatGateway) Remove() error {
 	params := &ec2.DeleteNatGatewayInput{
-		NatGatewayId: &e.id,
+		NatGatewayId: &n.id,
 	}
 
-	_, err := e.svc.DeleteNatGateway(params)
+	_, err := n.svc.DeleteNatGateway(params)
 	if err != nil {
 		return err
 	}
@@ -51,6 +51,6 @@ func (e *EC2NatGateway) Remove() error {
 	return nil
 }
 
-func (e *EC2NatGateway) String() string {
-	return e.id
+func (n *EC2NatGateway) String() string {
+	return n.id
 }

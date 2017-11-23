@@ -30,6 +30,6 @@ func (cfs *CloudFormationStack) Remove() error {
 	return err
 }
 
-func (csf *CloudFormationStack) String() string {
-	return *csf.name
+func (cfs *CloudFormationStack) String() string {
+	return *cfs.name
 }

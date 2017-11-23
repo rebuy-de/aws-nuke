@@ -31,19 +31,19 @@ func (n *EC2Nuke) ListVpnGateways() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2VpnGateway) Filter() error {
-	if i.state == "deleted" {
+func (v *EC2VpnGateway) Filter() error {
+	if v.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
 }
 
-func (e *EC2VpnGateway) Remove() error {
+func (v *EC2VpnGateway) Remove() error {
 	params := &ec2.DeleteVpnGatewayInput{
-		VpnGatewayId: &e.id,
+		VpnGatewayId: &v.id,
 	}
 
-	_, err := e.svc.DeleteVpnGateway(params)
+	_, err := v.svc.DeleteVpnGateway(params)
 	if err != nil {
 		return err
 	}
@@ -51,6 +51,6 @@ func (e *EC2VpnGateway) Remove() error {
 	return nil
 }
 
-func (e *EC2VpnGateway) String() string {
-	return e.id
+func (v *EC2VpnGateway) String() string {
+	return v.id
 }
