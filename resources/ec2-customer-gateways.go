@@ -31,19 +31,19 @@ func (n *EC2Nuke) ListCustomerGateways() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2CustomerGateway) Filter() error {
-	if i.state == "deleted" {
+func (c *EC2CustomerGateway) Filter() error {
+	if c.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
 }
 
-func (e *EC2CustomerGateway) Remove() error {
+func (c *EC2CustomerGateway) Remove() error {
 	params := &ec2.DeleteCustomerGatewayInput{
-		CustomerGatewayId: &e.id,
+		CustomerGatewayId: &c.id,
 	}
 
-	_, err := e.svc.DeleteCustomerGateway(params)
+	_, err := c.svc.DeleteCustomerGateway(params)
 	if err != nil {
 		return err
 	}
@@ -51,6 +51,6 @@ func (e *EC2CustomerGateway) Remove() error {
 	return nil
 }
 
-func (e *EC2CustomerGateway) String() string {
-	return e.id
+func (c *EC2CustomerGateway) String() string {
+	return c.id
 }

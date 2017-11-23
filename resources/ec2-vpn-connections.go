@@ -31,19 +31,19 @@ func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2VpnConnection) Filter() error {
-	if i.state == "deleted" {
+func (v *EC2VpnConnection) Filter() error {
+	if v.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
 }
 
-func (e *EC2VpnConnection) Remove() error {
+func (v *EC2VpnConnection) Remove() error {
 	params := &ec2.DeleteVpnConnectionInput{
-		VpnConnectionId: &e.id,
+		VpnConnectionId: &v.id,
 	}
 
-	_, err := e.svc.DeleteVpnConnection(params)
+	_, err := v.svc.DeleteVpnConnection(params)
 	if err != nil {
 		return err
 	}
@@ -51,6 +51,6 @@ func (e *EC2VpnConnection) Remove() error {
 	return nil
 }
 
-func (e *EC2VpnConnection) String() string {
-	return e.id
+func (v *EC2VpnConnection) String() string {
+	return v.id
 }

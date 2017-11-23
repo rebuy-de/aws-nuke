@@ -9,7 +9,7 @@ import (
 
 func TestSafeLister(t *testing.T) {
 	nilLister := func() ([]resources.Resource, error) {
-		var ptr *string = nil
+		var ptr *string
 		_ = *ptr
 
 		return nil, nil

@@ -90,6 +90,6 @@ func (r *Route53ResourceRecordSet) Remove() error {
 	return nil
 }
 
-func (rrs *Route53ResourceRecordSet) String() string {
-	return *rrs.data.Name
+func (r *Route53ResourceRecordSet) String() string {
+	return *r.data.Name
 }

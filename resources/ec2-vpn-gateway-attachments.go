@@ -36,20 +36,20 @@ func (n *EC2Nuke) ListVpnGatewayAttachments() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *EC2VpnGatewayAttachment) Filter() error {
-	if i.state == "detached" {
+func (v *EC2VpnGatewayAttachment) Filter() error {
+	if v.state == "detached" {
 		return fmt.Errorf("already detached")
 	}
 	return nil
 }
 
-func (e *EC2VpnGatewayAttachment) Remove() error {
+func (v *EC2VpnGatewayAttachment) Remove() error {
 	params := &ec2.DetachVpnGatewayInput{
-		VpcId:        &e.vpcId,
-		VpnGatewayId: &e.vpnId,
+		VpcId:        &v.vpcId,
+		VpnGatewayId: &v.vpnId,
 	}
 
-	_, err := e.svc.DetachVpnGateway(params)
+	_, err := v.svc.DetachVpnGateway(params)
 	if err != nil {
 		return err
 	}
@@ -57,6 +57,6 @@ func (e *EC2VpnGatewayAttachment) Remove() error {
 	return nil
 }
 
-func (e *EC2VpnGatewayAttachment) String() string {
-	return fmt.Sprintf("%s -> %s", e.vpnId, e.vpcId)
+func (v *EC2VpnGatewayAttachment) String() string {
+	return fmt.Sprintf("%s -> %s", v.vpnId, v.vpcId)
 }
