@@ -1,10 +1,16 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/iam"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/aws/aws-sdk-go/service/iam"
+)
 
 type IamRole struct {
 	svc  *iam.IAM
 	name string
+	path string
 }
 
 func (n *IamNuke) ListRoles() ([]Resource, error) {
@@ -18,10 +24,18 @@ func (n *IamNuke) ListRoles() ([]Resource, error) {
 		resources = append(resources, &IamRole{
 			svc:  n.Service,
 			name: *out.RoleName,
+			path: *out.Path,
 		})
 	}
 
 	return resources, nil
+}
+
+func (e *IamRole) Filter() error {
+	if strings.HasPrefix(e.path, "/aws-service-role/") {
+		return fmt.Errorf("cannot delete service roles")
+	}
+	return nil
 }
 
 func (e *IamRole) Remove() error {
