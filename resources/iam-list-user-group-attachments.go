@@ -6,13 +6,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type IamUserGroupAttachement struct {
+type IamUserGroupAttachment struct {
 	svc       *iam.IAM
 	groupName string
 	userName  string
 }
 
-func (n *IamNuke) ListUserGroupAttachements() ([]Resource, error) {
+func (n *IamNuke) ListUserGroupAttachments() ([]Resource, error) {
 	resp, err := n.Service.ListUsers(nil)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (n *IamNuke) ListUserGroupAttachements() ([]Resource, error) {
 		}
 
 		for _, grp := range resp.Groups {
-			resources = append(resources, &IamUserGroupAttachement{
+			resources = append(resources, &IamUserGroupAttachment{
 				svc:       n.Service,
 				groupName: *grp.GroupName,
 				userName:  *role.UserName,
@@ -40,7 +40,7 @@ func (n *IamNuke) ListUserGroupAttachements() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamUserGroupAttachement) Remove() error {
+func (e *IamUserGroupAttachment) Remove() error {
 	_, err := e.svc.RemoveUserFromGroup(
 		&iam.RemoveUserFromGroupInput{
 			GroupName: &e.groupName,
@@ -53,6 +53,6 @@ func (e *IamUserGroupAttachement) Remove() error {
 	return nil
 }
 
-func (e *IamUserGroupAttachement) String() string {
+func (e *IamUserGroupAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.userName, e.groupName)
 }

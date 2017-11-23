@@ -6,14 +6,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type IamUserPolicyAttachement struct {
+type IamUserPolicyAttachment struct {
 	svc        *iam.IAM
 	policyArn  string
 	policyName string
 	roleName   string
 }
 
-func (n *IamNuke) ListUserPolicyAttachements() ([]Resource, error) {
+func (n *IamNuke) ListUserPolicyAttachments() ([]Resource, error) {
 	resp, err := n.Service.ListUsers(nil)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (n *IamNuke) ListUserPolicyAttachements() ([]Resource, error) {
 		}
 
 		for _, pol := range resp.AttachedPolicies {
-			resources = append(resources, &IamUserPolicyAttachement{
+			resources = append(resources, &IamUserPolicyAttachment{
 				svc:        n.Service,
 				policyArn:  *pol.PolicyArn,
 				policyName: *pol.PolicyName,
@@ -42,7 +42,7 @@ func (n *IamNuke) ListUserPolicyAttachements() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamUserPolicyAttachement) Remove() error {
+func (e *IamUserPolicyAttachment) Remove() error {
 	_, err := e.svc.DetachUserPolicy(
 		&iam.DetachUserPolicyInput{
 			PolicyArn: &e.policyArn,
@@ -55,6 +55,6 @@ func (e *IamUserPolicyAttachement) Remove() error {
 	return nil
 }
 
-func (e *IamUserPolicyAttachement) String() string {
+func (e *IamUserPolicyAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
 }
