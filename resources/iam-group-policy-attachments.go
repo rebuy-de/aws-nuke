@@ -6,14 +6,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type IamGroupPolicyAttachment struct {
+type IAMGroupPolicyAttachment struct {
 	svc        *iam.IAM
 	policyArn  string
 	policyName string
 	roleName   string
 }
 
-func (n *IamNuke) ListGroupPolicyAttachments() ([]Resource, error) {
+func (n *IAMNuke) ListGroupPolicyAttachments() ([]Resource, error) {
 	resp, err := n.Service.ListGroups(nil)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (n *IamNuke) ListGroupPolicyAttachments() ([]Resource, error) {
 		}
 
 		for _, pol := range resp.AttachedPolicies {
-			resources = append(resources, &IamGroupPolicyAttachment{
+			resources = append(resources, &IAMGroupPolicyAttachment{
 				svc:        n.Service,
 				policyArn:  *pol.PolicyArn,
 				policyName: *pol.PolicyName,
@@ -42,7 +42,7 @@ func (n *IamNuke) ListGroupPolicyAttachments() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamGroupPolicyAttachment) Remove() error {
+func (e *IAMGroupPolicyAttachment) Remove() error {
 	_, err := e.svc.DetachGroupPolicy(
 		&iam.DetachGroupPolicyInput{
 			PolicyArn: &e.policyArn,
@@ -55,6 +55,6 @@ func (e *IamGroupPolicyAttachment) Remove() error {
 	return nil
 }
 
-func (e *IamGroupPolicyAttachment) String() string {
+func (e *IAMGroupPolicyAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
 }

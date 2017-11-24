@@ -2,12 +2,12 @@ package resources
 
 import "github.com/aws/aws-sdk-go/service/iam"
 
-type IamUser struct {
+type IAMUser struct {
 	svc  *iam.IAM
 	name string
 }
 
-func (n *IamNuke) ListUsers() ([]Resource, error) {
+func (n *IAMNuke) ListUsers() ([]Resource, error) {
 	resp, err := n.Service.ListUsers(nil)
 	if err != nil {
 		return nil, err
@@ -15,7 +15,7 @@ func (n *IamNuke) ListUsers() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.Users {
-		resources = append(resources, &IamUser{
+		resources = append(resources, &IAMUser{
 			svc:  n.Service,
 			name: *out.UserName,
 		})
@@ -24,7 +24,7 @@ func (n *IamNuke) ListUsers() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamUser) Remove() error {
+func (e *IAMUser) Remove() error {
 	_, err := e.svc.DeleteUser(&iam.DeleteUserInput{
 		UserName: &e.name,
 	})
@@ -35,6 +35,6 @@ func (e *IamUser) Remove() error {
 	return nil
 }
 
-func (e *IamUser) String() string {
+func (e *IAMUser) String() string {
 	return e.name
 }

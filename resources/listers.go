@@ -33,7 +33,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		elasticache      = ElasticacheNuke{elasticache.New(sess)}
 		elb              = ElbNuke{elb.New(sess)}
 		elbv2            = Elbv2Nuke{elbv2.New(sess)}
-		iam              = IamNuke{iam.New(sess)}
+		iam              = IAMNuke{iam.New(sess)}
 		kms              = KMSNuke{kms.New(sess)}
 		lambda           = LambdaNuke{lambda.New(sess)}
 		rds              = RDSNuke{rds.New(sess)}

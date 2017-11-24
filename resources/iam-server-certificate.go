@@ -2,12 +2,12 @@ package resources
 
 import "github.com/aws/aws-sdk-go/service/iam"
 
-type IamServerCertificate struct {
+type IAMServerCertificate struct {
 	svc  *iam.IAM
 	name string
 }
 
-func (n *IamNuke) ListServerCertificates() ([]Resource, error) {
+func (n *IAMNuke) ListServerCertificates() ([]Resource, error) {
 	resp, err := n.Service.ListServerCertificates(nil)
 	if err != nil {
 		return nil, err
@@ -15,7 +15,7 @@ func (n *IamNuke) ListServerCertificates() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, meta := range resp.ServerCertificateMetadataList {
-		resources = append(resources, &IamServerCertificate{
+		resources = append(resources, &IAMServerCertificate{
 			svc:  n.Service,
 			name: *meta.ServerCertificateName,
 		})
@@ -24,7 +24,7 @@ func (n *IamNuke) ListServerCertificates() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamServerCertificate) Remove() error {
+func (e *IAMServerCertificate) Remove() error {
 	_, err := e.svc.DeleteServerCertificate(&iam.DeleteServerCertificateInput{
 		ServerCertificateName: &e.name,
 	})
@@ -35,6 +35,6 @@ func (e *IamServerCertificate) Remove() error {
 	return nil
 }
 
-func (e *IamServerCertificate) String() string {
+func (e *IAMServerCertificate) String() string {
 	return e.name
 }

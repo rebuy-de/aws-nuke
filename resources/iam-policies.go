@@ -5,12 +5,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type IamPolicy struct {
+type IAMPolicy struct {
 	svc *iam.IAM
 	arn string
 }
 
-func (n *IamNuke) ListPolicies() ([]Resource, error) {
+func (n *IAMNuke) ListPolicies() ([]Resource, error) {
 	resp, err := n.Service.ListPolicies(&iam.ListPoliciesInput{
 		Scope: aws.String("Local"),
 	})
@@ -20,7 +20,7 @@ func (n *IamNuke) ListPolicies() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.Policies {
-		resources = append(resources, &IamPolicy{
+		resources = append(resources, &IAMPolicy{
 			svc: n.Service,
 			arn: *out.Arn,
 		})
@@ -29,7 +29,7 @@ func (n *IamNuke) ListPolicies() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamPolicy) Remove() error {
+func (e *IAMPolicy) Remove() error {
 	resp, err := e.svc.ListPolicyVersions(&iam.ListPolicyVersionsInput{
 		PolicyArn: &e.arn,
 	})
@@ -58,6 +58,6 @@ func (e *IamPolicy) Remove() error {
 	return nil
 }
 
-func (e *IamPolicy) String() string {
+func (e *IAMPolicy) String() string {
 	return e.arn
 }

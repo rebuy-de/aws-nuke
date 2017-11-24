@@ -60,7 +60,7 @@ type Elbv2Nuke struct {
 	Service *elbv2.ELBV2
 }
 
-type IamNuke struct {
+type IAMNuke struct {
 	Service *iam.IAM
 }
 
