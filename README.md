@@ -82,7 +82,7 @@ Do you really want to nuke the account with the ID 000000000000 and the alias 'a
 Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - would remove
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - would remove
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - would remove
 eu-west-1 - EC2KeyPair - 'test' - would remove
 eu-west-1 - EC2NetworkACL - 'acl-6482a303' - cannot delete default VPC
@@ -132,7 +132,7 @@ Do you really want to nuke the account with the ID 000000000000 and the alias 'a
 Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - would remove
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - would remove
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - would remove
 eu-west-1 - EC2KeyPair - 'test' - would remove
 eu-west-1 - EC2NetworkACL - 'acl-6482a303' - cannot delete default VPC
@@ -151,7 +151,7 @@ Do you really want to nuke these resources on the account with the ID 0000000000
 Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
 	status code: 400, request id: 9665c066-6bb1-4643-9071-f03481f80d4e
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - triggered remove
 eu-west-1 - EC2KeyPair - 'test' - triggered remove
@@ -168,7 +168,7 @@ eu-west-1 - S3Object - 's3://rebuy-terraform-state-138758637120/run-terraform.lo
 
 Removal requested: 2 waiting, 6 failed, 5 skipped, 0 finished
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
 	status code: 400, request id: d85d26e8-9f6f-42f0-811a-3b05471b0254
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - waiting
 eu-west-1 - EC2KeyPair - 'test' - removed

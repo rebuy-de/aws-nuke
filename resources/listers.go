@@ -51,7 +51,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		cloudwatchevents.ListTargets,
 		ec2.ListAddresses,
 		ec2.ListCustomerGateways,
-		ec2.ListDhcpOptions,
+		ec2.ListDHCPOptions,
 		ec2.ListInstances,
 		ec2.ListInternetGatewayAttachments,
 		ec2.ListInternetGateways,

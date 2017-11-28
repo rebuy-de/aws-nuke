@@ -2,12 +2,12 @@ package resources
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
-type EC2DhcpOption struct {
+type EC2DHCPOption struct {
 	svc *ec2.EC2
 	id  *string
 }
 
-func (n *EC2Nuke) ListDhcpOptions() ([]Resource, error) {
+func (n *EC2Nuke) ListDHCPOptions() ([]Resource, error) {
 	resp, err := n.Service.DescribeDhcpOptions(nil)
 	if err != nil {
 		return nil, err
@@ -16,7 +16,7 @@ func (n *EC2Nuke) ListDhcpOptions() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.DhcpOptions {
 
-		resources = append(resources, &EC2DhcpOption{
+		resources = append(resources, &EC2DHCPOption{
 			svc: n.Service,
 			id:  out.DhcpOptionsId,
 		})
@@ -25,7 +25,7 @@ func (n *EC2Nuke) ListDhcpOptions() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *EC2DhcpOption) Remove() error {
+func (e *EC2DHCPOption) Remove() error {
 	params := &ec2.DeleteDhcpOptionsInput{
 		DhcpOptionsId: e.id,
 	}
@@ -38,6 +38,6 @@ func (e *EC2DhcpOption) Remove() error {
 	return nil
 }
 
-func (e *EC2DhcpOption) String() string {
+func (e *EC2DHCPOption) String() string {
 	return *e.id
 }
