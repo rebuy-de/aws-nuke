@@ -56,7 +56,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		ec2.ListInternetGatewayAttachments,
 		ec2.ListInternetGateways,
 		ec2.ListKeyPairs,
-		ec2.ListNatGateways,
+		ec2.ListNATGateways,
 		ec2.ListNetworkACLs,
 		ec2.ListRouteTables,
 		ec2.ListSecurityGroups,
