@@ -92,9 +92,9 @@ eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - would remove
 eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
 eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - would remove
-eu-west-1 - IamUserAccessKeys - 'my-user -> ABCDEFGHIJKLMNOPQRST' - would remove
-eu-west-1 - IamUserPolicyAttachment - 'my-user -> AdministratorAccess' - would remove
-eu-west-1 - IamUser - 'my-user' - would remove
+eu-west-1 - IAMUserAccessKey - 'my-user -> ABCDEFGHIJKLMNOPQRST' - would remove
+eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - would remove
+eu-west-1 - IAMUser - 'my-user' - would remove
 Scan complete: 13 total, 11 nukeable, 2 filtered.
 
 Would delete these resources. Provide --no-dry-run to actually destroy resources.
@@ -116,11 +116,11 @@ account-blacklist:
 accounts:
   "000000000000": # aws-nuke-example
     filters:
-      IamUser:
+      IAMUser:
       - "my-user"
-      IamUserPolicyAttachment:
+      IAMUserPolicyAttachment:
       - "my-user -> AdministratorAccess"
-      IamUserAccessKeys:
+      IAMUserAccessKey:
       - "my-user -> ABCDEFGHIJKLMNOPQRST"
 ```
 
@@ -142,9 +142,9 @@ eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - would remove
 eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
 eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - would remove
-eu-west-1 - IamUserAccessKeys - 'my-user -> ABCDEFGHIJKLMNOPQRST' - filtered by config
-eu-west-1 - IamUserPolicyAttachment - 'my-user -> AdministratorAccess' - filtered by config
-eu-west-1 - IamUser - 'my-user' - filtered by config
+eu-west-1 - IAMUserAccessKey - 'my-user -> ABCDEFGHIJKLMNOPQRST' - filtered by config
+eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - filtered by config
+eu-west-1 - IAMUser - 'my-user' - filtered by config
 Scan complete: 13 total, 8 nukeable, 5 filtered.
 
 Do you really want to nuke these resources on the account with the ID 000000000000 and the alias 'aws-nuke-example'?

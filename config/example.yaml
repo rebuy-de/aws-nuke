@@ -7,7 +7,7 @@ account-blacklist:
 accounts:
   555133742:
     filters:
-      IamRole:
+      IAMRole:
       - "uber.admin"
-      IamRolePolicyAttachment:
+      IAMRolePolicyAttachment:
       - "uber.admin -> AdministratorAccess"

@@ -60,10 +60,10 @@ func TestLoadExampleConfig(t *testing.T) {
 		Accounts: map[string]NukeConfigAccount{
 			"555133742": NukeConfigAccount{
 				Filters: map[string][]string{
-					"IamRole": []string{
+					"IAMRole": []string{
 						"uber.admin",
 					},
-					"IamRolePolicyAttachment": []string{
+					"IAMRolePolicyAttachment": []string{
 						"uber.admin -> AdministratorAccess",
 					},
 				},

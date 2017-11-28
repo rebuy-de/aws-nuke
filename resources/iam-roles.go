@@ -7,13 +7,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type IamRole struct {
+type IAMRole struct {
 	svc  *iam.IAM
 	name string
 	path string
 }
 
-func (n *IamNuke) ListRoles() ([]Resource, error) {
+func (n *IAMNuke) ListRoles() ([]Resource, error) {
 	resp, err := n.Service.ListRoles(nil)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func (n *IamNuke) ListRoles() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.Roles {
-		resources = append(resources, &IamRole{
+		resources = append(resources, &IAMRole{
 			svc:  n.Service,
 			name: *out.RoleName,
 			path: *out.Path,
@@ -31,14 +31,14 @@ func (n *IamNuke) ListRoles() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamRole) Filter() error {
+func (e *IAMRole) Filter() error {
 	if strings.HasPrefix(e.path, "/aws-service-role/") {
 		return fmt.Errorf("cannot delete service roles")
 	}
 	return nil
 }
 
-func (e *IamRole) Remove() error {
+func (e *IAMRole) Remove() error {
 	_, err := e.svc.DeleteRole(&iam.DeleteRoleInput{
 		RoleName: &e.name,
 	})
@@ -49,6 +49,6 @@ func (e *IamRole) Remove() error {
 	return nil
 }
 
-func (e *IamRole) String() string {
+func (e *IAMRole) String() string {
 	return e.name
 }

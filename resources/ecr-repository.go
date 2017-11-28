@@ -7,13 +7,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecr"
 )
 
-type ECRrepository struct {
+type ECRRepository struct {
 	svc  *ecr.ECR
 	name *string
 }
 
 func (n *ECRNuke) ListRepos() ([]Resource, error) {
-
 	var params *ecr.DescribeRepositoriesInput
 	var resp *ecr.DescribeRepositoriesOutput
 	var resources []Resource
@@ -43,7 +42,7 @@ func (n *ECRNuke) ListRepos() ([]Resource, error) {
 			return nil, err
 		}
 		for _, repository := range resp.Repositories {
-			resources = append(resources, &ECRrepository{
+			resources = append(resources, &ECRRepository{
 				svc:  n.Service,
 				name: repository.RepositoryName,
 			})
@@ -53,11 +52,11 @@ func (n *ECRNuke) ListRepos() ([]Resource, error) {
 	return resources, nil
 }
 
-func (r *ECRrepository) Filter() error {
+func (r *ECRRepository) Filter() error {
 	return nil
 }
 
-func (r *ECRrepository) Remove() error {
+func (r *ECRRepository) Remove() error {
 
 	params := &ecr.DeleteRepositoryInput{
 		RepositoryName: r.name,
@@ -67,6 +66,6 @@ func (r *ECRrepository) Remove() error {
 	return err
 }
 
-func (r *ECRrepository) String() string {
+func (r *ECRRepository) String() string {
 	return fmt.Sprintf("Repository: %s", *r.name)
 }

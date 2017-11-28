@@ -6,14 +6,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type IamUserAccessKeys struct {
+type IAMUserAccessKey struct {
 	svc         *iam.IAM
 	accessKeyId string
 	userName    string
 	status      string
 }
 
-func (n *IamNuke) ListUserAccessKeys() ([]Resource, error) {
+func (n *IAMNuke) ListUserAccessKeys() ([]Resource, error) {
 	resp, err := n.Service.ListUsers(nil)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (n *IamNuke) ListUserAccessKeys() ([]Resource, error) {
 		}
 
 		for _, meta := range resp.AccessKeyMetadata {
-			resources = append(resources, &IamUserAccessKeys{
+			resources = append(resources, &IAMUserAccessKey{
 				svc:         n.Service,
 				accessKeyId: *meta.AccessKeyId,
 				userName:    *meta.UserName,
@@ -42,7 +42,7 @@ func (n *IamNuke) ListUserAccessKeys() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamUserAccessKeys) Remove() error {
+func (e *IAMUserAccessKey) Remove() error {
 	_, err := e.svc.DeleteAccessKey(
 		&iam.DeleteAccessKeyInput{
 			AccessKeyId: &e.accessKeyId,
@@ -55,6 +55,6 @@ func (e *IamUserAccessKeys) Remove() error {
 	return nil
 }
 
-func (e *IamUserAccessKeys) String() string {
+func (e *IAMUserAccessKey) String() string {
 	return fmt.Sprintf("%s -> %s", e.userName, e.accessKeyId)
 }

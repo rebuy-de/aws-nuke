@@ -7,14 +7,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
-type IamRolePolicyAttachment struct {
+type IAMRolePolicyAttachment struct {
 	svc        *iam.IAM
 	policyArn  string
 	policyName string
 	roleName   string
 }
 
-func (n *IamNuke) ListRolePolicyAttachments() ([]Resource, error) {
+func (n *IAMNuke) ListRolePolicyAttachments() ([]Resource, error) {
 	resp, err := n.Service.ListRoles(nil)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (n *IamNuke) ListRolePolicyAttachments() ([]Resource, error) {
 		}
 
 		for _, pol := range resp.AttachedPolicies {
-			resources = append(resources, &IamRolePolicyAttachment{
+			resources = append(resources, &IAMRolePolicyAttachment{
 				svc:        n.Service,
 				policyArn:  *pol.PolicyArn,
 				policyName: *pol.PolicyName,
@@ -43,14 +43,14 @@ func (n *IamNuke) ListRolePolicyAttachments() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamRolePolicyAttachment) Filter() error {
+func (e *IAMRolePolicyAttachment) Filter() error {
 	if strings.HasPrefix(e.policyArn, "arn:aws:iam::aws:policy/aws-service-role/") {
 		return fmt.Errorf("cannot detach from service roles")
 	}
 	return nil
 }
 
-func (e *IamRolePolicyAttachment) Remove() error {
+func (e *IAMRolePolicyAttachment) Remove() error {
 	_, err := e.svc.DetachRolePolicy(
 		&iam.DetachRolePolicyInput{
 			PolicyArn: &e.policyArn,
@@ -63,6 +63,6 @@ func (e *IamRolePolicyAttachment) Remove() error {
 	return nil
 }
 
-func (e *IamRolePolicyAttachment) String() string {
+func (e *IAMRolePolicyAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
 }

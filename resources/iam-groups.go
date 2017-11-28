@@ -2,12 +2,12 @@ package resources
 
 import "github.com/aws/aws-sdk-go/service/iam"
 
-type IamGroup struct {
+type IAMGroup struct {
 	svc  *iam.IAM
 	name string
 }
 
-func (n *IamNuke) ListGroups() ([]Resource, error) {
+func (n *IAMNuke) ListGroups() ([]Resource, error) {
 	resp, err := n.Service.ListGroups(nil)
 	if err != nil {
 		return nil, err
@@ -15,7 +15,7 @@ func (n *IamNuke) ListGroups() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.Groups {
-		resources = append(resources, &IamGroup{
+		resources = append(resources, &IAMGroup{
 			svc:  n.Service,
 			name: *out.GroupName,
 		})
@@ -24,7 +24,7 @@ func (n *IamNuke) ListGroups() ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *IamGroup) Remove() error {
+func (e *IAMGroup) Remove() error {
 	_, err := e.svc.DeleteGroup(&iam.DeleteGroupInput{
 		GroupName: &e.name,
 	})
@@ -35,6 +35,6 @@ func (e *IamGroup) Remove() error {
 	return nil
 }
 
-func (e *IamGroup) String() string {
+func (e *IAMGroup) String() string {
 	return e.name
 }
