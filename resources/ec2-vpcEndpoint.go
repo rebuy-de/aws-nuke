@@ -2,12 +2,12 @@ package resources
 
 import "github.com/aws/aws-sdk-go/service/ec2"
 
-type EC2VpcEndpoint struct {
+type EC2VPCEndpoint struct {
 	svc *ec2.EC2
 	id  *string
 }
 
-func (n *EC2Nuke) ListVpcEndpoints() ([]Resource, error) {
+func (n *EC2Nuke) ListVPCEndpoints() ([]Resource, error) {
 	resp, err := n.Service.DescribeVpcEndpoints(nil)
 	if err != nil {
 		return nil, err
@@ -15,7 +15,7 @@ func (n *EC2Nuke) ListVpcEndpoints() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, vpcEndpoint := range resp.VpcEndpoints {
-		resources = append(resources, &EC2VpcEndpoint{
+		resources = append(resources, &EC2VPCEndpoint{
 			svc: n.Service,
 			id:  vpcEndpoint.VpcEndpointId,
 		})
@@ -24,7 +24,7 @@ func (n *EC2Nuke) ListVpcEndpoints() ([]Resource, error) {
 	return resources, nil
 }
 
-func (endpoint *EC2VpcEndpoint) Remove() error {
+func (endpoint *EC2VPCEndpoint) Remove() error {
 	params := &ec2.DeleteVpcEndpointsInput{
 		VpcEndpointIds: []*string{endpoint.id},
 	}
@@ -37,6 +37,6 @@ func (endpoint *EC2VpcEndpoint) Remove() error {
 	return nil
 }
 
-func (endpoint *EC2VpcEndpoint) String() string {
+func (endpoint *EC2VPCEndpoint) String() string {
 	return *endpoint.id
 }
