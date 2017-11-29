@@ -173,7 +173,7 @@ func (n *Nuke) ValidateAccount() error {
 	if !n.Config.HasBlacklist() {
 		return fmt.Errorf("The config file contains an empty blacklist. " +
 			"For safety reasons you need to specify at least one account ID. " +
-			"This should be you production account.")
+			"This should be your production account.")
 	}
 
 	if n.Config.InBlacklist(accountID) {
@@ -189,7 +189,7 @@ func (n *Nuke) ValidateAccount() error {
 
 	for _, alias := range aliases {
 		if strings.Contains(strings.ToLower(*alias), "prod") {
-			return fmt.Errorf("You are trying to nuke a account with the alias '%s', "+
+			return fmt.Errorf("You are trying to nuke an account with the alias '%s', "+
 				"but it has the substring 'prod' in it. Aborting.", *aliases[0])
 		}
 	}

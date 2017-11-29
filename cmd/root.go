@@ -53,7 +53,7 @@ func NewRootCommand() *cobra.Command {
 		"limit nuking to certain resource types (eg IAMServerCertificate)")
 	command.PersistentFlags().BoolVar(
 		&params.NoDryRun, "no-dry-run", false,
-		"actualy delete found resources")
+		"actually delete found resources")
 	command.PersistentFlags().BoolVar(
 		&params.Force, "force", false,
 		"don't ask for confirmation")
