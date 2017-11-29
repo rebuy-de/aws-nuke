@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -75,5 +76,69 @@ func TestLoadExampleConfig(t *testing.T) {
 		t.Errorf("Read struct mismatches:")
 		t.Errorf("  Got:      %#v", *config)
 		t.Errorf("  Expected: %#v", expect)
+	}
+}
+
+func TestResolveDeprecations(t *testing.T) {
+	config := NukeConfig{
+		AccountBlacklist: []string{"1234567890"},
+		Regions:          []string{"eu-west-1"},
+		Accounts: map[string]NukeConfigAccount{
+			"555133742": {
+				Filters: map[string][]string{
+					"IamRole":                 {"uber.admin", "foo.bar"},
+					"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+				},
+			},
+			"2345678901": {
+				Filters: map[string][]string{
+					"ECRrepository":           {"foo:bar", "bar:foo"},
+					"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+				},
+			},
+		},
+	}
+
+	expect := map[string]NukeConfigAccount{
+		"555133742": {
+			Filters: map[string][]string{
+				"IAMRole":                 {"uber.admin", "foo.bar"},
+				"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+			},
+		},
+		"2345678901": {
+			Filters: map[string][]string{
+				"ECRRepository":           {"foo:bar", "bar:foo"},
+				"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+			},
+		},
+	}
+
+	err := config.resolveDeprecations()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(config.Accounts, expect) {
+		t.Errorf("Read struct mismatches:")
+		t.Errorf("  Got:      %#v", config.Accounts)
+		t.Errorf("  Expected: %#v", expect)
+	}
+
+	invalidConfig := NukeConfig{
+		AccountBlacklist: []string{"1234567890"},
+		Regions:          []string{"eu-west-1"},
+		Accounts: map[string]NukeConfigAccount{
+			"555133742": {
+				Filters: map[string][]string{
+					"IamUserAccessKeys": {"X"},
+					"IAMUserAccessKey":  {"Y"},
+				},
+			},
+		},
+	}
+
+	err = invalidConfig.resolveDeprecations()
+	if err == nil || !strings.Contains(err.Error(), "using deprecated resource type and replacement") {
+		t.Fatal("invalid config did not cause correct error")
 	}
 }
