@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudtrail"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/efs"
@@ -37,6 +38,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		kms              = KMSNuke{kms.New(sess)}
 		lambda           = LambdaNuke{lambda.New(sess)}
 		rds              = RDSNuke{rds.New(sess)}
+		dynamodb         = DynamoDBNuke{dynamodb.New(sess)}
 		route53          = Route53Nuke{route53.New(sess)}
 		s3               = S3Nuke{s3.New(sess)}
 		sns              = SNSNuke{sns.New(sess)}
@@ -98,6 +100,8 @@ func GetListers(sess *session.Session) []ResourceLister {
 		rds.ListParameterGroups,
 		rds.ListSnapshots,
 		rds.ListSubnetGroups,
+		dynamodb.ListItems,
+		dynamodb.ListTables,
 		route53.ListHostedZones,
 		route53.ListResourceRecords,
 		s3.ListBuckets,
