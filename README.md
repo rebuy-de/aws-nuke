@@ -116,7 +116,7 @@ account-blacklist:
 accounts:
   "000000000000": # aws-nuke-example
     filters:
-      IAMUser:
+      IamUser:
       - "my-user"
       IAMUserPolicyAttachment:
       - "my-user -> AdministratorAccess"
