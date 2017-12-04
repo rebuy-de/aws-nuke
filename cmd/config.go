@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"io/ioutil"
-
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 type NukeConfig struct {
@@ -83,7 +82,7 @@ func (c *NukeConfig) resolveDeprecations() error {
 			if !ok {
 				continue
 			}
-			fmt.Printf("deprecated resource type '%s' - replace with '%s'\n", resourceType, replacement)
+			LogWarn("deprecated resource type '%s' - converting to '%s'\n", resourceType, replacement)
 
 			if _, ok := a.Filters[replacement]; ok {
 				return fmt.Errorf("using deprecated resource type and replacement: '%s','%s'", resourceType, replacement)

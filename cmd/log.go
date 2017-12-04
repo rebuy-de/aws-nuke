@@ -14,6 +14,7 @@ var (
 	ReasonWaitPending     = *color.New(color.FgBlue)
 	ReasonSuccess         = *color.New(color.FgGreen)
 	ColorID               = *color.New(color.Bold)
+	Warning               = *color.New(color.FgYellow)
 )
 
 func Log(reg string, r resources.Resource, c color.Color, msg string) {
@@ -24,6 +25,10 @@ func Log(reg string, r resources.Resource, c color.Color, msg string) {
 	ColorID.Printf("'%s'", r.String())
 	fmt.Printf(" - ")
 	c.Printf("%s\n", msg)
+}
+
+func LogWarn(s string, i ...interface{}) {
+	Warning.Printf("WARNING: "+s, i...)
 }
 
 func LogErrorf(err error) {
