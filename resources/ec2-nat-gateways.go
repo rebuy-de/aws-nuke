@@ -6,13 +6,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type EC2NatGateway struct {
+type EC2NATGateway struct {
 	svc   *ec2.EC2
 	id    string
 	state string
 }
 
-func (n *EC2Nuke) ListNatGateways() ([]Resource, error) {
+func (n *EC2Nuke) ListNATGateways() ([]Resource, error) {
 	params := &ec2.DescribeNatGatewaysInput{}
 	resp, err := n.Service.DescribeNatGateways(params)
 	if err != nil {
@@ -21,7 +21,7 @@ func (n *EC2Nuke) ListNatGateways() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.NatGateways {
-		resources = append(resources, &EC2NatGateway{
+		resources = append(resources, &EC2NATGateway{
 			svc:   n.Service,
 			id:    *out.NatGatewayId,
 			state: *out.State,
@@ -31,14 +31,14 @@ func (n *EC2Nuke) ListNatGateways() ([]Resource, error) {
 	return resources, nil
 }
 
-func (n *EC2NatGateway) Filter() error {
+func (n *EC2NATGateway) Filter() error {
 	if n.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
 }
 
-func (n *EC2NatGateway) Remove() error {
+func (n *EC2NATGateway) Remove() error {
 	params := &ec2.DeleteNatGatewayInput{
 		NatGatewayId: &n.id,
 	}
@@ -51,6 +51,6 @@ func (n *EC2NatGateway) Remove() error {
 	return nil
 }
 
-func (n *EC2NatGateway) String() string {
+func (n *EC2NATGateway) String() string {
 	return n.id
 }

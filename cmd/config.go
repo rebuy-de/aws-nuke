@@ -3,7 +3,8 @@ package cmd
 import (
 	"io/ioutil"
 
-	yaml "gopkg.in/yaml.v2"
+	"fmt"
+	"gopkg.in/yaml.v2"
 )
 
 type NukeConfig struct {
@@ -30,6 +31,10 @@ func LoadConfig(path string) (*NukeConfig, error) {
 		return nil, err
 	}
 
+	if err := config.resolveDeprecations(); err != nil {
+		return nil, err
+	}
+
 	return config, nil
 }
 
@@ -45,4 +50,48 @@ func (c *NukeConfig) InBlacklist(searchID string) bool {
 	}
 
 	return false
+}
+
+func (c *NukeConfig) resolveDeprecations() error {
+	deprecations := map[string]string{
+		"EC2DhcpOptions":                "EC2DHCPOptions",
+		"EC2InternetGatewayAttachement": "EC2InternetGatewayAttachment",
+		"EC2NatGateway":                 "EC2NATGateway",
+		"EC2Vpc":                        "EC2VPC",
+		"EC2VpcEndpoint":                "EC2VPCEndpoint",
+		"EC2VpnConnection":              "EC2VPNConnection",
+		"EC2VpnGateway":                 "EC2VPNGateway",
+		"EC2VpnGatewayAttachement":      "EC2VPNGatewayAttachment",
+		"ECRrepository":                 "ECRRepository",
+		"IamGroup":                      "IAMGroup",
+		"IamGroupPolicyAttachement":     "IAMGroupPolicyAttachment",
+		"IamInstanceProfile":            "IAMInstanceProfile",
+		"IamInstanceProfileRole":        "IAMInstanceProfileRole",
+		"IamPolicy":                     "IAMPolicy",
+		"IamRole":                       "IAMRole",
+		"IamRolePolicyAttachement":      "IAMRolePolicyAttachment",
+		"IamServerCertificate":          "IAMServerCertificate",
+		"IamUser":                       "IAMUser",
+		"IamUserAccessKeys":             "IAMUserAccessKey",
+		"IamUserGroupAttachement":       "IAMUserGroupAttachment",
+		"IamUserPolicyAttachement":      "IAMUserPolicyAttachment",
+	}
+
+	for _, a := range c.Accounts {
+		for resourceType, resources := range a.Filters {
+			replacement, ok := deprecations[resourceType]
+			if !ok {
+				continue
+			}
+			fmt.Printf("deprecated resource type '%s' - replace with '%s'\n", resourceType, replacement)
+
+			if _, ok := a.Filters[replacement]; ok {
+				return fmt.Errorf("using deprecated resource type and replacement: '%s','%s'", resourceType, replacement)
+			}
+
+			a.Filters[replacement] = resources
+			delete(a.Filters, resourceType)
+		}
+	}
+	return nil
 }

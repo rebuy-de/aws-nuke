@@ -82,7 +82,7 @@ Do you really want to nuke the account with the ID 000000000000 and the alias 'a
 Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - would remove
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - would remove
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - would remove
 eu-west-1 - EC2KeyPair - 'test' - would remove
 eu-west-1 - EC2NetworkACL - 'acl-6482a303' - cannot delete default VPC
@@ -91,7 +91,7 @@ eu-west-1 - EC2SecurityGroup - 'sg-220e945a' - cannot delete group 'default'
 eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - would remove
 eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
-eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - would remove
+eu-west-1 - EC2VPC - 'vpc-c6159fa1' - would remove
 eu-west-1 - IAMUserAccessKey - 'my-user -> ABCDEFGHIJKLMNOPQRST' - would remove
 eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - would remove
 eu-west-1 - IAMUser - 'my-user' - would remove
@@ -132,7 +132,7 @@ Do you really want to nuke the account with the ID 000000000000 and the alias 'a
 Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - would remove
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - would remove
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - would remove
 eu-west-1 - EC2KeyPair - 'test' - would remove
 eu-west-1 - EC2NetworkACL - 'acl-6482a303' - cannot delete default VPC
@@ -141,7 +141,7 @@ eu-west-1 - EC2SecurityGroup - 'sg-220e945a' - cannot delete group 'default'
 eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - would remove
 eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
-eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - would remove
+eu-west-1 - EC2VPC - 'vpc-c6159fa1' - would remove
 eu-west-1 - IAMUserAccessKey - 'my-user -> ABCDEFGHIJKLMNOPQRST' - filtered by config
 eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - filtered by config
 eu-west-1 - IAMUser - 'my-user' - filtered by config
@@ -151,7 +151,7 @@ Do you really want to nuke these resources on the account with the ID 0000000000
 Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
 	status code: 400, request id: 9665c066-6bb1-4643-9071-f03481f80d4e
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - triggered remove
 eu-west-1 - EC2KeyPair - 'test' - triggered remove
@@ -163,12 +163,12 @@ eu-west-1 - EC2Subnet - 'subnet-154d844e' - DependencyViolation: The subnet 'sub
 	status code: 400, request id: 237186aa-b035-4f64-a6e3-518bed64e240
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - VolumeInUse: Volume vol-0ddfb15461a00c3e2 is currently attached to i-01b489457a60298dd
 	status code: 400, request id: f88ff792-a17f-4fdd-9219-78a937a8d058
-eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
+eu-west-1 - EC2VPC - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
 eu-west-1 - S3Object - 's3://rebuy-terraform-state-138758637120/run-terraform.lock' - triggered remove
 
 Removal requested: 2 waiting, 6 failed, 5 skipped, 0 finished
 
-eu-west-1 - EC2DhcpOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
 	status code: 400, request id: d85d26e8-9f6f-42f0-811a-3b05471b0254
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - waiting
 eu-west-1 - EC2KeyPair - 'test' - removed
@@ -180,7 +180,7 @@ eu-west-1 - EC2Subnet - 'subnet-154d844e' - DependencyViolation: The subnet 'sub
 	status code: 400, request id: ba0649ba-3be8-41ee-ae0f-6b74a1f0a873
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - VolumeInUse: Volume vol-0ddfb15461a00c3e2 is currently attached to i-01b489457a60298dd
 	status code: 400, request id: 9ac3eac5-f1ef-4337-a780-228295a7ebc7
-eu-west-1 - EC2Vpc - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
+eu-west-1 - EC2VPC - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
 	status code: 400, request id: 89f870e9-1ffa-42be-9f73-76c29f088e1a
 
 Removal requested: 1 waiting, 6 failed, 5 skipped, 1 finished

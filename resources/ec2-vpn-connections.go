@@ -6,13 +6,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type EC2VpnConnection struct {
+type EC2VPNConnection struct {
 	svc   *ec2.EC2
 	id    string
 	state string
 }
 
-func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
+func (n *EC2Nuke) ListVPNConnections() ([]Resource, error) {
 	params := &ec2.DescribeVpnConnectionsInput{}
 	resp, err := n.Service.DescribeVpnConnections(params)
 	if err != nil {
@@ -21,7 +21,7 @@ func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.VpnConnections {
-		resources = append(resources, &EC2VpnConnection{
+		resources = append(resources, &EC2VPNConnection{
 			svc:   n.Service,
 			id:    *out.VpnConnectionId,
 			state: *out.State,
@@ -31,14 +31,14 @@ func (n *EC2Nuke) ListVpnConnections() ([]Resource, error) {
 	return resources, nil
 }
 
-func (v *EC2VpnConnection) Filter() error {
+func (v *EC2VPNConnection) Filter() error {
 	if v.state == "deleted" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
 }
 
-func (v *EC2VpnConnection) Remove() error {
+func (v *EC2VPNConnection) Remove() error {
 	params := &ec2.DeleteVpnConnectionInput{
 		VpnConnectionId: &v.id,
 	}
@@ -51,6 +51,6 @@ func (v *EC2VpnConnection) Remove() error {
 	return nil
 }
 
-func (v *EC2VpnConnection) String() string {
+func (v *EC2VPNConnection) String() string {
 	return v.id
 }
