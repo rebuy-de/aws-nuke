@@ -94,7 +94,7 @@ func GetListers(sess *session.Session) []ResourceLister {
 		kms.ListAliases,
 		kms.ListKeys,
 		lambda.ListFunctions,
-		rds.ListClusers,
+		rds.ListClusters,
 		rds.ListInstances,
 		rds.ListClusterParameterGroups,
 		rds.ListParameterGroups,
