@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudtrail"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/efs"
@@ -70,6 +71,10 @@ type LambdaNuke struct {
 
 type RDSNuke struct {
 	Service *rds.RDS
+}
+
+type DynamoDBNuke struct {
+	Service *dynamodb.DynamoDB
 }
 
 type Route53Nuke struct {
