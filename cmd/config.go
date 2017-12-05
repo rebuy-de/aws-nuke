@@ -74,6 +74,7 @@ func (c *NukeConfig) resolveDeprecations() error {
 		"IamUserAccessKeys":             "IAMUserAccessKey",
 		"IamUserGroupAttachement":       "IAMUserGroupAttachment",
 		"IamUserPolicyAttachement":      "IAMUserPolicyAttachment",
+		"RDSCluster":                    "RDSDBCluster",
 	}
 
 	for _, a := range c.Accounts {

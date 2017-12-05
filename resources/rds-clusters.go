@@ -5,12 +5,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
-type RDSCluster struct {
+type RDSDBCluster struct {
 	svc *rds.RDS
 	id  string
 }
 
-func (n *RDSNuke) ListClusers() ([]Resource, error) {
+func (n *RDSNuke) ListClusters() ([]Resource, error) {
 	params := &rds.DescribeDBClustersInput{}
 	resp, err := n.Service.DescribeDBClusters(params)
 	if err != nil {
@@ -19,7 +19,7 @@ func (n *RDSNuke) ListClusers() ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBClusters {
-		resources = append(resources, &RDSCluster{
+		resources = append(resources, &RDSDBCluster{
 			svc: n.Service,
 			id:  *instance.DBClusterIdentifier,
 		})
@@ -28,7 +28,7 @@ func (n *RDSNuke) ListClusers() ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *RDSCluster) Remove() error {
+func (i *RDSDBCluster) Remove() error {
 	params := &rds.DeleteDBClusterInput{
 		DBClusterIdentifier: &i.id,
 		SkipFinalSnapshot:   aws.Bool(true),
@@ -42,6 +42,6 @@ func (i *RDSCluster) Remove() error {
 	return nil
 }
 
-func (i *RDSCluster) String() string {
+func (i *RDSDBCluster) String() string {
 	return i.id
 }
