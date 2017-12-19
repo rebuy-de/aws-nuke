@@ -5,77 +5,34 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
 type Nuke struct {
-	Parameters NukeParameters
-	Config     *NukeConfig
+	Parameters  NukeParameters
+	Credentials awsutil.Credentials
+	Config      *NukeConfig
 
 	accountConfig NukeConfigAccount
 	accountID     string
 	accountAlias  string
-	sessions      map[string]*session.Session
 
 	ForceSleep time.Duration
 
 	items Queue
 }
 
-func NewNuke(params NukeParameters) *Nuke {
+func NewNuke(params NukeParameters, creds awsutil.Credentials) *Nuke {
 	n := Nuke{
-		Parameters: params,
-		ForceSleep: 15 * time.Second,
+		Parameters:  params,
+		Credentials: creds,
+		ForceSleep:  15 * time.Second,
 	}
 
 	return &n
-}
-
-func (n *Nuke) StartSession() error {
-	n.sessions = make(map[string]*session.Session)
-	for _, region := range n.Config.Regions {
-		if n.Parameters.hasProfile() {
-			var err error
-			n.sessions[region], err = session.NewSessionWithOptions(session.Options{
-				Config: aws.Config{
-					Region: aws.String(region),
-				},
-				SharedConfigState: session.SharedConfigEnable,
-				Profile:           n.Parameters.Profile,
-			})
-
-			if err != nil {
-				return err
-			}
-		}
-
-		if n.Parameters.hasKeys() {
-			n.sessions[region] = session.Must(session.NewSessionWithOptions(session.Options{
-				Config: aws.Config{
-					Region: aws.String(region),
-					Credentials: credentials.NewStaticCredentials(
-						n.Parameters.AccessKeyID,
-						n.Parameters.SecretAccessKey,
-						"",
-					)}}))
-
-			if n.sessions[region] == nil {
-				return fmt.Errorf("Unable to create session with key ID '%s'.", n.Parameters.AccessKeyID)
-			}
-
-		}
-
-	}
-
-	if len(n.sessions) < 1 {
-		return fmt.Errorf("You have to specify a profile or credentials for at least one region.")
-	}
-	return nil
 }
 
 func (n *Nuke) Run() error {
@@ -156,7 +113,11 @@ func (n *Nuke) Run() error {
 }
 
 func (n *Nuke) ValidateAccount() error {
-	sess := n.sessions[n.Config.Regions[0]]
+	sess, err := n.Credentials.Session(n.Config.Regions[0])
+	if err != nil {
+		return err
+	}
+
 	identOutput, err := sts.New(sess).GetCallerIdentity(nil)
 	if err != nil {
 		return err
@@ -210,7 +171,11 @@ func (n *Nuke) Scan() error {
 	queue := make(Queue, 0)
 
 	for _, region := range n.Config.Regions {
-		sess := n.sessions[region]
+		sess, err := n.Credentials.Session(region)
+		if err != nil {
+			return err
+		}
+
 		items := Scan(sess)
 		for item := range items {
 			if !n.Parameters.WantsTarget(item.Service) {
