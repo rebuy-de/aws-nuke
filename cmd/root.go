@@ -1,9 +1,15 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
+	"github.com/spf13/cobra"
+)
 
 func NewRootCommand() *cobra.Command {
-	params := NukeParameters{}
+	var (
+		params NukeParameters
+		creds  awsutil.Credentials
+	)
 
 	command := &cobra.Command{
 		Use:   "aws-nuke",
@@ -19,16 +25,16 @@ func NewRootCommand() *cobra.Command {
 			return err
 		}
 
-		command.SilenceUsage = true
-
-		n := NewNuke(params)
-
-		n.Config, err = LoadConfig(n.Parameters.ConfigPath)
+		err = creds.Validate()
 		if err != nil {
 			return err
 		}
 
-		err = n.StartSession()
+		command.SilenceUsage = true
+
+		n := NewNuke(params, creds)
+
+		n.Config, err = LoadConfig(n.Parameters.ConfigPath)
 		if err != nil {
 			return err
 		}
@@ -40,13 +46,13 @@ func NewRootCommand() *cobra.Command {
 		&params.ConfigPath, "config", "c", "",
 		"path to config (required)")
 	command.PersistentFlags().StringVar(
-		&params.Profile, "profile", "",
+		&creds.Profile, "profile", "",
 		"profile name to nuke")
 	command.PersistentFlags().StringVar(
-		&params.AccessKeyID, "access-key-id", "",
+		&creds.AccessKeyID, "access-key-id", "",
 		"AWS access-key-id")
 	command.PersistentFlags().StringVar(
-		&params.SecretAccessKey, "secret-access-key", "",
+		&creds.SecretAccessKey, "secret-access-key", "",
 		"AWS secret-access-key")
 	command.PersistentFlags().StringSliceVarP(
 		&params.Targets, "target", "t", []string{},
