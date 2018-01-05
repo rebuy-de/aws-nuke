@@ -32,7 +32,12 @@ func NewRootCommand() *cobra.Command {
 
 		command.SilenceUsage = true
 
-		n := NewNuke(params, creds)
+		account, err := awsutil.NewAccount(creds)
+		if err != nil {
+			return err
+		}
+
+		n := NewNuke(params, *account)
 
 		n.Config, err = LoadConfig(n.Parameters.ConfigPath)
 		if err != nil {

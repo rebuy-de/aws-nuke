@@ -5,31 +5,27 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
 type Nuke struct {
-	Parameters  NukeParameters
-	Credentials awsutil.Credentials
-	Config      *NukeConfig
+	Parameters NukeParameters
+	Account    awsutil.Account
+	Config     *NukeConfig
 
 	accountConfig NukeConfigAccount
-	accountID     string
-	accountAlias  string
 
 	ForceSleep time.Duration
 
 	items Queue
 }
 
-func NewNuke(params NukeParameters, creds awsutil.Credentials) *Nuke {
+func NewNuke(params NukeParameters, account awsutil.Account) *Nuke {
 	n := Nuke{
-		Parameters:  params,
-		Credentials: creds,
-		ForceSleep:  15 * time.Second,
+		Parameters: params,
+		Account:    account,
+		ForceSleep: 15 * time.Second,
 	}
 
 	return &n
@@ -46,13 +42,13 @@ func (n *Nuke) Run() error {
 	}
 
 	fmt.Printf("Do you really want to nuke the account with "+
-		"the ID %s and the alias '%s'?\n", n.accountID, n.accountAlias)
+		"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
 	if n.Parameters.Force {
 		fmt.Printf("Waiting %v before continuing.\n", n.ForceSleep)
 		time.Sleep(n.ForceSleep)
 	} else {
 		fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
-		err = Prompt(n.accountAlias)
+		err = Prompt(n.Account.Alias())
 		if err != nil {
 			return err
 		}
@@ -74,13 +70,13 @@ func (n *Nuke) Run() error {
 	}
 
 	fmt.Printf("Do you really want to nuke these resources on the account with "+
-		"the ID %s and the alias '%s'?\n", n.accountID, n.accountAlias)
+		"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
 	if n.Parameters.Force {
 		fmt.Printf("Waiting %v before continuing.\n", n.ForceSleep)
 		time.Sleep(n.ForceSleep)
 	} else {
 		fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
-		err = Prompt(n.accountAlias)
+		err = Prompt(n.Account.Alias())
 		if err != nil {
 			return err
 		}
@@ -113,23 +109,10 @@ func (n *Nuke) Run() error {
 }
 
 func (n *Nuke) ValidateAccount() error {
-	sess, err := n.Credentials.Session(n.Config.Regions[0])
-	if err != nil {
-		return err
-	}
-
-	identOutput, err := sts.New(sess).GetCallerIdentity(nil)
-	if err != nil {
-		return err
-	}
-
-	aliasesOutput, err := iam.New(sess).ListAccountAliases(nil)
-	if err != nil {
-		return err
-	}
-
-	accountID := *identOutput.Account
-	aliases := aliasesOutput.AccountAliases
+	var (
+		accountID = n.Account.ID()
+		aliases   = n.Account.Aliases()
+	)
 
 	if !n.Config.HasBlacklist() {
 		return fmt.Errorf("The config file contains an empty blacklist. " +
@@ -149,9 +132,9 @@ func (n *Nuke) ValidateAccount() error {
 	}
 
 	for _, alias := range aliases {
-		if strings.Contains(strings.ToLower(*alias), "prod") {
+		if strings.Contains(strings.ToLower(alias), "prod") {
 			return fmt.Errorf("You are trying to nuke an account with the alias '%s', "+
-				"but it has the substring 'prod' in it. Aborting.", *aliases[0])
+				"but it has the substring 'prod' in it. Aborting.", aliases[0])
 		}
 	}
 
@@ -161,8 +144,6 @@ func (n *Nuke) ValidateAccount() error {
 	}
 
 	n.accountConfig = n.Config.Accounts[accountID]
-	n.accountID = accountID
-	n.accountAlias = *aliases[0]
 
 	return nil
 }
@@ -171,7 +152,7 @@ func (n *Nuke) Scan() error {
 	queue := make(Queue, 0)
 
 	for _, region := range n.Config.Regions {
-		sess, err := n.Credentials.Session(region)
+		sess, err := n.Account.Session(region)
 		if err != nil {
 			return err
 		}
