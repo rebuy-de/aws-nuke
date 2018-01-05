@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
@@ -36,10 +35,11 @@ func (n *Nuke) Run() error {
 
 	fmt.Printf("aws-nuke version %s - %s - %s\n\n", BuildVersion, BuildDate, BuildHash)
 
-	err = n.ValidateAccount()
+	accountConfig, err := n.Config.ValidateAccount(n.Account.ID(), n.Account.Aliases())
 	if err != nil {
 		return err
 	}
+	n.accountConfig = *accountConfig
 
 	fmt.Printf("Do you really want to nuke the account with "+
 		"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
@@ -104,46 +104,6 @@ func (n *Nuke) Run() error {
 
 	fmt.Printf("Nuke complete: %d failed, %d skipped, %d finished.\n\n",
 		n.items.Count(ItemStateFailed), n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished))
-
-	return nil
-}
-
-func (n *Nuke) ValidateAccount() error {
-	var (
-		accountID = n.Account.ID()
-		aliases   = n.Account.Aliases()
-	)
-
-	if !n.Config.HasBlacklist() {
-		return fmt.Errorf("The config file contains an empty blacklist. " +
-			"For safety reasons you need to specify at least one account ID. " +
-			"This should be your production account.")
-	}
-
-	if n.Config.InBlacklist(accountID) {
-		return fmt.Errorf("You are trying to nuke the account with the ID %s, "+
-			"but it is blacklisted. Aborting.", accountID)
-	}
-
-	if len(aliases) == 0 {
-		return fmt.Errorf("The specified account doesn't have an alias. " +
-			"For safety reasons you need to specify an account alias. " +
-			"Your production account should contain the term 'prod'.")
-	}
-
-	for _, alias := range aliases {
-		if strings.Contains(strings.ToLower(alias), "prod") {
-			return fmt.Errorf("You are trying to nuke an account with the alias '%s', "+
-				"but it has the substring 'prod' in it. Aborting.", aliases[0])
-		}
-	}
-
-	if _, ok := n.Config.Accounts[accountID]; !ok {
-		return fmt.Errorf("Your account ID '%s' isn't listed in the config. "+
-			"Aborting.", accountID)
-	}
-
-	n.accountConfig = n.Config.Accounts[accountID]
 
 	return nil
 }
