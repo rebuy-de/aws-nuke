@@ -53,38 +53,37 @@ func (c *NukeConfig) InBlacklist(searchID string) bool {
 	return false
 }
 
-func (c *NukeConfig) ValidateAccount(accountID string, aliases []string) (*NukeConfigAccount, error) {
+func (c *NukeConfig) ValidateAccount(accountID string, aliases []string) error {
 	if !c.HasBlacklist() {
-		return nil, fmt.Errorf("The config file contains an empty blacklist. " +
+		return fmt.Errorf("The config file contains an empty blacklist. " +
 			"For safety reasons you need to specify at least one account ID. " +
 			"This should be your production account.")
 	}
 
 	if c.InBlacklist(accountID) {
-		return nil, fmt.Errorf("You are trying to nuke the account with the ID %s, "+
+		return fmt.Errorf("You are trying to nuke the account with the ID %s, "+
 			"but it is blacklisted. Aborting.", accountID)
 	}
 
 	if len(aliases) == 0 {
-		return nil, fmt.Errorf("The specified account doesn't have an alias. " +
+		return fmt.Errorf("The specified account doesn't have an alias. " +
 			"For safety reasons you need to specify an account alias. " +
 			"Your production account should contain the term 'prod'.")
 	}
 
 	for _, alias := range aliases {
 		if strings.Contains(strings.ToLower(alias), "prod") {
-			return nil, fmt.Errorf("You are trying to nuke an account with the alias '%s', "+
+			return fmt.Errorf("You are trying to nuke an account with the alias '%s', "+
 				"but it has the substring 'prod' in it. Aborting.", alias)
 		}
 	}
 
 	if _, ok := c.Accounts[accountID]; !ok {
-		return nil, fmt.Errorf("Your account ID '%s' isn't listed in the config. "+
+		return fmt.Errorf("Your account ID '%s' isn't listed in the config. "+
 			"Aborting.", accountID)
 	}
 
-	ac := c.Accounts[accountID]
-	return &ac, nil
+	return nil
 }
 
 func (c *NukeConfig) resolveDeprecations() error {

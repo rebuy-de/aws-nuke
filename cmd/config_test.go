@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path"
 	"reflect"
 	"strings"
 	"testing"
@@ -46,12 +44,7 @@ func TestConfigBlacklist(t *testing.T) {
 }
 
 func TestLoadExampleConfig(t *testing.T) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	config, err := LoadConfig(path.Join(cwd, "..", "config", "example.yaml"))
+	config, err := LoadConfig("test-fixtures/example.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,12 +138,7 @@ func TestResolveDeprecations(t *testing.T) {
 }
 
 func TestConfigValidation(t *testing.T) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	config, err := LoadConfig(path.Join(cwd, "..", "config", "example.yaml"))
+	config, err := LoadConfig("test-fixtures/example.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +159,7 @@ func TestConfigValidation(t *testing.T) {
 	for i, tc := range cases {
 		name := fmt.Sprintf("%d_%s/%v/%t", i, tc.ID, tc.Aliases, tc.ShouldFail)
 		t.Run(name, func(t *testing.T) {
-			_, err := config.ValidateAccount(tc.ID, tc.Aliases)
+			err := config.ValidateAccount(tc.ID, tc.Aliases)
 			if tc.ShouldFail && err == nil {
 				t.Fatal("Expected an error but didn't get one.")
 			}

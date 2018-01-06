@@ -13,8 +13,6 @@ type Nuke struct {
 	Account    awsutil.Account
 	Config     *NukeConfig
 
-	accountConfig NukeConfigAccount
-
 	ForceSleep time.Duration
 
 	items Queue
@@ -35,11 +33,10 @@ func (n *Nuke) Run() error {
 
 	fmt.Printf("aws-nuke version %s - %s - %s\n\n", BuildVersion, BuildDate, BuildHash)
 
-	accountConfig, err := n.Config.ValidateAccount(n.Account.ID(), n.Account.Aliases())
+	err = n.Config.ValidateAccount(n.Account.ID(), n.Account.Aliases())
 	if err != nil {
 		return err
 	}
-	n.accountConfig = *accountConfig
 
 	fmt.Printf("Do you really want to nuke the account with "+
 		"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
@@ -138,6 +135,8 @@ func (n *Nuke) Scan() error {
 }
 
 func (n *Nuke) Filter(item *Item) {
+	accountConfig := n.Config.Accounts[n.Account.ID()]
+
 	checker, ok := item.Resource.(resources.Filter)
 	if ok {
 		err := checker.Filter()
@@ -148,7 +147,7 @@ func (n *Nuke) Filter(item *Item) {
 		}
 	}
 
-	filters, ok := n.accountConfig.Filters[item.Service]
+	filters, ok := accountConfig.Filters[item.Service]
 	if !ok {
 		return
 	}
