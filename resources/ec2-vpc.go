@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2VPC struct {
 	svc *ec2.EC2
 	id  *string
 }
 
-func (n *EC2Nuke) ListVPCs() ([]Resource, error) {
-	resp, err := n.Service.DescribeVpcs(nil)
+func init() {
+	register("EC2VPC", ListEC2VPCs)
+}
+
+func ListEC2VPCs(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeVpcs(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +25,7 @@ func (n *EC2Nuke) ListVPCs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, vpc := range resp.Vpcs {
 		resources = append(resources, &EC2VPC{
-			svc: n.Service,
+			svc: svc,
 			id:  vpc.VpcId,
 		})
 	}

@@ -15,30 +15,32 @@ const (
 
 type Item struct {
 	Resource resources.Resource
-
-	Service string
-	Lister  resources.ResourceLister
-
-	State  ItemState
-	Region string
-	Reason string
+	State    ItemState
+	Region   Region
+	Reason   string
+	Type     string
 }
 
 func (i *Item) Print() {
 	switch i.State {
 	case ItemStateNew:
-		Log(i.Region, i.Resource, ReasonWaitPending, "would remove")
+		Log(i.Region, i.Type, i.Resource, ReasonWaitPending, "would remove")
 	case ItemStatePending:
-		Log(i.Region, i.Resource, ReasonWaitPending, "triggered remove")
+		Log(i.Region, i.Type, i.Resource, ReasonWaitPending, "triggered remove")
 	case ItemStateWaiting:
-		Log(i.Region, i.Resource, ReasonWaitPending, "waiting")
+		Log(i.Region, i.Type, i.Resource, ReasonWaitPending, "waiting")
 	case ItemStateFailed:
-		Log(i.Region, i.Resource, ReasonError, i.Reason)
+		Log(i.Region, i.Type, i.Resource, ReasonError, i.Reason)
 	case ItemStateFiltered:
-		Log(i.Region, i.Resource, ReasonSkip, i.Reason)
+		Log(i.Region, i.Type, i.Resource, ReasonSkip, i.Reason)
 	case ItemStateFinished:
-		Log(i.Region, i.Resource, ReasonSuccess, "removed")
+		Log(i.Region, i.Type, i.Resource, ReasonSuccess, "removed")
 	}
+}
+
+func (i *Item) List() ([]resources.Resource, error) {
+	listers := resources.GetListers()
+	return listers[i.Type](i.Region.Session)
 }
 
 type Queue []*Item

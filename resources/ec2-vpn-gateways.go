@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -12,9 +13,15 @@ type EC2VPNGateway struct {
 	state string
 }
 
-func (n *EC2Nuke) ListVPNGateways() ([]Resource, error) {
+func init() {
+	register("EC2VPNGateway", ListEC2VPNGateways)
+}
+
+func ListEC2VPNGateways(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
 	params := &ec2.DescribeVpnGatewaysInput{}
-	resp, err := n.Service.DescribeVpnGateways(params)
+	resp, err := svc.DescribeVpnGateways(params)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +29,7 @@ func (n *EC2Nuke) ListVPNGateways() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.VpnGateways {
 		resources = append(resources, &EC2VPNGateway{
-			svc:   n.Service,
+			svc:   svc,
 			id:    *out.VpnGatewayId,
 			state: *out.State,
 		})

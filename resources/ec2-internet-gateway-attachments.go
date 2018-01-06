@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -13,8 +14,14 @@ type EC2InternetGatewayAttachment struct {
 	igwId *string
 }
 
-func (n *EC2Nuke) ListInternetGatewayAttachments() ([]Resource, error) {
-	resp, err := n.Service.DescribeVpcs(nil)
+func init() {
+	register("EC2InternetGatewayAttachment", ListEC2InternetGatewayAttachments)
+}
+
+func ListEC2InternetGatewayAttachments(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeVpcs(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -30,14 +37,14 @@ func (n *EC2Nuke) ListInternetGatewayAttachments() ([]Resource, error) {
 			},
 		}
 
-		resp, err := n.Service.DescribeInternetGateways(params)
+		resp, err := svc.DescribeInternetGateways(params)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, out := range resp.InternetGateways {
 			resources = append(resources, &EC2InternetGatewayAttachment{
-				svc:   n.Service,
+				svc:   svc,
 				vpcId: vpc.VpcId,
 				igwId: out.InternetGatewayId,
 			})

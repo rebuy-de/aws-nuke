@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -13,15 +14,21 @@ type IAMGroupPolicyAttachment struct {
 	roleName   string
 }
 
-func (n *IAMNuke) ListGroupPolicyAttachments() ([]Resource, error) {
-	resp, err := n.Service.ListGroups(nil)
+func init() {
+	register("IAMGroupPolicyAttachment", ListIAMGroupPolicyAttachments)
+}
+
+func ListIAMGroupPolicyAttachments(sess *session.Session) ([]Resource, error) {
+	svc := iam.New(sess)
+
+	resp, err := svc.ListGroups(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	resources := make([]Resource, 0)
 	for _, role := range resp.Groups {
-		resp, err := n.Service.ListAttachedGroupPolicies(
+		resp, err := svc.ListAttachedGroupPolicies(
 			&iam.ListAttachedGroupPoliciesInput{
 				GroupName: role.GroupName,
 			})
@@ -31,7 +38,7 @@ func (n *IAMNuke) ListGroupPolicyAttachments() ([]Resource, error) {
 
 		for _, pol := range resp.AttachedPolicies {
 			resources = append(resources, &IAMGroupPolicyAttachment{
-				svc:        n.Service,
+				svc:        svc,
 				policyArn:  *pol.PolicyArn,
 				policyName: *pol.PolicyName,
 				roleName:   *role.GroupName,

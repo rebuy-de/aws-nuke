@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
 )
 
@@ -12,7 +13,13 @@ type ECRRepository struct {
 	name *string
 }
 
-func (n *ECRNuke) ListRepos() ([]Resource, error) {
+func init() {
+	register("ECRRepo", ListECRRepos)
+}
+
+func ListECRRepos(sess *session.Session) ([]Resource, error) {
+	svc := ecr.New(sess)
+
 	var params *ecr.DescribeRepositoriesInput
 	var resp *ecr.DescribeRepositoriesOutput
 	var resources []Resource
@@ -36,14 +43,14 @@ func (n *ECRNuke) ListRepos() ([]Resource, error) {
 				continue
 			}
 		}
-		resp, err = n.Service.DescribeRepositories(params)
+		resp, err = svc.DescribeRepositories(params)
 		if err != nil {
 			fmt.Printf("Error occured")
 			return nil, err
 		}
 		for _, repository := range resp.Repositories {
 			resources = append(resources, &ECRRepository{
-				svc:  n.Service,
+				svc:  svc,
 				name: repository.RepositoryName,
 			})
 		}

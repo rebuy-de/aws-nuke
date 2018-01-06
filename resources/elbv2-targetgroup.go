@@ -1,6 +1,9 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/elbv2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/elbv2"
+)
 
 type ELBv2TargetGroup struct {
 	svc  *elbv2.ELBV2
@@ -8,8 +11,14 @@ type ELBv2TargetGroup struct {
 	arn  *string
 }
 
-func (n *Elbv2Nuke) ListTargetGroups() ([]Resource, error) {
-	resp, err := n.Service.DescribeTargetGroups(nil)
+func init() {
+	register("Elbv2TargetGroup", ListElbv2TargetGroups)
+}
+
+func ListElbv2TargetGroups(sess *session.Session) ([]Resource, error) {
+	svc := elbv2.New(sess)
+
+	resp, err := svc.DescribeTargetGroups(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +26,7 @@ func (n *Elbv2Nuke) ListTargetGroups() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, elbv2TargetGroup := range resp.TargetGroups {
 		resources = append(resources, &ELBv2TargetGroup{
-			svc:  n.Service,
+			svc:  svc,
 			name: elbv2TargetGroup.TargetGroupName,
 			arn:  elbv2TargetGroup.TargetGroupArn,
 		})

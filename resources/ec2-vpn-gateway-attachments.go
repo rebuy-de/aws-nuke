@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -13,9 +14,14 @@ type EC2VPNGatewayAttachment struct {
 	state string
 }
 
-func (n *EC2Nuke) ListVPNGatewayAttachments() ([]Resource, error) {
+func init() {
+	register("EC2VPNGatewayAttachment", ListEC2VPNGatewayAttachments)
+}
 
-	resp, err := n.Service.DescribeVpnGateways(nil)
+func ListEC2VPNGatewayAttachments(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeVpnGateways(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +31,7 @@ func (n *EC2Nuke) ListVPNGatewayAttachments() ([]Resource, error) {
 	for _, vgw := range resp.VpnGateways {
 		for _, att := range vgw.VpcAttachments {
 			resources = append(resources, &EC2VPNGatewayAttachment{
-				svc:   n.Service,
+				svc:   svc,
 				vpcId: *att.VpcId,
 				vpnId: *vgw.VpnGatewayId,
 				state: *att.State,

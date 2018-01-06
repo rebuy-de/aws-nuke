@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -13,8 +14,14 @@ type IAMRole struct {
 	path string
 }
 
-func (n *IAMNuke) ListRoles() ([]Resource, error) {
-	resp, err := n.Service.ListRoles(nil)
+func init() {
+	register("IAMRole", ListIAMRoles)
+}
+
+func ListIAMRoles(sess *session.Session) ([]Resource, error) {
+	svc := iam.New(sess)
+
+	resp, err := svc.ListRoles(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +29,7 @@ func (n *IAMNuke) ListRoles() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Roles {
 		resources = append(resources, &IAMRole{
-			svc:  n.Service,
+			svc:  svc,
 			name: *out.RoleName,
 			path: *out.Path,
 		})

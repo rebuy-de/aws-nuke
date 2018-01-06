@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -12,9 +13,15 @@ type EC2SecurityGroup struct {
 	name *string
 }
 
-func (n *EC2Nuke) ListSecurityGroups() ([]Resource, error) {
+func init() {
+	register("EC2SecurityGroup", ListEC2SecurityGroups)
+}
+
+func ListEC2SecurityGroups(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
 	params := &ec2.DescribeSecurityGroupsInput{}
-	resp, err := n.Service.DescribeSecurityGroups(params)
+	resp, err := svc.DescribeSecurityGroups(params)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +29,7 @@ func (n *EC2Nuke) ListSecurityGroups() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, group := range resp.SecurityGroups {
 		resources = append(resources, &EC2SecurityGroup{
-			svc:  n.Service,
+			svc:  svc,
 			id:   group.GroupId,
 			name: group.GroupName,
 		})

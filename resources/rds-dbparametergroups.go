@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
@@ -13,16 +14,22 @@ type RDSDBParameterGroup struct {
 	name *string
 }
 
-func (n *RDSNuke) ListParameterGroups() ([]Resource, error) {
+func init() {
+	register("RDSParameterGroup", ListRDSParameterGroups)
+}
+
+func ListRDSParameterGroups(sess *session.Session) ([]Resource, error) {
+	svc := rds.New(sess)
+
 	params := &rds.DescribeDBParameterGroupsInput{MaxRecords: aws.Int64(100)}
-	resp, err := n.Service.DescribeDBParameterGroups(params)
+	resp, err := svc.DescribeDBParameterGroups(params)
 	if err != nil {
 		return nil, err
 	}
 	var resources []Resource
 	for _, parametergroup := range resp.DBParameterGroups {
 		resources = append(resources, &RDSDBParameterGroup{
-			svc:  n.Service,
+			svc:  svc,
 			name: parametergroup.DBParameterGroupName,
 		})
 

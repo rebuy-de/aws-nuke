@@ -8,14 +8,12 @@ import (
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
-func Scan(sess *session.Session) <-chan *Item {
+func Scan(region Region) <-chan *Item {
 	items := make(chan *Item, 100)
 
 	go func() {
-		listers := resources.GetListers(sess)
-
-		for _, lister := range listers {
-			r, err := safeLister(lister)
+		for category, lister := range resources.GetListers() {
+			rs, err := safeLister(region.Session, lister)
 			if err != nil {
 				LogErrorf(fmt.Errorf("\n=============\n\n"+
 					"Listing with %T failed:\n\n"+
@@ -26,13 +24,12 @@ func Scan(sess *session.Session) <-chan *Item {
 				continue
 			}
 
-			for _, r := range r {
+			for _, r := range rs {
 				items <- &Item{
-					Region:   *sess.Config.Region,
+					Region:   region,
 					Resource: r,
-					Service:  resources.GetCategory(r),
-					Lister:   lister,
 					State:    ItemStateNew,
+					Type:     category,
 				}
 			}
 		}
@@ -43,13 +40,13 @@ func Scan(sess *session.Session) <-chan *Item {
 	return items
 }
 
-func safeLister(lister resources.ResourceLister) (r []resources.Resource, err error) {
+func safeLister(sess *session.Session, lister resources.ResourceLister) (r []resources.Resource, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v\n\n%s", r.(error), string(debug.Stack()))
 		}
 	}()
 
-	r, err = lister()
+	r, err = lister(sess)
 	return
 }

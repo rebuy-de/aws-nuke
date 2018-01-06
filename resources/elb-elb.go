@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/elb"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/elb"
+)
 
 type ELB struct {
 	svc  *elb.ELB
 	name *string
 }
 
-func (n *ElbNuke) ListELBs() ([]Resource, error) {
-	resp, err := n.Service.DescribeLoadBalancers(nil)
+func init() {
+	register("ElbELB", ListElbELBs)
+}
+
+func ListElbELBs(sess *session.Session) ([]Resource, error) {
+	svc := elb.New(sess)
+
+	resp, err := svc.DescribeLoadBalancers(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +25,7 @@ func (n *ElbNuke) ListELBs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, elb := range resp.LoadBalancerDescriptions {
 		resources = append(resources, &ELB{
-			svc:  n.Service,
+			svc:  svc,
 			name: elb.LoadBalancerName,
 		})
 	}

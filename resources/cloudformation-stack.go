@@ -1,9 +1,18 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/cloudformation"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cloudformation"
+)
 
-func (n *CloudFormationNuke) ListStacks() ([]Resource, error) {
-	resp, err := n.Service.DescribeStacks(nil)
+func init() {
+	register("CloudFormationStack", ListCloudFormationStacks)
+}
+
+func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
+	svc := cloudformation.New(sess)
+
+	resp, err := svc.DescribeStacks(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -11,7 +20,7 @@ func (n *CloudFormationNuke) ListStacks() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, stack := range resp.Stacks {
 		resources = append(resources, &CloudFormationStack{
-			svc:  n.Service,
+			svc:  svc,
 			name: stack.StackName,
 		})
 	}

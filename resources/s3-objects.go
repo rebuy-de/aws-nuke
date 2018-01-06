@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -12,10 +13,16 @@ type S3Object struct {
 	key    string
 }
 
-func (n *S3Nuke) ListObjects() ([]Resource, error) {
+func init() {
+	register("S3Object", ListS3Objects)
+}
+
+func ListS3Objects(sess *session.Session) ([]Resource, error) {
+	svc := s3.New(sess)
+
 	resources := make([]Resource, 0)
 
-	buckets, err := n.DescribeBuckets()
+	buckets, err := DescribeS3Buckets(svc)
 	if err != nil {
 		return nil, err
 	}
@@ -25,14 +32,14 @@ func (n *S3Nuke) ListObjects() ([]Resource, error) {
 			Bucket: &name,
 		}
 
-		resp, err := n.Service.ListObjects(params)
+		resp, err := svc.ListObjects(params)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, out := range resp.Contents {
 			resources = append(resources, &S3Object{
-				svc:    n.Service,
+				svc:    svc,
 				bucket: name,
 				key:    *out.Key,
 			})

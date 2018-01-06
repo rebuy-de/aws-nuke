@@ -1,15 +1,24 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/lambda"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/lambda"
+)
 
 type LambdaFunction struct {
 	svc          *lambda.Lambda
 	functionName *string
 }
 
-func (n *LambdaNuke) ListFunctions() ([]Resource, error) {
+func init() {
+	register("LambdaFunction", ListLambdaFunctions)
+}
+
+func ListLambdaFunctions(sess *session.Session) ([]Resource, error) {
+	svc := lambda.New(sess)
+
 	params := &lambda.ListFunctionsInput{}
-	resp, err := n.Service.ListFunctions(params)
+	resp, err := svc.ListFunctions(params)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +26,7 @@ func (n *LambdaNuke) ListFunctions() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, function := range resp.Functions {
 		resources = append(resources, &LambdaFunction{
-			svc:          n.Service,
+			svc:          svc,
 			functionName: function.FunctionName,
 		})
 	}

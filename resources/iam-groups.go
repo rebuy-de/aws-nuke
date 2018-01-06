@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/iam"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/iam"
+)
 
 type IAMGroup struct {
 	svc  *iam.IAM
 	name string
 }
 
-func (n *IAMNuke) ListGroups() ([]Resource, error) {
-	resp, err := n.Service.ListGroups(nil)
+func init() {
+	register("IAMGroup", ListIAMGroups)
+}
+
+func ListIAMGroups(sess *session.Session) ([]Resource, error) {
+	svc := iam.New(sess)
+
+	resp, err := svc.ListGroups(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +25,7 @@ func (n *IAMNuke) ListGroups() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Groups {
 		resources = append(resources, &IAMGroup{
-			svc:  n.Service,
+			svc:  svc,
 			name: *out.GroupName,
 		})
 	}

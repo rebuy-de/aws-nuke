@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -13,8 +14,14 @@ type EC2SpotFleetRequest struct {
 	state string
 }
 
-func (n *EC2Nuke) ListSpotFleetRequests() ([]Resource, error) {
-	resp, err := n.Service.DescribeSpotFleetRequests(nil)
+func init() {
+	register("EC2SpotFleetRequest", ListEC2SpotFleetRequests)
+}
+
+func ListEC2SpotFleetRequests(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeSpotFleetRequests(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +29,7 @@ func (n *EC2Nuke) ListSpotFleetRequests() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, config := range resp.SpotFleetRequestConfigs {
 		resources = append(resources, &EC2SpotFleetRequest{
-			svc:   n.Service,
+			svc:   svc,
 			id:    *config.SpotFleetRequestId,
 			state: *config.SpotFleetRequestState,
 		})

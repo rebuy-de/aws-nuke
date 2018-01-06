@@ -2,12 +2,19 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 )
 
-func (n *AutoScalingNuke) ListGroups() ([]Resource, error) {
+func init() {
+	register("AutoScalingGroup", ListAutoscalingGroups)
+}
+
+func ListAutoscalingGroups(s *session.Session) ([]Resource, error) {
+	svc := autoscaling.New(s)
+
 	params := &autoscaling.DescribeAutoScalingGroupsInput{}
-	resp, err := n.Service.DescribeAutoScalingGroups(params)
+	resp, err := svc.DescribeAutoScalingGroups(params)
 	if err != nil {
 		return nil, err
 	}
@@ -15,7 +22,7 @@ func (n *AutoScalingNuke) ListGroups() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, asg := range resp.AutoScalingGroups {
 		resources = append(resources, &AutoScalingGroup{
-			svc:  n.Service,
+			svc:  svc,
 			name: asg.AutoScalingGroupName,
 		})
 	}

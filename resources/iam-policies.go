@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -10,8 +11,14 @@ type IAMPolicy struct {
 	arn string
 }
 
-func (n *IAMNuke) ListPolicies() ([]Resource, error) {
-	resp, err := n.Service.ListPolicies(&iam.ListPoliciesInput{
+func init() {
+	register("IAMPolicie", ListIAMPolicies)
+}
+
+func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
+	svc := iam.New(sess)
+
+	resp, err := svc.ListPolicies(&iam.ListPoliciesInput{
 		Scope: aws.String("Local"),
 	})
 	if err != nil {
@@ -21,7 +28,7 @@ func (n *IAMNuke) ListPolicies() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Policies {
 		resources = append(resources, &IAMPolicy{
-			svc: n.Service,
+			svc: svc,
 			arn: *out.Arn,
 		})
 	}

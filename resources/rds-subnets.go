@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
@@ -10,16 +11,22 @@ type RDSDBSubnetGroup struct {
 	name *string
 }
 
-func (n *RDSNuke) ListSubnetGroups() ([]Resource, error) {
+func init() {
+	register("RDSSubnetGroup", ListRDSSubnetGroups)
+}
+
+func ListRDSSubnetGroups(sess *session.Session) ([]Resource, error) {
+	svc := rds.New(sess)
+
 	params := &rds.DescribeDBSubnetGroupsInput{MaxRecords: aws.Int64(100)}
-	resp, err := n.Service.DescribeDBSubnetGroups(params)
+	resp, err := svc.DescribeDBSubnetGroups(params)
 	if err != nil {
 		return nil, err
 	}
 	var resources []Resource
 	for _, subnetGroup := range resp.DBSubnetGroups {
 		resources = append(resources, &RDSDBSubnetGroup{
-			svc:  n.Service,
+			svc:  svc,
 			name: subnetGroup.DBSubnetGroupName,
 		})
 

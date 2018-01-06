@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2KeyPair struct {
 	svc  *ec2.EC2
 	name string
 }
 
-func (n *EC2Nuke) ListKeyPairs() ([]Resource, error) {
-	resp, err := n.Service.DescribeKeyPairs(nil)
+func init() {
+	register("EC2KeyPair", ListEC2KeyPairs)
+}
+
+func ListEC2KeyPairs(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeKeyPairs(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +25,7 @@ func (n *EC2Nuke) ListKeyPairs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.KeyPairs {
 		resources = append(resources, &EC2KeyPair{
-			svc:  n.Service,
+			svc:  svc,
 			name: *out.KeyName,
 		})
 	}

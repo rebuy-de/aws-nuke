@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -12,9 +13,15 @@ type EC2CustomerGateway struct {
 	state string
 }
 
-func (n *EC2Nuke) ListCustomerGateways() ([]Resource, error) {
+func init() {
+	register("EC2CustomerGateway", ListEC2CustomerGateways)
+}
+
+func ListEC2CustomerGateways(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
 	params := &ec2.DescribeCustomerGatewaysInput{}
-	resp, err := n.Service.DescribeCustomerGateways(params)
+	resp, err := svc.DescribeCustomerGateways(params)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +29,7 @@ func (n *EC2Nuke) ListCustomerGateways() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.CustomerGateways {
 		resources = append(resources, &EC2CustomerGateway{
-			svc:   n.Service,
+			svc:   svc,
 			id:    *out.CustomerGatewayId,
 			state: *out.State,
 		})

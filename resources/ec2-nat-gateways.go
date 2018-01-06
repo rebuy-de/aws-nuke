@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -12,9 +13,15 @@ type EC2NATGateway struct {
 	state string
 }
 
-func (n *EC2Nuke) ListNATGateways() ([]Resource, error) {
+func init() {
+	register("EC2NATGateway", ListEC2NATGateways)
+}
+
+func ListEC2NATGateways(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
 	params := &ec2.DescribeNatGatewaysInput{}
-	resp, err := n.Service.DescribeNatGateways(params)
+	resp, err := svc.DescribeNatGateways(params)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +29,7 @@ func (n *EC2Nuke) ListNATGateways() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.NatGateways {
 		resources = append(resources, &EC2NATGateway{
-			svc:   n.Service,
+			svc:   svc,
 			id:    *out.NatGatewayId,
 			state: *out.State,
 		})

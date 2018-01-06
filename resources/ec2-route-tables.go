@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2RouteTable struct {
 	svc *ec2.EC2
 	id  *string
 }
 
-func (n *EC2Nuke) ListRouteTables() ([]Resource, error) {
-	resp, err := n.Service.DescribeRouteTables(nil)
+func init() {
+	register("EC2RouteTable", ListEC2RouteTables)
+}
+
+func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeRouteTables(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +25,7 @@ func (n *EC2Nuke) ListRouteTables() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.RouteTables {
 		resources = append(resources, &EC2RouteTable{
-			svc: n.Service,
+			svc: svc,
 			id:  out.RouteTableId,
 		})
 	}

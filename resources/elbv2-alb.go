@@ -1,6 +1,9 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/elbv2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/elbv2"
+)
 
 type ELBv2 struct {
 	svc  *elbv2.ELBV2
@@ -8,8 +11,14 @@ type ELBv2 struct {
 	arn  *string
 }
 
-func (n *Elbv2Nuke) ListELBs() ([]Resource, error) {
-	resp, err := n.Service.DescribeLoadBalancers(nil)
+func init() {
+	register("Elbv2ELB", ListElbv2ELBs)
+}
+
+func ListElbv2ELBs(sess *session.Session) ([]Resource, error) {
+	svc := elbv2.New(sess)
+
+	resp, err := svc.DescribeLoadBalancers(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +26,7 @@ func (n *Elbv2Nuke) ListELBs() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, elbv2 := range resp.LoadBalancers {
 		resources = append(resources, &ELBv2{
-			svc:  n.Service,
+			svc:  svc,
 			name: elbv2.LoadBalancerName,
 			arn:  elbv2.LoadBalancerArn,
 		})

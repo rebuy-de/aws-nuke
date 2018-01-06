@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
@@ -10,9 +11,15 @@ type RDSInstance struct {
 	id  string
 }
 
-func (n *RDSNuke) ListInstances() ([]Resource, error) {
+func init() {
+	register("RDSInstance", ListRDSInstances)
+}
+
+func ListRDSInstances(sess *session.Session) ([]Resource, error) {
+	svc := rds.New(sess)
+
 	params := &rds.DescribeDBInstancesInput{}
-	resp, err := n.Service.DescribeDBInstances(params)
+	resp, err := svc.DescribeDBInstances(params)
 	if err != nil {
 		return nil, err
 	}
@@ -20,7 +27,7 @@ func (n *RDSNuke) ListInstances() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBInstances {
 		resources = append(resources, &RDSInstance{
-			svc: n.Service,
+			svc: svc,
 			id:  *instance.DBInstanceIdentifier,
 		})
 	}

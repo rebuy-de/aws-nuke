@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2DHCPOption struct {
 	svc *ec2.EC2
 	id  *string
 }
 
-func (n *EC2Nuke) ListDHCPOptions() ([]Resource, error) {
-	resp, err := n.Service.DescribeDhcpOptions(nil)
+func init() {
+	register("EC2DHCPOption", ListEC2DHCPOptions)
+}
+
+func ListEC2DHCPOptions(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeDhcpOptions(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +26,7 @@ func (n *EC2Nuke) ListDHCPOptions() ([]Resource, error) {
 	for _, out := range resp.DhcpOptions {
 
 		resources = append(resources, &EC2DHCPOption{
-			svc: n.Service,
+			svc: svc,
 			id:  out.DhcpOptionsId,
 		})
 	}
