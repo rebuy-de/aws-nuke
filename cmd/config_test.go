@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"os"
-	"path"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -45,12 +44,7 @@ func TestConfigBlacklist(t *testing.T) {
 }
 
 func TestLoadExampleConfig(t *testing.T) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	config, err := LoadConfig(path.Join(cwd, "..", "config", "example.yaml"))
+	config, err := LoadConfig("test-fixtures/example.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,5 +134,38 @@ func TestResolveDeprecations(t *testing.T) {
 	err = invalidConfig.resolveDeprecations()
 	if err == nil || !strings.Contains(err.Error(), "using deprecated resource type and replacement") {
 		t.Fatal("invalid config did not cause correct error")
+	}
+}
+
+func TestConfigValidation(t *testing.T) {
+	config, err := LoadConfig("test-fixtures/example.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cases := []struct {
+		ID         string
+		Aliases    []string
+		ShouldFail bool
+	}{
+		{ID: "555133742", Aliases: []string{"staging"}, ShouldFail: false},
+		{ID: "1234567890", Aliases: []string{"staging"}, ShouldFail: true},
+		{ID: "1111111111", Aliases: []string{"staging"}, ShouldFail: true},
+		{ID: "555133742", Aliases: []string{"production"}, ShouldFail: true},
+		{ID: "555133742", Aliases: []string{}, ShouldFail: true},
+		{ID: "555133742", Aliases: []string{"staging", "prod"}, ShouldFail: true},
+	}
+
+	for i, tc := range cases {
+		name := fmt.Sprintf("%d_%s/%v/%t", i, tc.ID, tc.Aliases, tc.ShouldFail)
+		t.Run(name, func(t *testing.T) {
+			err := config.ValidateAccount(tc.ID, tc.Aliases)
+			if tc.ShouldFail && err == nil {
+				t.Fatal("Expected an error but didn't get one.")
+			}
+			if !tc.ShouldFail && err != nil {
+				t.Fatalf("Didn't excpect an error, but got one: %v", err)
+			}
+		})
 	}
 }
