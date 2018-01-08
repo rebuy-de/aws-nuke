@@ -12,7 +12,7 @@ func Scan(region Region) <-chan *Item {
 	items := make(chan *Item, 100)
 
 	go func() {
-		for category, lister := range resources.GetListers() {
+		for resourceType, lister := range resources.GetListers() {
 			rs, err := safeLister(region.Session, lister)
 			if err != nil {
 				LogErrorf(fmt.Errorf("\n=============\n\n"+
@@ -29,7 +29,7 @@ func Scan(region Region) <-chan *Item {
 					Region:   region,
 					Resource: r,
 					State:    ItemStateNew,
-					Type:     category,
+					Type:     resourceType,
 				}
 			}
 		}

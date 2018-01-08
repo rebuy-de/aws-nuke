@@ -1,6 +1,10 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/aws/session"
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/aws/session"
+)
 
 type ResourceListers map[string]ResourceLister
 
@@ -19,6 +23,11 @@ type Filter interface {
 var resourceListers = make(ResourceListers)
 
 func register(name string, lister ResourceLister) {
+	_, exists := resourceListers[name]
+	if exists {
+		panic(fmt.Sprintf("a resource with the name %s already exists", name))
+	}
+
 	resourceListers[name] = lister
 }
 
