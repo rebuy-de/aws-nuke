@@ -7,9 +7,10 @@ import (
 )
 
 type S3Object struct {
-	svc    *s3.S3
-	bucket string
-	key    string
+	svc       *s3.S3
+	bucket    string
+	key       string
+	versionID *string
 }
 
 func (n *S3Nuke) ListObjects() ([]Resource, error) {
@@ -21,21 +22,41 @@ func (n *S3Nuke) ListObjects() ([]Resource, error) {
 	}
 
 	for _, name := range buckets {
-		params := &s3.ListObjectsInput{
+		params := &s3.ListObjectVersionsInput{
 			Bucket: &name,
 		}
 
-		resp, err := n.Service.ListObjects(params)
-		if err != nil {
-			return nil, err
-		}
+		for {
+			resp, err := n.Service.ListObjectVersions(params)
+			if err != nil {
+				return nil, err
+			}
 
-		for _, out := range resp.Contents {
-			resources = append(resources, &S3Object{
-				svc:    n.Service,
-				bucket: name,
-				key:    *out.Key,
-			})
+			for _, out := range resp.Versions {
+				resources = append(resources, &S3Object{
+					svc:       n.Service,
+					bucket:    name,
+					key:       *out.Key,
+					versionID: out.VersionId,
+				})
+			}
+
+			for _, out := range resp.DeleteMarkers {
+				resources = append(resources, &S3Object{
+					svc:       n.Service,
+					bucket:    name,
+					key:       *out.Key,
+					versionID: out.VersionId,
+				})
+			}
+
+			// make sure to list all with more than 1000 objects
+			if *resp.IsTruncated {
+				params.KeyMarker = resp.NextKeyMarker
+				continue
+			}
+
+			break
 		}
 	}
 
@@ -57,5 +78,8 @@ func (e *S3Object) Remove() error {
 }
 
 func (e *S3Object) String() string {
+	if e.versionID != nil && *e.versionID != "null" {
+		return fmt.Sprintf("s3://%s/%s#%s", e.bucket, e.key, *e.versionID)
+	}
 	return fmt.Sprintf("s3://%s/%s", e.bucket, e.key)
 }
