@@ -4,6 +4,7 @@ import "github.com/rebuy-de/aws-nuke/resources"
 
 type ItemState int
 
+// States of Items based on the latest request to AWS.
 const (
 	ItemStateNew ItemState = iota
 	ItemStatePending
@@ -13,12 +14,16 @@ const (
 	ItemStateFinished
 )
 
+// An Item describes an actual AWS resource entity with the current state and
+// some metadata.
 type Item struct {
 	Resource resources.Resource
-	State    ItemState
-	Region   Region
-	Reason   string
-	Type     string
+
+	State  ItemState
+	Reason string
+
+	Region Region
+	Type   string
 }
 
 func (i *Item) Print() {
@@ -38,6 +43,7 @@ func (i *Item) Print() {
 	}
 }
 
+// List gets all resource items of the same resource type like the Item.
 func (i *Item) List() ([]resources.Resource, error) {
 	listers := resources.GetListers()
 	return listers[i.Type](i.Region.Session)
