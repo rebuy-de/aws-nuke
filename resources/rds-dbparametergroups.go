@@ -15,7 +15,7 @@ type RDSDBParameterGroup struct {
 }
 
 func init() {
-	register("RDSParameterGroup", ListRDSParameterGroups)
+	register("RDSDBParameterGroup", ListRDSParameterGroups)
 }
 
 func ListRDSParameterGroups(sess *session.Session) ([]Resource, error) {

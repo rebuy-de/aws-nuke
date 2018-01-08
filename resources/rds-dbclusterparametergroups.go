@@ -15,7 +15,7 @@ type RDSDBClusterParameterGroup struct {
 }
 
 func init() {
-	register("RDSClusterParameterGroup", ListRDSClusterParameterGroups)
+	register("RDSDBClusterParameterGroup", ListRDSClusterParameterGroups)
 }
 
 func ListRDSClusterParameterGroups(sess *session.Session) ([]Resource, error) {

@@ -12,10 +12,10 @@ type ELBv2TargetGroup struct {
 }
 
 func init() {
-	register("Elbv2TargetGroup", ListElbv2TargetGroups)
+	register("ELBv2TargetGroup", ListELBv2TargetGroups)
 }
 
-func ListElbv2TargetGroups(sess *session.Session) ([]Resource, error) {
+func ListELBv2TargetGroups(sess *session.Session) ([]Resource, error) {
 	svc := elbv2.New(sess)
 
 	resp, err := svc.DescribeTargetGroups(nil)

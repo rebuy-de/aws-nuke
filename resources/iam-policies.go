@@ -12,7 +12,7 @@ type IAMPolicy struct {
 }
 
 func init() {
-	register("IAMPolicie", ListIAMPolicies)
+	register("IAMPolicy", ListIAMPolicies)
 }
 
 func ListIAMPolicies(sess *session.Session) ([]Resource, error) {

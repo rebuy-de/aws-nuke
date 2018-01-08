@@ -15,7 +15,7 @@ type DynamoDBTableItem struct {
 }
 
 func init() {
-	register("DynamoDBItem", ListDynamoDBItems)
+	register("DynamoDBTableItem", ListDynamoDBItems)
 }
 
 func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {

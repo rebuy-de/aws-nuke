@@ -12,7 +12,7 @@ type EC2Address struct {
 }
 
 func init() {
-	register("EC2Addresse", ListEC2Addresses)
+	register("EC2Address", ListEC2Addresses)
 }
 
 func ListEC2Addresses(sess *session.Session) ([]Resource, error) {

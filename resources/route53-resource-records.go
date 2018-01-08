@@ -16,10 +16,10 @@ type Route53ResourceRecordSet struct {
 }
 
 func init() {
-	register("Route53ResourceRecord", ListRoute53ResourceRecords)
+	register("Route53ResourceRecordSet", ListRoute53ResourceRecordSets)
 }
 
-func ListRoute53ResourceRecords(sess *session.Session) ([]Resource, error) {
+func ListRoute53ResourceRecordSets(sess *session.Session) ([]Resource, error) {
 	svc := route53.New(sess)
 
 	resources := make([]Resource, 0)

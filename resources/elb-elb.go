@@ -5,16 +5,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 )
 
-type ELB struct {
+type ELBLoadBalancer struct {
 	svc  *elb.ELB
 	name *string
 }
 
 func init() {
-	register("ElbELB", ListElbELBs)
+	register("ELB", ListELBLoadBalancers)
 }
 
-func ListElbELBs(sess *session.Session) ([]Resource, error) {
+func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 	svc := elb.New(sess)
 
 	resp, err := svc.DescribeLoadBalancers(nil)
@@ -24,7 +24,7 @@ func ListElbELBs(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, elb := range resp.LoadBalancerDescriptions {
-		resources = append(resources, &ELB{
+		resources = append(resources, &ELBLoadBalancer{
 			svc:  svc,
 			name: elb.LoadBalancerName,
 		})
@@ -33,7 +33,7 @@ func ListElbELBs(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (e *ELB) Remove() error {
+func (e *ELBLoadBalancer) Remove() error {
 	params := &elb.DeleteLoadBalancerInput{
 		LoadBalancerName: e.name,
 	}
@@ -46,6 +46,6 @@ func (e *ELB) Remove() error {
 	return nil
 }
 
-func (e *ELB) String() string {
+func (e *ELBLoadBalancer) String() string {
 	return *e.name
 }

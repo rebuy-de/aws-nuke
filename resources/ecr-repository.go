@@ -14,10 +14,10 @@ type ECRRepository struct {
 }
 
 func init() {
-	register("ECRRepo", ListECRRepos)
+	register("ECRRepository", ListECRRepositories)
 }
 
-func ListECRRepos(sess *session.Session) ([]Resource, error) {
+func ListECRRepositories(sess *session.Session) ([]Resource, error) {
 	svc := ecr.New(sess)
 
 	var params *ecr.DescribeRepositoriesInput

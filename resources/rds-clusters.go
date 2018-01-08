@@ -12,7 +12,7 @@ type RDSDBCluster struct {
 }
 
 func init() {
-	register("RDSCluster", ListRDSClusters)
+	register("RDSDBCluster", ListRDSClusters)
 }
 
 func ListRDSClusters(sess *session.Session) ([]Resource, error) {

@@ -12,7 +12,7 @@ type RDSDBSubnetGroup struct {
 }
 
 func init() {
-	register("RDSSubnetGroup", ListRDSSubnetGroups)
+	register("RDSDBSubnetGroup", ListRDSSubnetGroups)
 }
 
 func ListRDSSubnetGroups(sess *session.Session) ([]Resource, error) {

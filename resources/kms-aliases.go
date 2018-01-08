@@ -14,7 +14,7 @@ type KMSAlias struct {
 }
 
 func init() {
-	register("KMSAliases", ListKMSAliases)
+	register("KMSAlias", ListKMSAliases)
 }
 
 func ListKMSAliases(sess *session.Session) ([]Resource, error) {
