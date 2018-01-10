@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 )
 
@@ -12,8 +13,14 @@ type KMSAlias struct {
 	name string
 }
 
-func (n *KMSNuke) ListAliases() ([]Resource, error) {
-	resp, err := n.Service.ListAliases(nil)
+func init() {
+	register("KMSAlias", ListKMSAliases)
+}
+
+func ListKMSAliases(sess *session.Session) ([]Resource, error) {
+	svc := kms.New(sess)
+
+	resp, err := svc.ListAliases(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +28,7 @@ func (n *KMSNuke) ListAliases() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, alias := range resp.Aliases {
 		resources = append(resources, &KMSAlias{
-			svc:  n.Service,
+			svc:  svc,
 			name: *alias.AliasName,
 		})
 	}

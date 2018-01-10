@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -13,15 +14,21 @@ type IAMUserAccessKey struct {
 	status      string
 }
 
-func (n *IAMNuke) ListUserAccessKeys() ([]Resource, error) {
-	resp, err := n.Service.ListUsers(nil)
+func init() {
+	register("IAMUserAccessKey", ListIAMUserAccessKeys)
+}
+
+func ListIAMUserAccessKeys(sess *session.Session) ([]Resource, error) {
+	svc := iam.New(sess)
+
+	resp, err := svc.ListUsers(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	resources := make([]Resource, 0)
 	for _, role := range resp.Users {
-		resp, err := n.Service.ListAccessKeys(
+		resp, err := svc.ListAccessKeys(
 			&iam.ListAccessKeysInput{
 				UserName: role.UserName,
 			})
@@ -31,7 +38,7 @@ func (n *IAMNuke) ListUserAccessKeys() ([]Resource, error) {
 
 		for _, meta := range resp.AccessKeyMetadata {
 			resources = append(resources, &IAMUserAccessKey{
-				svc:         n.Service,
+				svc:         svc,
 				accessKeyId: *meta.AccessKeyId,
 				userName:    *meta.UserName,
 				status:      *meta.Status,

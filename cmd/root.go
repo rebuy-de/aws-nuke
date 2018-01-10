@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"sort"
+
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
+	"github.com/rebuy-de/aws-nuke/resources"
 	"github.com/spf13/cobra"
 )
 
@@ -70,6 +74,28 @@ func NewRootCommand() *cobra.Command {
 		"don't ask for confirmation")
 
 	command.AddCommand(NewVersionCommand())
+	command.AddCommand(NewResourceTypesCommand())
 
 	return command
+}
+
+func NewResourceTypesCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "resource-types",
+		Short: "lists all available resource types",
+		Run: func(cmd *cobra.Command, args []string) {
+			types := []string{}
+			for resourceType, _ := range resources.GetListers() {
+				types = append(types, resourceType)
+			}
+
+			sort.Strings(types)
+
+			for _, resourceType := range types {
+				fmt.Println(resourceType)
+			}
+		},
+	}
+
+	return cmd
 }

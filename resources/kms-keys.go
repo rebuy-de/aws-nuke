@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 )
 
@@ -15,8 +16,14 @@ type KMSKey struct {
 	alias string
 }
 
-func (n *KMSNuke) ListKeys() ([]Resource, error) {
-	respAlias, err := n.Service.ListAliases(nil)
+func init() {
+	register("KMSKey", ListKMSKeys)
+}
+
+func ListKMSKeys(sess *session.Session) ([]Resource, error) {
+	svc := kms.New(sess)
+
+	respAlias, err := svc.ListAliases(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -28,14 +35,14 @@ func (n *KMSNuke) ListKeys() ([]Resource, error) {
 		}
 	}
 
-	resp, err := n.Service.ListKeys(nil)
+	resp, err := svc.ListKeys(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	resources := make([]Resource, 0)
 	for _, key := range resp.Keys {
-		resp, err := n.Service.DescribeKey(&kms.DescribeKeyInput{
+		resp, err := svc.DescribeKey(&kms.DescribeKeyInput{
 			KeyId: key.KeyId,
 		})
 		if err != nil {
@@ -43,7 +50,7 @@ func (n *KMSNuke) ListKeys() ([]Resource, error) {
 		}
 
 		resources = append(resources, &KMSKey{
-			svc:   n.Service,
+			svc:   svc,
 			id:    *resp.KeyMetadata.KeyId,
 			state: *resp.KeyMetadata.KeyState,
 			alias: aliasMap[*resp.KeyMetadata.KeyId],

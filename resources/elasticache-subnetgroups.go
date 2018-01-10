@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
 )
 
@@ -10,16 +11,22 @@ type ElasticacheSubnetGroup struct {
 	name *string
 }
 
-func (n *ElasticacheNuke) ListSubnetGroups() ([]Resource, error) {
+func init() {
+	register("ElasticacheSubnetGroup", ListElasticacheSubnetGroups)
+}
+
+func ListElasticacheSubnetGroups(sess *session.Session) ([]Resource, error) {
+	svc := elasticache.New(sess)
+
 	params := &elasticache.DescribeCacheSubnetGroupsInput{MaxRecords: aws.Int64(100)}
-	resp, err := n.Service.DescribeCacheSubnetGroups(params)
+	resp, err := svc.DescribeCacheSubnetGroups(params)
 	if err != nil {
 		return nil, err
 	}
 	var resources []Resource
 	for _, subnetGroup := range resp.CacheSubnetGroups {
 		resources = append(resources, &ElasticacheSubnetGroup{
-			svc:  n.Service,
+			svc:  svc,
 			name: subnetGroup.CacheSubnetGroupName,
 		})
 

@@ -3,18 +3,25 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
 )
 
-func (n *SNSNuke) ListTopics() ([]Resource, error) {
-	resp, err := n.Service.ListTopics(nil)
+func init() {
+	register("SNSTopic", ListSNSTopics)
+}
+
+func ListSNSTopics(sess *session.Session) ([]Resource, error) {
+	svc := sns.New(sess)
+
+	resp, err := svc.ListTopics(nil)
 	if err != nil {
 		return nil, err
 	}
 	resources := make([]Resource, 0)
 	for _, topic := range resp.Topics {
 		resources = append(resources, &SNSTopic{
-			svc: n.Service,
+			svc: svc,
 			id:  topic.TopicArn,
 		})
 	}

@@ -13,22 +13,27 @@ var (
 	ReasonRemoveTriggered = *color.New(color.FgGreen)
 	ReasonWaitPending     = *color.New(color.FgBlue)
 	ReasonSuccess         = *color.New(color.FgGreen)
-	ColorID               = *color.New(color.Bold)
-	Warning               = *color.New(color.FgYellow)
 )
 
-func Log(reg string, r resources.Resource, c color.Color, msg string) {
-	ColorID.Printf("%s", reg)
+var (
+	ColorRegion       = *color.New(color.Bold)
+	ColorResourceType = *color.New()
+	ColorResourceID   = *color.New(color.Bold)
+	ColorWarning      = *color.New(color.FgYellow)
+)
+
+func Log(region Region, resourceType string, r resources.Resource, c color.Color, msg string) {
+	ColorRegion.Printf("%s", region.Name)
 	fmt.Printf(" - ")
-	fmt.Print(resources.GetCategory(r))
+	ColorResourceType.Print(resourceType)
 	fmt.Printf(" - ")
-	ColorID.Printf("'%s'", r.String())
+	ColorResourceID.Printf("'%s'", r.String())
 	fmt.Printf(" - ")
 	c.Printf("%s\n", msg)
 }
 
 func LogWarn(s string, i ...interface{}) {
-	Warning.Printf("WARNING: "+s, i...)
+	ColorWarning.Printf("WARNING: "+s, i...)
 }
 
 func LogErrorf(err error) {

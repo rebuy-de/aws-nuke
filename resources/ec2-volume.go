@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2Volume struct {
 	svc *ec2.EC2
 	id  string
 }
 
-func (n *EC2Nuke) ListVolumes() ([]Resource, error) {
-	resp, err := n.Service.DescribeVolumes(nil)
+func init() {
+	register("EC2Volume", ListEC2Volumes)
+}
+
+func ListEC2Volumes(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeVolumes(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +25,7 @@ func (n *EC2Nuke) ListVolumes() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Volumes {
 		resources = append(resources, &EC2Volume{
-			svc: n.Service,
+			svc: svc,
 			id:  *out.VolumeId,
 		})
 	}

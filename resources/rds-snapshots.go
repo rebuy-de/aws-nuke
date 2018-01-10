@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
@@ -11,16 +12,22 @@ type RDSSnapshot struct {
 	status     *string
 }
 
-func (n *RDSNuke) ListSnapshots() ([]Resource, error) {
+func init() {
+	register("RDSSnapshot", ListRDSSnapshots)
+}
+
+func ListRDSSnapshots(sess *session.Session) ([]Resource, error) {
+	svc := rds.New(sess)
+
 	params := &rds.DescribeDBSnapshotsInput{MaxRecords: aws.Int64(100)}
-	resp, err := n.Service.DescribeDBSnapshots(params)
+	resp, err := svc.DescribeDBSnapshots(params)
 	if err != nil {
 		return nil, err
 	}
 	var resources []Resource
 	for _, snapshot := range resp.DBSnapshots {
 		resources = append(resources, &RDSSnapshot{
-			svc:        n.Service,
+			svc:        svc,
 			identifier: snapshot.DBSnapshotIdentifier,
 			status:     snapshot.Status,
 		})

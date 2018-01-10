@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
 
@@ -10,9 +11,15 @@ type RDSDBCluster struct {
 	id  string
 }
 
-func (n *RDSNuke) ListClusters() ([]Resource, error) {
+func init() {
+	register("RDSDBCluster", ListRDSClusters)
+}
+
+func ListRDSClusters(sess *session.Session) ([]Resource, error) {
+	svc := rds.New(sess)
+
 	params := &rds.DescribeDBClustersInput{}
-	resp, err := n.Service.DescribeDBClusters(params)
+	resp, err := svc.DescribeDBClusters(params)
 	if err != nil {
 		return nil, err
 	}
@@ -20,7 +27,7 @@ func (n *RDSNuke) ListClusters() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBClusters {
 		resources = append(resources, &RDSDBCluster{
-			svc: n.Service,
+			svc: svc,
 			id:  *instance.DBClusterIdentifier,
 		})
 	}

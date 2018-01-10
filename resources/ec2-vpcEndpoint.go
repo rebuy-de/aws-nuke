@@ -1,14 +1,23 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2VPCEndpoint struct {
 	svc *ec2.EC2
 	id  *string
 }
 
-func (n *EC2Nuke) ListVPCEndpoints() ([]Resource, error) {
-	resp, err := n.Service.DescribeVpcEndpoints(nil)
+func init() {
+	register("EC2VPCEndpoint", ListEC2VPCEndpoints)
+}
+
+func ListEC2VPCEndpoints(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
+	resp, err := svc.DescribeVpcEndpoints(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +25,7 @@ func (n *EC2Nuke) ListVPCEndpoints() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, vpcEndpoint := range resp.VpcEndpoints {
 		resources = append(resources, &EC2VPCEndpoint{
-			svc: n.Service,
+			svc: svc,
 			id:  vpcEndpoint.VpcEndpointId,
 		})
 	}

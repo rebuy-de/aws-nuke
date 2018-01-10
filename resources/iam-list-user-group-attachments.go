@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -12,15 +13,21 @@ type IAMUserGroupAttachment struct {
 	userName  string
 }
 
-func (n *IAMNuke) ListUserGroupAttachments() ([]Resource, error) {
-	resp, err := n.Service.ListUsers(nil)
+func init() {
+	register("IAMUserGroupAttachment", ListIAMUserGroupAttachments)
+}
+
+func ListIAMUserGroupAttachments(sess *session.Session) ([]Resource, error) {
+	svc := iam.New(sess)
+
+	resp, err := svc.ListUsers(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	resources := make([]Resource, 0)
 	for _, role := range resp.Users {
-		resp, err := n.Service.ListGroupsForUser(
+		resp, err := svc.ListGroupsForUser(
 			&iam.ListGroupsForUserInput{
 				UserName: role.UserName,
 			})
@@ -30,7 +37,7 @@ func (n *IAMNuke) ListUserGroupAttachments() ([]Resource, error) {
 
 		for _, grp := range resp.Groups {
 			resources = append(resources, &IAMUserGroupAttachment{
-				svc:       n.Service,
+				svc:       svc,
 				groupName: *grp.GroupName,
 				userName:  *role.UserName,
 			})

@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 )
 
@@ -12,8 +13,14 @@ type IAMInstanceProfileRole struct {
 	profile string
 }
 
-func (n *IAMNuke) ListInstanceProfileRoles() ([]Resource, error) {
-	resp, err := n.Service.ListInstanceProfiles(nil)
+func init() {
+	register("IAMInstanceProfileRole", ListIAMInstanceProfileRoles)
+}
+
+func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
+	svc := iam.New(sess)
+
+	resp, err := svc.ListInstanceProfiles(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +29,7 @@ func (n *IAMNuke) ListInstanceProfileRoles() ([]Resource, error) {
 	for _, out := range resp.InstanceProfiles {
 		for _, role := range out.Roles {
 			resources = append(resources, &IAMInstanceProfileRole{
-				svc:     n.Service,
+				svc:     svc,
 				profile: *out.InstanceProfileName,
 				role:    *role.RoleName,
 			})

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
@@ -13,8 +14,14 @@ type DynamoDBTableItem struct {
 	table Resource
 }
 
-func (n *DynamoDBNuke) ListItems() ([]Resource, error) {
-	tables, tablesErr := n.ListTables()
+func init() {
+	register("DynamoDBTableItem", ListDynamoDBItems)
+}
+
+func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
+	svc := dynamodb.New(sess)
+
+	tables, tablesErr := ListDynamoDBTables(sess)
 	if tablesErr != nil {
 		return nil, tablesErr
 	}
@@ -25,7 +32,7 @@ func (n *DynamoDBNuke) ListItems() ([]Resource, error) {
 			TableName: aws.String(dynamoTable.String()),
 		}
 
-		descResp, descErr := n.Service.DescribeTable(describeParams)
+		descResp, descErr := svc.DescribeTable(describeParams)
 		if descErr != nil {
 			return nil, descErr
 		}
@@ -36,14 +43,14 @@ func (n *DynamoDBNuke) ListItems() ([]Resource, error) {
 			ProjectionExpression: aws.String(key),
 		}
 
-		scanResp, scanErr := n.Service.Scan(params)
+		scanResp, scanErr := svc.Scan(params)
 		if scanErr != nil {
 			return nil, scanErr
 		}
 
 		for _, itemMap := range scanResp.Items {
 			resources = append(resources, &DynamoDBTableItem{
-				svc:   n.Service,
+				svc:   svc,
 				id:    itemMap,
 				table: dynamoTable,
 			})

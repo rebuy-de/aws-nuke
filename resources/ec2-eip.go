@@ -1,6 +1,9 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2Address struct {
 	svc *ec2.EC2
@@ -8,9 +11,15 @@ type EC2Address struct {
 	ip  string
 }
 
-func (n *EC2Nuke) ListAddresses() ([]Resource, error) {
+func init() {
+	register("EC2Address", ListEC2Addresses)
+}
+
+func ListEC2Addresses(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
 	params := &ec2.DescribeAddressesInput{}
-	resp, err := n.Service.DescribeAddresses(params)
+	resp, err := svc.DescribeAddresses(params)
 	if err != nil {
 		return nil, err
 	}
@@ -18,7 +27,7 @@ func (n *EC2Nuke) ListAddresses() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Addresses {
 		resources = append(resources, &EC2Address{
-			svc: n.Service,
+			svc: svc,
 			id:  *out.AllocationId,
 			ip:  *out.PublicIp,
 		})

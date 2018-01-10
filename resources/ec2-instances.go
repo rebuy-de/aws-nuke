@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -12,9 +13,15 @@ type EC2Instance struct {
 	state string
 }
 
-func (n *EC2Nuke) ListInstances() ([]Resource, error) {
+func init() {
+	register("EC2Instance", ListEC2Instances)
+}
+
+func ListEC2Instances(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
 	params := &ec2.DescribeInstancesInput{}
-	resp, err := n.Service.DescribeInstances(params)
+	resp, err := svc.DescribeInstances(params)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +30,7 @@ func (n *EC2Nuke) ListInstances() ([]Resource, error) {
 	for _, reservation := range resp.Reservations {
 		for _, instance := range reservation.Instances {
 			resources = append(resources, &EC2Instance{
-				svc:   n.Service,
+				svc:   svc,
 				id:    instance.InstanceId,
 				state: *instance.State.Name,
 			})

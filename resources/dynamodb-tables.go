@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
@@ -10,8 +11,14 @@ type DynamoDBTable struct {
 	id  string
 }
 
-func (n *DynamoDBNuke) ListTables() ([]Resource, error) {
-	resp, err := n.Service.ListTables(&dynamodb.ListTablesInput{})
+func init() {
+	register("DynamoDBTable", ListDynamoDBTables)
+}
+
+func ListDynamoDBTables(sess *session.Session) ([]Resource, error) {
+	svc := dynamodb.New(sess)
+
+	resp, err := svc.ListTables(&dynamodb.ListTablesInput{})
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +26,7 @@ func (n *DynamoDBNuke) ListTables() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, tableName := range resp.TableNames {
 		resources = append(resources, &DynamoDBTable{
-			svc: n.Service,
+			svc: svc,
 			id:  *tableName,
 		})
 	}

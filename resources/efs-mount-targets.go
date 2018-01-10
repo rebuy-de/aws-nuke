@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/efs"
 )
 
@@ -12,15 +13,21 @@ type EFSMountTarget struct {
 	fsid string
 }
 
-func (n *EFSNuke) ListMountTargets() ([]Resource, error) {
-	resp, err := n.Service.DescribeFileSystems(nil)
+func init() {
+	register("EFSMountTarget", ListEFSMountTargets)
+}
+
+func ListEFSMountTargets(sess *session.Session) ([]Resource, error) {
+	svc := efs.New(sess)
+
+	resp, err := svc.DescribeFileSystems(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	resources := make([]Resource, 0)
 	for _, fs := range resp.FileSystems {
-		mt, err := n.Service.DescribeMountTargets(&efs.DescribeMountTargetsInput{
+		mt, err := svc.DescribeMountTargets(&efs.DescribeMountTargetsInput{
 			FileSystemId: fs.FileSystemId,
 		})
 
@@ -30,7 +37,7 @@ func (n *EFSNuke) ListMountTargets() ([]Resource, error) {
 
 		for _, t := range mt.MountTargets {
 			resources = append(resources, &EFSMountTarget{
-				svc:  n.Service,
+				svc:  svc,
 				id:   *t.MountTargetId,
 				fsid: *t.FileSystemId,
 			})

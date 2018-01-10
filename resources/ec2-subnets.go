@@ -1,15 +1,24 @@
 package resources
 
-import "github.com/aws/aws-sdk-go/service/ec2"
+import (
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+)
 
 type EC2Subnet struct {
 	svc *ec2.EC2
 	id  *string
 }
 
-func (n *EC2Nuke) ListSubnets() ([]Resource, error) {
+func init() {
+	register("EC2Subnet", ListEC2Subnets)
+}
+
+func ListEC2Subnets(sess *session.Session) ([]Resource, error) {
+	svc := ec2.New(sess)
+
 	params := &ec2.DescribeSubnetsInput{}
-	resp, err := n.Service.DescribeSubnets(params)
+	resp, err := svc.DescribeSubnets(params)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +26,7 @@ func (n *EC2Nuke) ListSubnets() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Subnets {
 		resources = append(resources, &EC2Subnet{
-			svc: n.Service,
+			svc: svc,
 			id:  out.SubnetId,
 		})
 	}

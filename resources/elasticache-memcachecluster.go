@@ -2,6 +2,7 @@ package resources
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
 )
 
@@ -11,16 +12,22 @@ type ElasticacheCacheCluster struct {
 	status    *string
 }
 
-func (n *ElasticacheNuke) ListCacheClusters() ([]Resource, error) {
+func init() {
+	register("ElasticacheCacheCluster", ListElasticacheCacheClusters)
+}
+
+func ListElasticacheCacheClusters(sess *session.Session) ([]Resource, error) {
+	svc := elasticache.New(sess)
+
 	params := &elasticache.DescribeCacheClustersInput{MaxRecords: aws.Int64(100)}
-	resp, err := n.Service.DescribeCacheClusters(params)
+	resp, err := svc.DescribeCacheClusters(params)
 	if err != nil {
 		return nil, err
 	}
 	var resources []Resource
 	for _, cacheCluster := range resp.CacheClusters {
 		resources = append(resources, &ElasticacheCacheCluster{
-			svc:       n.Service,
+			svc:       svc,
 			clusterID: cacheCluster.CacheClusterId,
 			status:    cacheCluster.CacheClusterStatus,
 		})

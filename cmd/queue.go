@@ -4,6 +4,7 @@ import "github.com/rebuy-de/aws-nuke/resources"
 
 type ItemState int
 
+// States of Items based on the latest request to AWS.
 const (
 	ItemStateNew ItemState = iota
 	ItemStatePending
@@ -13,32 +14,39 @@ const (
 	ItemStateFinished
 )
 
+// An Item describes an actual AWS resource entity with the current state and
+// some metadata.
 type Item struct {
 	Resource resources.Resource
 
-	Service string
-	Lister  resources.ResourceLister
-
 	State  ItemState
-	Region string
 	Reason string
+
+	Region Region
+	Type   string
 }
 
 func (i *Item) Print() {
 	switch i.State {
 	case ItemStateNew:
-		Log(i.Region, i.Resource, ReasonWaitPending, "would remove")
+		Log(i.Region, i.Type, i.Resource, ReasonWaitPending, "would remove")
 	case ItemStatePending:
-		Log(i.Region, i.Resource, ReasonWaitPending, "triggered remove")
+		Log(i.Region, i.Type, i.Resource, ReasonWaitPending, "triggered remove")
 	case ItemStateWaiting:
-		Log(i.Region, i.Resource, ReasonWaitPending, "waiting")
+		Log(i.Region, i.Type, i.Resource, ReasonWaitPending, "waiting")
 	case ItemStateFailed:
-		Log(i.Region, i.Resource, ReasonError, i.Reason)
+		Log(i.Region, i.Type, i.Resource, ReasonError, i.Reason)
 	case ItemStateFiltered:
-		Log(i.Region, i.Resource, ReasonSkip, i.Reason)
+		Log(i.Region, i.Type, i.Resource, ReasonSkip, i.Reason)
 	case ItemStateFinished:
-		Log(i.Region, i.Resource, ReasonSuccess, "removed")
+		Log(i.Region, i.Type, i.Resource, ReasonSuccess, "removed")
 	}
+}
+
+// List gets all resource items of the same resource type like the Item.
+func (i *Item) List() ([]resources.Resource, error) {
+	listers := resources.GetListers()
+	return listers[i.Type](i.Region.Session)
 }
 
 type Queue []*Item

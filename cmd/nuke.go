@@ -108,15 +108,20 @@ func (n *Nuke) Run() error {
 func (n *Nuke) Scan() error {
 	queue := make(Queue, 0)
 
-	for _, region := range n.Config.Regions {
-		sess, err := n.Account.Session(region)
+	for _, regionName := range n.Config.Regions {
+		sess, err := n.Account.Session(regionName)
 		if err != nil {
 			return err
 		}
 
-		items := Scan(sess)
+		region := Region{
+			Name:    regionName,
+			Session: sess,
+		}
+
+		items := Scan(region)
 		for item := range items {
-			if !n.Parameters.WantsTarget(item.Service) {
+			if !n.Parameters.WantsTarget(item.Type) {
 				continue
 			}
 
@@ -147,7 +152,7 @@ func (n *Nuke) Filter(item *Item) {
 		}
 	}
 
-	filters, ok := accountConfig.Filters[item.Service]
+	filters, ok := accountConfig.Filters[item.Type]
 	if !ok {
 		return
 	}
@@ -207,15 +212,15 @@ func (n *Nuke) HandleRemove(item *Item) {
 func (n *Nuke) HandleWait(item *Item, cache map[string][]resources.Resource) {
 	var err error
 
-	left, ok := cache[item.Service]
+	left, ok := cache[item.Type]
 	if !ok {
-		left, err = item.Lister()
+		left, err = item.List()
 		if err != nil {
 			item.State = ItemStateFailed
 			item.Reason = err.Error()
 			return
 		}
-		cache[item.Service] = left
+		cache[item.Type] = left
 	}
 
 	for _, r := range left {

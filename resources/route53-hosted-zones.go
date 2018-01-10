@@ -3,12 +3,19 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
 )
 
-func (n *Route53Nuke) ListHostedZones() ([]Resource, error) {
+func init() {
+	register("Route53HostedZone", ListRoute53HostedZones)
+}
+
+func ListRoute53HostedZones(sess *session.Session) ([]Resource, error) {
+	svc := route53.New(sess)
+
 	params := &route53.ListHostedZonesInput{}
-	resp, err := n.Service.ListHostedZones(params)
+	resp, err := svc.ListHostedZones(params)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +23,7 @@ func (n *Route53Nuke) ListHostedZones() ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, hz := range resp.HostedZones {
 		resources = append(resources, &Route53HostedZone{
-			svc:  n.Service,
+			svc:  svc,
 			id:   hz.Id,
 			name: hz.Name,
 		})

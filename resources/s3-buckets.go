@@ -3,29 +3,48 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-type S3Bucket struct {
-	svc  *s3.S3
-	name string
+func init() {
+	register("S3Bucket", ListS3Buckets)
 }
 
-func (n *S3Nuke) DescribeBuckets() ([]string, error) {
-	resp, err := n.Service.ListBuckets(nil)
+func ListS3Buckets(s *session.Session) ([]Resource, error) {
+	svc := s3.New(s)
+
+	buckets, err := DescribeS3Buckets(svc)
+	if err != nil {
+		return nil, err
+	}
+
+	resources := make([]Resource, 0)
+	for _, name := range buckets {
+		resources = append(resources, &S3Bucket{
+			svc:  svc,
+			name: name,
+		})
+	}
+
+	return resources, nil
+}
+
+func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
+	resp, err := svc.ListBuckets(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	buckets := make([]string, 0)
 	for _, out := range resp.Buckets {
-		bucketLocationResponse, err := n.Service.GetBucketLocation(&s3.GetBucketLocationInput{Bucket: out.Name})
+		bucketLocationResponse, err := svc.GetBucketLocation(&s3.GetBucketLocationInput{Bucket: out.Name})
 
 		if err != nil {
 			return nil, err
 		}
 
-		if EqualStringPtr(bucketLocationResponse.LocationConstraint, n.Service.Config.Region) {
+		if EqualStringPtr(bucketLocationResponse.LocationConstraint, svc.Config.Region) {
 			buckets = append(buckets, *out.Name)
 		}
 
@@ -34,21 +53,9 @@ func (n *S3Nuke) DescribeBuckets() ([]string, error) {
 	return buckets, nil
 }
 
-func (n *S3Nuke) ListBuckets() ([]Resource, error) {
-	buckets, err := n.DescribeBuckets()
-	if err != nil {
-		return nil, err
-	}
-
-	resources := make([]Resource, 0)
-	for _, name := range buckets {
-		resources = append(resources, &S3Bucket{
-			svc:  n.Service,
-			name: name,
-		})
-	}
-
-	return resources, nil
+type S3Bucket struct {
+	svc  *s3.S3
+	name string
 }
 
 func (e *S3Bucket) Remove() error {
