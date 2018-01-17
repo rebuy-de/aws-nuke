@@ -2,7 +2,6 @@ package resources
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -10,10 +9,10 @@ import (
 )
 
 type KMSKey struct {
-	svc   *kms.KMS
-	id    string
-	state string
-	alias string
+	svc     *kms.KMS
+	id      string
+	state   string
+	manager *string
 }
 
 func init() {
@@ -22,18 +21,6 @@ func init() {
 
 func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 	svc := kms.New(sess)
-
-	respAlias, err := svc.ListAliases(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	aliasMap := map[string]string{}
-	for _, alias := range respAlias.Aliases {
-		if alias.TargetKeyId != nil {
-			aliasMap[*alias.TargetKeyId] = *alias.AliasName
-		}
-	}
 
 	resp, err := svc.ListKeys(nil)
 	if err != nil {
@@ -50,10 +37,10 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 		}
 
 		resources = append(resources, &KMSKey{
-			svc:   svc,
-			id:    *resp.KeyMetadata.KeyId,
-			state: *resp.KeyMetadata.KeyState,
-			alias: aliasMap[*resp.KeyMetadata.KeyId],
+			svc:     svc,
+			id:      *resp.KeyMetadata.KeyId,
+			state:   *resp.KeyMetadata.KeyState,
+			manager: resp.KeyMetadata.KeyManager,
 		})
 	}
 
@@ -65,7 +52,7 @@ func (e *KMSKey) Filter() error {
 		return fmt.Errorf("is already in PendingDeletion state")
 	}
 
-	if strings.HasPrefix(e.alias, "alias/aws/") {
+	if e.manager != nil && *e.manager == kms.KeyManagerTypeAws {
 		return fmt.Errorf("cannot delete AWS managed key")
 	}
 
