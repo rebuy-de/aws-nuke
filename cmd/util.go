@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func Prompt(expect string) error {
@@ -21,4 +23,18 @@ func Prompt(expect string) error {
 	fmt.Println()
 
 	return nil
+}
+
+func ResolveResourceTypes(base types.Set, include, exclude []types.Set) types.Set {
+	for _, i := range include {
+		if len(i) > 0 {
+			base = base.Intersect(i)
+		}
+	}
+
+	for _, e := range exclude {
+		base = base.Remove(e)
+	}
+
+	return base
 }
