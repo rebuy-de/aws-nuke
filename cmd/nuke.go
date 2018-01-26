@@ -114,14 +114,14 @@ func (n *Nuke) Scan() error {
 	resourceTypes := ResolveResourceTypes(
 		resources.GetListerNames(),
 		[]types.Set{
-			types.Set(n.Parameters.Targets).Union(n.Parameters.Include),
-			n.Config.ResourceTypes.Include,
-			accountConfig.ResourceTypes.Include,
+			n.Parameters.Targets,
+			n.Config.ResourceTypes.Targets,
+			accountConfig.ResourceTypes.Targets,
 		},
 		[]types.Set{
-			n.Parameters.Exclude,
-			n.Config.ResourceTypes.Exclude,
-			accountConfig.ResourceTypes.Exclude,
+			n.Parameters.Excludes,
+			n.Config.ResourceTypes.Excludes,
+			accountConfig.ResourceTypes.Excludes,
 		},
 	)
 

@@ -71,14 +71,10 @@ func NewRootCommand() *cobra.Command {
 
 	command.PersistentFlags().StringSliceVarP(
 		&params.Targets, "target", "t", []string{},
-		"(deprecated) Limit nuking to certain resource types (eg IAMServerCertificate). "+
-			"This flag is deprecated. Please use --include instead.")
-	command.PersistentFlags().StringSliceVar(
-		&params.Include, "include", []string{},
 		"Limit nuking to certain resource types (eg IAMServerCertificate). "+
 			"This flag can be used multiple times.")
-	command.PersistentFlags().StringSliceVar(
-		&params.Exclude, "exclude", []string{},
+	command.PersistentFlags().StringSliceVarP(
+		&params.Excludes, "exclude", "e", []string{},
 		"Prevent nuking of certain resource types (eg IAMServerCertificate). "+
 			"This flag can be used multiple times.")
 	command.PersistentFlags().BoolVar(
