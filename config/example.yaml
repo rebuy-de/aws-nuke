@@ -5,16 +5,16 @@ account-blacklist:
 - 1234567890
 
 resource-types:
-  target:
+  targets:
   - S3Object
   - S3Bucket
-  exclude:
+  excludes:
   - IAMRole
 
 accounts:
   555133742:
     resource-types:
-      target:
+      targets:
       - S3Bucket
     filters:
       IAMRole:

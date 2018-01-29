@@ -3,14 +3,11 @@ package types
 type Set []string
 
 func (s Set) Intersect(o Set) Set {
-	m := map[string]bool{}
-	for _, t := range o {
-		m[t] = true
-	}
+	mo := o.toMap()
 
 	result := Set{}
 	for _, t := range s {
-		if m[t] {
+		if mo[t] {
 			result = append(result, t)
 		}
 	}
@@ -19,14 +16,11 @@ func (s Set) Intersect(o Set) Set {
 }
 
 func (s Set) Remove(o Set) Set {
-	m := map[string]bool{}
-	for _, t := range o {
-		m[t] = true
-	}
+	mo := o.toMap()
 
 	result := Set{}
 	for _, t := range s {
-		if !m[t] {
+		if !mo[t] {
 			result = append(result, t)
 		}
 	}
@@ -35,5 +29,22 @@ func (s Set) Remove(o Set) Set {
 }
 
 func (s Set) Union(o Set) Set {
-	return Set(append(s, o...))
+	ms := s.toMap()
+
+	result := []string(s)
+	for _, oi := range o {
+		if !ms[oi] {
+			result = append(result, oi)
+		}
+	}
+
+	return Set(result)
+}
+
+func (s Set) toMap() map[string]bool {
+	m := map[string]bool{}
+	for _, t := range s {
+		m[t] = true
+	}
+	return m
 }

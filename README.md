@@ -199,10 +199,10 @@ or until there are only resources with errors left.
 ### Specifying Resource Types to Delete
 
 *aws-nuke* deletes a lot of resources and there might be added more at any
-release. Eventually, every resources should get deleted. You might to restrict
-which resources to delete. There are multiple ways to configure this.
+release. Eventually, every resources should get deleted. You might want to
+restrict which resources to delete. There are multiple ways to configure this.
 
-One way are filter, which already got mentioned. This requires to know the
+One way are filters, which already got mentioned. This requires to know the
 identifier of each resource. It is also possible to prevent whole resource
 types (eg `S3Bucket`) from getting deleted with two methods.
 
@@ -210,7 +210,7 @@ types (eg `S3Bucket`) from getting deleted with two methods.
 * The `--exclude` flag prevent nuking of the specified resource types.
 
 It is also possible to configure the resource types in the config file like in
-this example:
+these examples:
 
 ```
 ---
@@ -220,26 +220,39 @@ account-blacklist:
 - 1234567890
 
 resource-types:
-  target:
+  # only nuke these three resources
+  targets:
   - S3Object
   - S3Bucket
-  exclude:
   - IAMRole
 
 accounts:
-  555133742:
-    resource-types:
-      target:
-      - S3Bucket
+  555133742: {}
+```
+
+```
+---
+regions:
+  - "eu-west-1"
+account-blacklist:
+- 1234567890
+
+resource-types:
+  # don't nuke IAM users
+  exclude:
+  - IAMUser
+
+accounts:
+  555133742: {}
 ```
 
 If targets are specified in multiple places (eg CLI and account specific), then
 a resource type must be specified in all places. In other words each
 configuration limits the previous ones.
 
-If a exclude is defined in any place, then if will be ignored in any case.
+If an exclude is used, then all its resource types will not be deleted.
 
-**Hint:** You can see all available resources types with this command:
+**Hint:** You can see all available resource types with this command:
 
 ```
 aws-nuke resource-types
