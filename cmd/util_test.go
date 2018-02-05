@@ -10,36 +10,36 @@ import (
 
 func TestResolveResourceTypes(t *testing.T) {
 	cases := []struct {
-		base    types.Set
-		include []types.Set
-		exclude []types.Set
-		result  types.Set
+		base    types.Collection
+		include []types.Collection
+		exclude []types.Collection
+		result  types.Collection
 	}{
 		{
-			base:    types.Set{"a", "b", "c", "d"},
-			include: []types.Set{types.Set{"a", "b", "c"}},
-			result:  types.Set{"a", "b", "c"},
+			base:    types.Collection{"a", "b", "c", "d"},
+			include: []types.Collection{types.Collection{"a", "b", "c"}},
+			result:  types.Collection{"a", "b", "c"},
 		},
 		{
-			base:    types.Set{"a", "b", "c", "d"},
-			exclude: []types.Set{types.Set{"b", "d"}},
-			result:  types.Set{"a", "c"},
+			base:    types.Collection{"a", "b", "c", "d"},
+			exclude: []types.Collection{types.Collection{"b", "d"}},
+			result:  types.Collection{"a", "c"},
 		},
 		{
-			base:    types.Set{"a", "b"},
-			include: []types.Set{types.Set{}},
-			result:  types.Set{"a", "b"},
+			base:    types.Collection{"a", "b"},
+			include: []types.Collection{types.Collection{}},
+			result:  types.Collection{"a", "b"},
 		},
 		{
-			base:    types.Set{"c", "b"},
-			exclude: []types.Set{types.Set{}},
-			result:  types.Set{"c", "b"},
+			base:    types.Collection{"c", "b"},
+			exclude: []types.Collection{types.Collection{}},
+			result:  types.Collection{"c", "b"},
 		},
 		{
-			base:    types.Set{"a", "b", "c", "d"},
-			include: []types.Set{types.Set{"a", "b", "c"}},
-			exclude: []types.Set{types.Set{"a"}},
-			result:  types.Set{"b", "c"},
+			base:    types.Collection{"a", "b", "c", "d"},
+			include: []types.Collection{types.Collection{"a", "b", "c"}},
+			exclude: []types.Collection{types.Collection{"a"}},
+			result:  types.Collection{"b", "c"},
 		},
 	}
 

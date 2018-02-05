@@ -11,8 +11,8 @@ import (
 )
 
 type ResourceConfig struct {
-	Targets  types.Set `yaml:"targets"`
-	Excludes types.Set `yaml:"excludes"`
+	Targets  types.Collection `yaml:"targets"`
+	Excludes types.Collection `yaml:"excludes"`
 }
 
 type NukeConfig struct {

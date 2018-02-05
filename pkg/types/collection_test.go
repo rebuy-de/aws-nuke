@@ -8,8 +8,8 @@ import (
 )
 
 func TestSetInterset(t *testing.T) {
-	s1 := types.Set{"a", "b", "c"}
-	s2 := types.Set{"b", "a", "d"}
+	s1 := types.Collection{"a", "b", "c"}
+	s2 := types.Collection{"b", "a", "d"}
 
 	r := s1.Intersect(s2)
 
@@ -22,8 +22,8 @@ func TestSetInterset(t *testing.T) {
 }
 
 func TestSetRemove(t *testing.T) {
-	s1 := types.Set{"a", "b", "c"}
-	s2 := types.Set{"b", "a", "d"}
+	s1 := types.Collection{"a", "b", "c"}
+	s2 := types.Collection{"b", "a", "d"}
 
 	r := s1.Remove(s2)
 
@@ -36,8 +36,8 @@ func TestSetRemove(t *testing.T) {
 }
 
 func TestSetUnion(t *testing.T) {
-	s1 := types.Set{"a", "b", "c"}
-	s2 := types.Set{"b", "a", "d"}
+	s1 := types.Collection{"a", "b", "c"}
+	s2 := types.Collection{"b", "a", "d"}
 
 	r := s1.Union(s2)
 

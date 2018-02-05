@@ -25,7 +25,7 @@ func Prompt(expect string) error {
 	return nil
 }
 
-func ResolveResourceTypes(base types.Set, include, exclude []types.Set) types.Set {
+func ResolveResourceTypes(base types.Collection, include, exclude []types.Collection) types.Collection {
 	for _, i := range include {
 		if len(i) > 0 {
 			base = base.Intersect(i)

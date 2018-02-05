@@ -14,7 +14,7 @@ type Nuke struct {
 	Account    awsutil.Account
 	Config     *NukeConfig
 
-	ResourceTypes types.Set
+	ResourceTypes types.Collection
 
 	ForceSleep time.Duration
 
@@ -113,12 +113,12 @@ func (n *Nuke) Scan() error {
 
 	resourceTypes := ResolveResourceTypes(
 		resources.GetListerNames(),
-		[]types.Set{
+		[]types.Collection{
 			n.Parameters.Targets,
 			n.Config.ResourceTypes.Targets,
 			accountConfig.ResourceTypes.Targets,
 		},
-		[]types.Set{
+		[]types.Collection{
 			n.Parameters.Excludes,
 			n.Config.ResourceTypes.Excludes,
 			accountConfig.ResourceTypes.Excludes,
