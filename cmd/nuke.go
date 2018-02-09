@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
@@ -12,6 +13,8 @@ type Nuke struct {
 	Parameters NukeParameters
 	Account    awsutil.Account
 	Config     *NukeConfig
+
+	ResourceTypes types.Collection
 
 	ForceSleep time.Duration
 
@@ -106,6 +109,22 @@ func (n *Nuke) Run() error {
 }
 
 func (n *Nuke) Scan() error {
+	accountConfig := n.Config.Accounts[n.Account.ID()]
+
+	resourceTypes := ResolveResourceTypes(
+		resources.GetListerNames(),
+		[]types.Collection{
+			n.Parameters.Targets,
+			n.Config.ResourceTypes.Targets,
+			accountConfig.ResourceTypes.Targets,
+		},
+		[]types.Collection{
+			n.Parameters.Excludes,
+			n.Config.ResourceTypes.Excludes,
+			accountConfig.ResourceTypes.Excludes,
+		},
+	)
+
 	queue := make(Queue, 0)
 
 	for _, regionName := range n.Config.Regions {
@@ -119,12 +138,8 @@ func (n *Nuke) Scan() error {
 			Session: sess,
 		}
 
-		items := Scan(region)
+		items := Scan(region, resourceTypes)
 		for item := range items {
-			if !n.Parameters.WantsTarget(item.Type) {
-				continue
-			}
-
 			queue = append(queue, item)
 			n.Filter(item)
 			item.Print()

@@ -34,3 +34,16 @@ func register(name string, lister ResourceLister) {
 func GetListers() ResourceListers {
 	return resourceListers
 }
+
+func GetLister(name string) ResourceLister {
+	return resourceListers[name]
+}
+
+func GetListerNames() []string {
+	names := []string{}
+	for resourceType, _ := range GetListers() {
+		names = append(names, resourceType)
+	}
+
+	return names
+}

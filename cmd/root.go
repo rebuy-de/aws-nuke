@@ -53,25 +53,38 @@ func NewRootCommand() *cobra.Command {
 
 	command.PersistentFlags().StringVarP(
 		&params.ConfigPath, "config", "c", "",
-		"path to config (required)")
+		"(required) Path to the nuke config file.")
 	command.PersistentFlags().StringVar(
 		&creds.Profile, "profile", "",
-		"profile name to nuke")
+		"Name of the AWS profile name for accessing the AWS API. "+
+			"Cannot be used together with --access-key-id and --secret-access-key.")
 	command.PersistentFlags().StringVar(
 		&creds.AccessKeyID, "access-key-id", "",
-		"AWS access-key-id")
+		"AWS access key ID for accessing the AWS API. "+
+			"Must be used together with --secret-access-key."+
+			"Cannot be used together with --profile.")
 	command.PersistentFlags().StringVar(
 		&creds.SecretAccessKey, "secret-access-key", "",
-		"AWS secret-access-key")
+		"AWS secret access key for accessing the AWS API. "+
+			"Must be used together with --access-key-id."+
+			"Cannot be used together with --profile.")
+
 	command.PersistentFlags().StringSliceVarP(
 		&params.Targets, "target", "t", []string{},
-		"limit nuking to certain resource types (eg IAMServerCertificate)")
+		"Limit nuking to certain resource types (eg IAMServerCertificate). "+
+			"This flag can be used multiple times.")
+	command.PersistentFlags().StringSliceVarP(
+		&params.Excludes, "exclude", "e", []string{},
+		"Prevent nuking of certain resource types (eg IAMServerCertificate). "+
+			"This flag can be used multiple times.")
 	command.PersistentFlags().BoolVar(
 		&params.NoDryRun, "no-dry-run", false,
-		"actually delete found resources")
+		"If specified, it actually deletes found resources. "+
+			"Otherwise it just lists all candidates.")
 	command.PersistentFlags().BoolVar(
 		&params.Force, "force", false,
-		"don't ask for confirmation")
+		"Don't ask for confirmation before deleting resources. "+
+			"Instead it waits 15s before continuing.")
 
 	command.AddCommand(NewVersionCommand())
 	command.AddCommand(NewResourceTypesCommand())
@@ -84,14 +97,10 @@ func NewResourceTypesCommand() *cobra.Command {
 		Use:   "resource-types",
 		Short: "lists all available resource types",
 		Run: func(cmd *cobra.Command, args []string) {
-			types := []string{}
-			for resourceType, _ := range resources.GetListers() {
-				types = append(types, resourceType)
-			}
+			names := resources.GetListerNames()
+			sort.Strings(names)
 
-			sort.Strings(types)
-
-			for _, resourceType := range types {
+			for _, resourceType := range names {
 				fmt.Println(resourceType)
 			}
 		},

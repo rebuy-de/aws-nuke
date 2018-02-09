@@ -5,17 +5,26 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/rebuy-de/aws-nuke/pkg/types"
+
 	"gopkg.in/yaml.v2"
 )
+
+type ResourceConfig struct {
+	Targets  types.Collection `yaml:"targets"`
+	Excludes types.Collection `yaml:"excludes"`
+}
 
 type NukeConfig struct {
 	AccountBlacklist []string                     `yaml:"account-blacklist"`
 	Regions          []string                     `yaml:"regions"`
 	Accounts         map[string]NukeConfigAccount `yaml:"accounts"`
+	ResourceTypes    ResourceConfig               `yaml:"resource-types"`
 }
 
 type NukeConfigAccount struct {
-	Filters map[string][]string `yaml:"filters"`
+	Filters       map[string][]string `yaml:"filters"`
+	ResourceTypes ResourceConfig      `yaml:"resource-types"`
 }
 
 func LoadConfig(path string) (*NukeConfig, error) {

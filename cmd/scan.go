@@ -8,11 +8,12 @@ import (
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
-func Scan(region Region) <-chan *Item {
+func Scan(region Region, resourceTypes []string) <-chan *Item {
 	items := make(chan *Item, 100)
 
 	go func() {
-		for resourceType, lister := range resources.GetListers() {
+		for _, resourceType := range resourceTypes {
+			lister := resources.GetLister(resourceType)
 			rs, err := safeLister(region.Session, lister)
 			if err != nil {
 				LogErrorf(fmt.Errorf("\n=============\n\n"+

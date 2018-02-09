@@ -4,8 +4,18 @@ regions:
 account-blacklist:
 - 1234567890
 
+resource-types:
+  target:
+  - S3Object
+  - S3Bucket
+  exclude:
+  - IAMRole
+
 accounts:
   555133742:
+    resource-types:
+      target:
+      - S3Bucket
     filters:
       IAMRole:
       - "uber.admin"

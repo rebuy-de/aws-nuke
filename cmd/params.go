@@ -8,7 +8,8 @@ import (
 type NukeParameters struct {
 	ConfigPath string
 
-	Targets []string
+	Targets  []string
+	Excludes []string
 
 	NoDryRun bool
 	Force    bool
@@ -20,18 +21,4 @@ func (p *NukeParameters) Validate() error {
 	}
 
 	return nil
-}
-
-func (p *NukeParameters) WantsTarget(name string) bool {
-	if p.Targets == nil || len(p.Targets) < 1 {
-		return true
-	}
-
-	for _, wants := range p.Targets {
-		if wants == name {
-			return true
-		}
-	}
-
-	return false
 }
