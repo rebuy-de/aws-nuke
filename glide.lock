@@ -1,8 +1,8 @@
-hash: 6fa91765a8814057be46a070a4ebcbe888bedeb5e38fe3dbae2de14ef1ef1ca6
-updated: 2017-07-24T12:04:43.624073528+02:00
+hash: 1c2230f3409ee41ca50875383087f519ee3183c4045a2c4a2ce26116414579ce
+updated: 2018-02-09T19:10:54.675812835+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: afd601335e2a72d43caa3af6bd2abe512fcc3bfd
+  version: de28909e9837364f0368d94ddcba085c57af3c12
   subpackages:
   - aws
   - aws/awserr
@@ -35,6 +35,7 @@ imports:
   - service/cloudformation
   - service/cloudtrail
   - service/cloudwatchevents
+  - service/dynamodb
   - service/ec2
   - service/ecr
   - service/efs
@@ -42,6 +43,7 @@ imports:
   - service/elb
   - service/elbv2
   - service/iam
+  - service/kms
   - service/lambda
   - service/rds
   - service/route53
@@ -51,7 +53,7 @@ imports:
 - name: github.com/fatih/color
   version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
 - name: github.com/go-ini/ini
-  version: 6e4869b434bd001f6983749881c7ead3545887d8
+  version: 5b3e00af70a9484542169a976dcab8d03e601a17
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
@@ -62,6 +64,8 @@ imports:
 - name: github.com/mattn/go-isatty
   version: 57fdcb988a5c543893cc61bce354a6e24ab70022
   repo: https://github.com/mattn/go-isatty
+- name: github.com/sirupsen/logrus
+  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/spf13/cobra
   version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
 - name: github.com/spf13/pflag
