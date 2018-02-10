@@ -19,7 +19,6 @@ var (
 	ColorRegion       = *color.New(color.Bold)
 	ColorResourceType = *color.New()
 	ColorResourceID   = *color.New(color.Bold)
-	ColorWarning      = *color.New(color.FgYellow)
 )
 
 func Log(region Region, resourceType string, r resources.Resource, c color.Color, msg string) {
@@ -30,15 +29,4 @@ func Log(region Region, resourceType string, r resources.Resource, c color.Color
 	ColorResourceID.Printf("'%s'", r.String())
 	fmt.Printf(" - ")
 	c.Printf("%s\n", msg)
-}
-
-func LogWarn(s string, i ...interface{}) {
-	ColorWarning.Printf("WARNING: "+s, i...)
-}
-
-func LogErrorf(err error) {
-	out := color.New(color.FgRed)
-	trace := fmt.Sprintf("%+v", err)
-	out.Println(trace)
-	out.Println("")
 }
