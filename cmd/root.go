@@ -6,19 +6,28 @@ import (
 
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/resources"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 func NewRootCommand() *cobra.Command {
 	var (
-		params NukeParameters
-		creds  awsutil.Credentials
+		params  NukeParameters
+		creds   awsutil.Credentials
+		verbose bool
 	)
 
 	command := &cobra.Command{
 		Use:   "aws-nuke",
 		Short: "aws-nuke removes every resource from AWS",
 		Long:  `A tool which removes every resource from an AWS account.  Use it with caution, since it cannot distinguish between production and non-production.`,
+	}
+
+	command.PreRun = func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.InfoLevel)
+		if verbose {
+			log.SetLevel(log.DebugLevel)
+		}
 	}
 
 	command.RunE = func(cmd *cobra.Command, args []string) error {
@@ -50,6 +59,10 @@ func NewRootCommand() *cobra.Command {
 
 		return n.Run()
 	}
+
+	command.PersistentFlags().BoolVarP(
+		&verbose, "verbose", "v", false,
+		"Enables debug output.")
 
 	command.PersistentFlags().StringVarP(
 		&params.ConfigPath, "config", "c", "",

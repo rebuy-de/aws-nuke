@@ -7,6 +7,7 @@ import (
 
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -127,7 +128,7 @@ func (c *NukeConfig) resolveDeprecations() error {
 			if !ok {
 				continue
 			}
-			LogWarn("deprecated resource type '%s' - converting to '%s'\n", resourceType, replacement)
+			log.Warnf("deprecated resource type '%s' - converting to '%s'\n", resourceType, replacement)
 
 			if _, ok := a.Filters[replacement]; ok {
 				return fmt.Errorf("using deprecated resource type and replacement: '%s','%s'", resourceType, replacement)

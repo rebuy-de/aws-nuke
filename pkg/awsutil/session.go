@@ -6,7 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
+	log "github.com/sirupsen/logrus"
 )
 
 type Credentials struct {
@@ -38,24 +40,24 @@ func (c *Credentials) Validate() error {
 
 func (c *Credentials) NewSession(region string) (*session.Session, error) {
 	if c.HasProfile() {
-		return session.NewSessionWithOptions(session.Options{
+		return Log(session.NewSessionWithOptions(session.Options{
 			Config: aws.Config{
 				Region: aws.String(region),
 			},
 			SharedConfigState: session.SharedConfigEnable,
 			Profile:           c.Profile,
-		})
+		}))
 	}
 
 	if c.HasKeys() {
-		return session.NewSessionWithOptions(session.Options{
+		return Log(session.NewSessionWithOptions(session.Options{
 			Config: aws.Config{
 				Region: aws.String(region),
 				Credentials: credentials.NewStaticCredentials(
 					strings.TrimSpace(c.AccessKeyID),
 					strings.TrimSpace(c.SecretAccessKey),
 					"",
-				)}})
+				)}}))
 	}
 
 	return nil, fmt.Errorf("You have to specify a profile or credentials for at least one region.")
@@ -73,4 +75,18 @@ func (c *Credentials) Session(region string) (*session.Session, error) {
 	}
 
 	return sess, err
+}
+
+func Log(s *session.Session, err error) (*session.Session, error) {
+	if err == nil {
+		s.Handlers.Send.PushFront(func(r *request.Request) {
+			log.Debugf("sending AWS request:\n%s", DumpRequest(r.HTTPRequest))
+		})
+
+		s.Handlers.ValidateResponse.PushFront(func(r *request.Request) {
+			log.Debugf("received AWS response:\n%s", DumpResponse(r.HTTPResponse))
+		})
+	}
+
+	return s, err
 }

@@ -5,7 +5,9 @@ import (
 	"runtime/debug"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/rebuy-de/aws-nuke/pkg/util"
 	"github.com/rebuy-de/aws-nuke/resources"
+	log "github.com/sirupsen/logrus"
 )
 
 func Scan(region Region, resourceTypes []string) <-chan *Item {
@@ -16,12 +18,8 @@ func Scan(region Region, resourceTypes []string) <-chan *Item {
 			lister := resources.GetLister(resourceType)
 			rs, err := safeLister(region.Session, lister)
 			if err != nil {
-				LogErrorf(fmt.Errorf("\n=============\n\n"+
-					"Listing with %T failed:\n\n"+
-					"%v\n\n"+
-					"Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n\n"+
-					"=============",
-					lister, err))
+				dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
+				log.Errorf("Listing with %T failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", lister, dump)
 				continue
 			}
 

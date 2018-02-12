@@ -4,3 +4,8 @@ import:
   version: ^v1.10.14
 - package: github.com/fatih/color
   version: ^1.1.0
+- package: github.com/sirupsen/logrus
+  version: ^1.0.4
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh/terminal
