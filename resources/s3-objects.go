@@ -8,9 +8,11 @@ import (
 )
 
 type S3Object struct {
-	svc    *s3.S3
-	bucket string
-	key    string
+	svc       *s3.S3
+	bucket    string
+	key       string
+	versionID *string
+	latest    bool
 }
 
 func init() {
@@ -28,21 +30,51 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 	}
 
 	for _, name := range buckets {
-		params := &s3.ListObjectsInput{
+		params := &s3.ListObjectVersionsInput{
 			Bucket: &name,
 		}
 
-		resp, err := svc.ListObjects(params)
-		if err != nil {
-			return nil, err
-		}
+		for {
+			resp, err := svc.ListObjectVersions(params)
+			if err != nil {
+				return nil, err
+			}
 
-		for _, out := range resp.Contents {
-			resources = append(resources, &S3Object{
-				svc:    svc,
-				bucket: name,
-				key:    *out.Key,
-			})
+			for _, out := range resp.Versions {
+				if out.Key == nil {
+					continue
+				}
+
+				resources = append(resources, &S3Object{
+					svc:       svc,
+					bucket:    name,
+					key:       *out.Key,
+					versionID: out.VersionId,
+					latest:    UnPtrBool(out.IsLatest, false),
+				})
+			}
+
+			for _, out := range resp.DeleteMarkers {
+				if out.Key == nil {
+					continue
+				}
+
+				resources = append(resources, &S3Object{
+					svc:       svc,
+					bucket:    name,
+					key:       *out.Key,
+					versionID: out.VersionId,
+					latest:    UnPtrBool(out.IsLatest, false),
+				})
+			}
+
+			// make sure to list all with more than 1000 objects
+			if *resp.IsTruncated {
+				params.KeyMarker = resp.NextKeyMarker
+				continue
+			}
+
+			break
 		}
 	}
 
@@ -51,8 +83,9 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 
 func (e *S3Object) Remove() error {
 	params := &s3.DeleteObjectInput{
-		Bucket: &e.bucket,
-		Key:    &e.key,
+		Bucket:    &e.bucket,
+		Key:       &e.key,
+		VersionId: e.versionID,
 	}
 
 	_, err := e.svc.DeleteObject(params)
@@ -64,5 +97,8 @@ func (e *S3Object) Remove() error {
 }
 
 func (e *S3Object) String() string {
+	if e.versionID != nil && *e.versionID != "null" && !e.latest {
+		return fmt.Sprintf("s3://%s/%s#%s", e.bucket, e.key, *e.versionID)
+	}
 	return fmt.Sprintf("s3://%s/%s", e.bucket, e.key)
 }
