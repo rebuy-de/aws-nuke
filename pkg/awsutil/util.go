@@ -10,7 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var REAuthHeader = regexp.MustCompile(`(?m:^(Auth[^:]*):.*$)`)
+var (
+	RESecretHeader = regexp.MustCompile(`(?m:^([^:]*(Auth|Security)[^:]*):.*$)`)
+)
+
+func HideSecureHeaders(dump []byte) []byte {
+	return RESecretHeader.ReplaceAll(dump, []byte("$1: <hidden>"))
+}
 
 func DumpRequest(r *http.Request) string {
 	dump, err := httputil.DumpRequest(r, true)
@@ -21,7 +27,7 @@ func DumpRequest(r *http.Request) string {
 	}
 
 	dump = bytes.TrimSpace(dump)
-	dump = REAuthHeader.ReplaceAll(dump, []byte("$1: <hidden>"))
+	dump = HideSecureHeaders(dump)
 	dump = util.IndentBytes(dump, []byte("    > "))
 	return string(dump)
 }
