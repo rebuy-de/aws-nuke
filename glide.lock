@@ -1,8 +1,8 @@
-hash: 2ea54212006ede8306215e547e5e86426f41c35230fc46e3a05de3b065fbe6d4
-updated: 2018-03-02T14:14:54.059773062+01:00
+hash: ce6bd4f43a8f766e187d3d9223ca51ab4b306c5ada7ad2c367e5be864552786f
+updated: 2018-02-10T16:02:26.35322554+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: aace5875a5c3b85a3902c6d72b9caed301d64cce
+  version: 82eadef012f77590875babb177c60878727821c0
   subpackages:
   - aws
   - aws/awserr
@@ -20,7 +20,6 @@ imports:
   - aws/request
   - aws/session
   - aws/signer/v4
-  - internal/sdkrand
   - internal/shareddefaults
   - private/protocol
   - private/protocol/ec2query
@@ -52,7 +51,7 @@ imports:
   - service/sns
   - service/sts
 - name: github.com/fatih/color
-  version: 507f6050b8568533fb3f5504de8e5205fa62a114
+  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
 - name: github.com/go-ini/ini
   version: 5b3e00af70a9484542169a976dcab8d03e601a17
 - name: github.com/inconshreveable/mousetrap
@@ -61,8 +60,10 @@ imports:
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/mattn/go-colorable
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
+  repo: https://github.com/mattn/go-colorable
 - name: github.com/mattn/go-isatty
   version: 57fdcb988a5c543893cc61bce354a6e24ab70022
+  repo: https://github.com/mattn/go-isatty
 - name: github.com/sirupsen/logrus
   version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
 - name: github.com/spf13/cobra
@@ -74,10 +75,11 @@ imports:
   subpackages:
   - ssh/terminal
 - name: golang.org/x/sys
-  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  repo: https://go.googlesource.com/sys
   subpackages:
   - unix
   - windows
 - name: gopkg.in/yaml.v2
-  version: 7f97868eec74b32b0982dd158a51a446d1da7eb5
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 testImports: []
