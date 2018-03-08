@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"runtime/debug"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/rebuy-de/aws-nuke/pkg/util"
@@ -18,9 +19,13 @@ func Scan(region Region, resourceTypes []string) <-chan *Item {
 			lister := resources.GetLister(resourceType)
 			rs, err := safeLister(region.Session, lister)
 			if err != nil {
-				dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
-				log.Errorf("Listing with %T failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", lister, dump)
-				continue
+				if !strings.Contains(err.Error(), "no such host") {
+					dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
+					log.Errorf("Listing with %T failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", lister, dump)
+					continue
+				} else {
+					continue
+				}
 			}
 
 			for _, r := range rs {
