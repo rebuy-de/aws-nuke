@@ -16,6 +16,7 @@ type Credentials struct {
 
 	AccessKeyID     string
 	SecretAccessKey string
+	SessionToken    string
 
 	cache map[string]*session.Session
 }
@@ -25,14 +26,16 @@ func (c *Credentials) HasProfile() bool {
 }
 
 func (c *Credentials) HasKeys() bool {
-	return strings.TrimSpace(c.AccessKeyID) != "" &&
-		strings.TrimSpace(c.SecretAccessKey) != ""
+	return strings.TrimSpace(c.AccessKeyID) != "" ||
+		strings.TrimSpace(c.SecretAccessKey) != "" ||
+		strings.TrimSpace(c.SessionToken) != ""
 }
 
 func (c *Credentials) Validate() error {
 	if c.HasProfile() == c.HasKeys() {
 		return fmt.Errorf("You have to specify the --profile flag OR " +
-			"--access-key-id and --secret-access-key.\n")
+			"--access-key-id with --secret-access-key and optionally " +
+			"--session-token.\n")
 	}
 
 	return nil
@@ -56,7 +59,7 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 				Credentials: credentials.NewStaticCredentials(
 					strings.TrimSpace(c.AccessKeyID),
 					strings.TrimSpace(c.SecretAccessKey),
-					"",
+					strings.TrimSpace(c.SessionToken),
 				)}}))
 	}
 
