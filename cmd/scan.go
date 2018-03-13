@@ -25,7 +25,7 @@ func Scan(region Region, resourceTypes []string) <-chan *Item {
 				}
 
 				dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
-				log.Errorf("Listing with %T failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", lister, dump)
+				log.Errorf("Listing %s failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", resourceType, dump)
 				continue
 			}
 
