@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/pkg/util"
 	"github.com/rebuy-de/aws-nuke/resources"
 	log "github.com/sirupsen/logrus"
@@ -18,6 +19,11 @@ func Scan(region Region, resourceTypes []string) <-chan *Item {
 			lister := resources.GetLister(resourceType)
 			rs, err := safeLister(region.Session, lister)
 			if err != nil {
+				_, ok := err.(awsutil.ErrServiceNotInRegion)
+				if ok {
+					continue
+				}
+
 				dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
 				log.Errorf("Listing with %T failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", lister, dump)
 				continue
