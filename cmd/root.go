@@ -67,6 +67,7 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().StringVarP(
 		&params.ConfigPath, "config", "c", "",
 		"(required) Path to the nuke config file.")
+
 	command.PersistentFlags().StringVar(
 		&creds.Profile, "profile", "",
 		"Name of the AWS profile name for accessing the AWS API. "+
@@ -80,6 +81,11 @@ func NewRootCommand() *cobra.Command {
 		&creds.SecretAccessKey, "secret-access-key", "",
 		"AWS secret access key for accessing the AWS API. "+
 			"Must be used together with --access-key-id."+
+			"Cannot be used together with --profile.")
+	command.PersistentFlags().StringVar(
+		&creds.SessionToken, "session-token", "",
+		"AWS session token for accessing the AWS API. "+
+			"Must be used together with --access-key-id and --secret-access-key."+
 			"Cannot be used together with --profile.")
 
 	command.PersistentFlags().StringSliceVarP(
