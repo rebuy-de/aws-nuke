@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lightsail"
 )
@@ -17,6 +18,11 @@ func init() {
 func ListLightsailDomains(sess *session.Session) ([]Resource, error) {
 	svc := lightsail.New(sess)
 	resources := []Resource{}
+
+	if sess.Config.Region == nil || *sess.Config.Region != endpoints.UsEast1RegionID {
+		// LightsailDomain only supports us-east-1
+		return resources, nil
+	}
 
 	params := &lightsail.GetDomainsInput{}
 
