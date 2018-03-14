@@ -1,0 +1,67 @@
+package resources
+
+import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/servicecatalog"
+)
+
+type ServiceCatalogProvisionedProduct struct {
+	svc            *servicecatalog.ServiceCatalog
+	ID             *string
+	terminateToken *string
+}
+
+func init() {
+	register("ServiceCatalogProvisionedProduct", ListServiceCatalogProvisionedProducts)
+}
+
+func ListServiceCatalogProvisionedProducts(sess *session.Session) ([]Resource, error) {
+	svc := servicecatalog.New(sess)
+	resources := []Resource{}
+
+	params := &servicecatalog.ScanProvisionedProductsInput{
+		PageSize: aws.Int64(20),
+		AccessLevelFilter: &servicecatalog.AccessLevelFilter{
+			Key:   aws.String("Account"),
+			Value: aws.String("self"),
+		},
+	}
+
+	for {
+		resp, err := svc.ScanProvisionedProducts(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, provisionedProduct := range resp.ProvisionedProducts {
+			resources = append(resources, &ServiceCatalogProvisionedProduct{
+				svc:            svc,
+				ID:             provisionedProduct.Id,
+				terminateToken: provisionedProduct.IdempotencyToken,
+			})
+		}
+
+		if resp.NextPageToken == nil {
+			break
+		}
+
+		params.PageToken = resp.NextPageToken
+	}
+
+	return resources, nil
+}
+
+func (f *ServiceCatalogProvisionedProduct) Remove() error {
+
+	_, err := f.svc.TerminateProvisionedProduct(&servicecatalog.TerminateProvisionedProductInput{
+		ProvisionedProductId: f.ID,
+		TerminateToken:       f.terminateToken,
+	})
+
+	return err
+}
+
+func (f *ServiceCatalogProvisionedProduct) String() string {
+	return *f.ID
+}

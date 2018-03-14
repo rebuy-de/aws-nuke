@@ -1,0 +1,90 @@
+package resources
+
+import (
+	"fmt"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/servicecatalog"
+)
+
+type ServiceCatalogTagOptionPortfolioAttachment struct {
+	svc         *servicecatalog.ServiceCatalog
+	tagOptionID *string
+	resourceID  *string
+}
+
+func init() {
+	register("ServiceCatalogTagOptionPortfolioAttachment", ListServiceCatalogTagOptionPortfolioAttachments)
+}
+
+func ListServiceCatalogTagOptionPortfolioAttachments(sess *session.Session) ([]Resource, error) {
+	svc := servicecatalog.New(sess)
+	resources := []Resource{}
+	tagOptions := []*servicecatalog.TagOptionDetail{}
+
+	params := &servicecatalog.ListTagOptionsInput{
+		PageSize: aws.Int64(20),
+	}
+
+	//List all Tag Options
+	for {
+		resp, err := svc.ListTagOptions(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, tagOptionDetail := range resp.TagOptionDetails {
+			tagOptions = append(tagOptions, tagOptionDetail)
+		}
+
+		if resp.PageToken == nil {
+			break
+		}
+
+		params.PageToken = resp.PageToken
+	}
+
+	resourceParams := &servicecatalog.ListResourcesForTagOptionInput{
+		PageSize: aws.Int64(20),
+	}
+
+	for _, tagOption := range tagOptions {
+
+		resourceParams.TagOptionId = tagOption.Id
+		resp, err := svc.ListResourcesForTagOption(resourceParams)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, resourceDetail := range resp.ResourceDetails {
+			resources = append(resources, &ServiceCatalogTagOptionPortfolioAttachment{
+				svc:         svc,
+				tagOptionID: tagOption.Id,
+				resourceID:  resourceDetail.Id,
+			})
+		}
+
+		if resp.PageToken == nil {
+			break
+		}
+
+		resourceParams.PageToken = resp.PageToken
+	}
+
+	return resources, nil
+}
+
+func (f *ServiceCatalogTagOptionPortfolioAttachment) Remove() error {
+
+	_, err := f.svc.DisassociateTagOptionFromResource(&servicecatalog.DisassociateTagOptionFromResourceInput{
+		TagOptionId: f.tagOptionID,
+		ResourceId:  f.resourceID,
+	})
+
+	return err
+}
+
+func (f *ServiceCatalogTagOptionPortfolioAttachment) String() string {
+	return fmt.Sprintf("%s -> %s", *f.tagOptionID, *f.resourceID)
+}
