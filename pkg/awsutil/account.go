@@ -5,8 +5,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
-const DefaultRegion = "us-east-1" // This is the only region which cannot be disabled.
-
 type Account struct {
 	Credentials
 
@@ -19,17 +17,22 @@ func NewAccount(creds Credentials) (*Account, error) {
 		Credentials: creds,
 	}
 
-	sess, err := account.Session(DefaultRegion)
+	defaultSession, err := account.Session(DefaultRegionID)
 	if err != nil {
 		return nil, err
 	}
 
-	identityOutput, err := sts.New(sess).GetCallerIdentity(nil)
+	identityOutput, err := sts.New(defaultSession).GetCallerIdentity(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	aliasesOutput, err := iam.New(sess).ListAccountAliases(nil)
+	globalSession, err := account.Session(GlobalRegionID)
+	if err != nil {
+		return nil, err
+	}
+
+	aliasesOutput, err := iam.New(globalSession).ListAccountAliases(nil)
 	if err != nil {
 		return nil, err
 	}

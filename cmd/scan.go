@@ -21,7 +21,7 @@ func Scan(region Region, resourceTypes []string) <-chan *Item {
 			if err != nil {
 				_, ok := err.(awsutil.ErrSkipRequest)
 				if ok {
-					log.Debug("skipping request: %v", err)
+					log.Debugf("skipping request: %v", err)
 					continue
 				}
 
