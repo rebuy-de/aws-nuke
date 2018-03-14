@@ -19,8 +19,9 @@ func Scan(region Region, resourceTypes []string) <-chan *Item {
 			lister := resources.GetLister(resourceType)
 			rs, err := safeLister(region.Session, lister)
 			if err != nil {
-				_, ok := err.(awsutil.ErrServiceNotInRegion)
+				_, ok := err.(awsutil.ErrSkipRequest)
 				if ok {
+					log.Debug("skipping request: %v", err)
 					continue
 				}
 
