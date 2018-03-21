@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -44,7 +45,9 @@ func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
 			return nil, err
 		}
 
-		if EqualStringPtr(bucketLocationResponse.LocationConstraint, svc.Config.Region) {
+		location := UnPtrString(bucketLocationResponse.LocationConstraint, endpoints.UsEast1RegionID)
+		region := UnPtrString(svc.Config.Region, endpoints.UsEast1RegionID)
+		if location == region {
 			buckets = append(buckets, *out.Name)
 		}
 
