@@ -1,8 +1,8 @@
-hash: 2ea54212006ede8306215e547e5e86426f41c35230fc46e3a05de3b065fbe6d4
-updated: 2018-03-02T14:14:54.059773062+01:00
+hash: 5f31f41b14ecd9d86bd91fad0be7d0868fa849fe61e9c0b2eec3f23c0da2d703
+updated: 2018-03-21T08:30:18.218391883+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: aace5875a5c3b85a3902c6d72b9caed301d64cce
+  version: 3698d5a02699973b1c9c8731b1c81f83bfcfd72f
   subpackages:
   - aws
   - aws/awserr
@@ -20,6 +20,7 @@ imports:
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/sdkio
   - internal/sdkrand
   - internal/shareddefaults
   - private/protocol
@@ -32,25 +33,67 @@ imports:
   - private/protocol/restjson
   - private/protocol/restxml
   - private/protocol/xml/xmlutil
+  - private/signer/v2
+  - service/acm
+  - service/apigateway
   - service/autoscaling
+  - service/cloud9
+  - service/clouddirectory
   - service/cloudformation
+  - service/cloudhsmv2
+  - service/cloudsearch
   - service/cloudtrail
+  - service/cloudwatch
   - service/cloudwatchevents
+  - service/cloudwatchlogs
+  - service/codebuild
+  - service/codecommit
+  - service/codedeploy
+  - service/codepipeline
+  - service/codestar
+  - service/configservice
+  - service/databasemigrationservice
+  - service/datapipeline
+  - service/dax
+  - service/devicefarm
+  - service/directoryservice
   - service/dynamodb
   - service/ec2
   - service/ecr
+  - service/ecs
   - service/efs
   - service/elasticache
+  - service/elasticbeanstalk
+  - service/elasticsearchservice
+  - service/elastictranscoder
   - service/elb
   - service/elbv2
+  - service/emr
+  - service/firehose
+  - service/glue
   - service/iam
+  - service/kinesis
+  - service/kinesisanalytics
+  - service/kinesisvideo
   - service/kms
   - service/lambda
+  - service/lightsail
+  - service/machinelearning
+  - service/mq
   - service/rds
+  - service/redshift
+  - service/rekognition
+  - service/resourcegroups
   - service/route53
   - service/s3
+  - service/servicediscovery
+  - service/sfn
+  - service/simpledb
   - service/sns
+  - service/sqs
+  - service/ssm
   - service/sts
+  - service/workspaces
 - name: github.com/fatih/color
   version: 507f6050b8568533fb3f5504de8e5205fa62a114
 - name: github.com/go-ini/ini
@@ -64,7 +107,7 @@ imports:
 - name: github.com/mattn/go-isatty
   version: 57fdcb988a5c543893cc61bce354a6e24ab70022
 - name: github.com/sirupsen/logrus
-  version: d682213848ed68c0a260ca37d6dd5ace8423f5ba
+  version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
 - name: github.com/spf13/cobra
   version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
 - name: github.com/spf13/pflag
@@ -79,5 +122,5 @@ imports:
   - unix
   - windows
 - name: gopkg.in/yaml.v2
-  version: 7f97868eec74b32b0982dd158a51a446d1da7eb5
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 testImports: []
