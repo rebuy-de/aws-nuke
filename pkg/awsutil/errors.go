@@ -1,14 +1,7 @@
 package awsutil
 
-import "fmt"
+type ErrSkipRequest string
 
-type ErrServiceNotInRegion struct {
-	Region  string
-	Service string
-}
-
-func (err ErrServiceNotInRegion) Error() string {
-	return fmt.Sprintf(
-		"service '%s' is not available in region '%s'",
-		err.Service, err.Region)
+func (err ErrSkipRequest) Error() string {
+	return string(err)
 }
