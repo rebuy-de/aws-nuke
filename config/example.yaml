@@ -1,5 +1,6 @@
 ---
 regions:
+  - "global" # This is for all global resource types e.g. IAM
   - "eu-west-1"
 account-blacklist:
 - 1234567890
