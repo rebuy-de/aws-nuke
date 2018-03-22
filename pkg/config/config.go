@@ -1,4 +1,4 @@
-package cmd
+package config
 
 import (
 	"fmt"
@@ -11,24 +11,24 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type ResourceConfig struct {
+type ResourceTypes struct {
 	Targets  types.Collection `yaml:"targets"`
 	Excludes types.Collection `yaml:"excludes"`
 }
 
-type NukeConfig struct {
-	AccountBlacklist []string                     `yaml:"account-blacklist"`
-	Regions          []string                     `yaml:"regions"`
-	Accounts         map[string]NukeConfigAccount `yaml:"accounts"`
-	ResourceTypes    ResourceConfig               `yaml:"resource-types"`
+type Nuke struct {
+	AccountBlacklist []string           `yaml:"account-blacklist"`
+	Regions          []string           `yaml:"regions"`
+	Accounts         map[string]Account `yaml:"accounts"`
+	ResourceTypes    ResourceTypes      `yaml:"resource-types"`
 }
 
-type NukeConfigAccount struct {
+type Account struct {
 	Filters       map[string][]string `yaml:"filters"`
-	ResourceTypes ResourceConfig      `yaml:"resource-types"`
+	ResourceTypes ResourceTypes       `yaml:"resource-types"`
 }
 
-func LoadConfig(path string) (*NukeConfig, error) {
+func Load(path string) (*Nuke, error) {
 	var err error
 
 	raw, err := ioutil.ReadFile(path)
@@ -36,7 +36,7 @@ func LoadConfig(path string) (*NukeConfig, error) {
 		return nil, err
 	}
 
-	config := new(NukeConfig)
+	config := new(Nuke)
 	err = yaml.Unmarshal(raw, config)
 	if err != nil {
 		return nil, err
@@ -49,11 +49,11 @@ func LoadConfig(path string) (*NukeConfig, error) {
 	return config, nil
 }
 
-func (c *NukeConfig) HasBlacklist() bool {
+func (c *Nuke) HasBlacklist() bool {
 	return c.AccountBlacklist != nil && len(c.AccountBlacklist) > 0
 }
 
-func (c *NukeConfig) InBlacklist(searchID string) bool {
+func (c *Nuke) InBlacklist(searchID string) bool {
 	for _, blacklistID := range c.AccountBlacklist {
 		if blacklistID == searchID {
 			return true
@@ -63,7 +63,7 @@ func (c *NukeConfig) InBlacklist(searchID string) bool {
 	return false
 }
 
-func (c *NukeConfig) ValidateAccount(accountID string, aliases []string) error {
+func (c *Nuke) ValidateAccount(accountID string, aliases []string) error {
 	if !c.HasBlacklist() {
 		return fmt.Errorf("The config file contains an empty blacklist. " +
 			"For safety reasons you need to specify at least one account ID. " +
@@ -96,7 +96,7 @@ func (c *NukeConfig) ValidateAccount(accountID string, aliases []string) error {
 	return nil
 }
 
-func (c *NukeConfig) resolveDeprecations() error {
+func (c *Nuke) resolveDeprecations() error {
 	deprecations := map[string]string{
 		"EC2DhcpOptions":                "EC2DHCPOptions",
 		"EC2InternetGatewayAttachement": "EC2InternetGatewayAttachment",

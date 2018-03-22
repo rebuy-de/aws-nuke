@@ -1,4 +1,4 @@
-package cmd
+package config
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestConfigBlacklist(t *testing.T) {
-	config := new(NukeConfig)
+	config := new(Nuke)
 
 	if config.HasBlacklist() {
 		t.Errorf("HasBlacklist() returned true on a nil backlist.")
@@ -44,16 +44,16 @@ func TestConfigBlacklist(t *testing.T) {
 }
 
 func TestLoadExampleConfig(t *testing.T) {
-	config, err := LoadConfig("test-fixtures/example.yaml")
+	config, err := Load("test-fixtures/example.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expect := NukeConfig{
+	expect := Nuke{
 		AccountBlacklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1"},
-		Accounts: map[string]NukeConfigAccount{
-			"555133742": NukeConfigAccount{
+		Accounts: map[string]Account{
+			"555133742": Account{
 				Filters: map[string][]string{
 					"IAMRole": []string{
 						"uber.admin",
@@ -74,10 +74,10 @@ func TestLoadExampleConfig(t *testing.T) {
 }
 
 func TestResolveDeprecations(t *testing.T) {
-	config := NukeConfig{
+	config := Nuke{
 		AccountBlacklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1"},
-		Accounts: map[string]NukeConfigAccount{
+		Accounts: map[string]Account{
 			"555133742": {
 				Filters: map[string][]string{
 					"IamRole":                 {"uber.admin", "foo.bar"},
@@ -93,7 +93,7 @@ func TestResolveDeprecations(t *testing.T) {
 		},
 	}
 
-	expect := map[string]NukeConfigAccount{
+	expect := map[string]Account{
 		"555133742": {
 			Filters: map[string][]string{
 				"IAMRole":                 {"uber.admin", "foo.bar"},
@@ -118,10 +118,10 @@ func TestResolveDeprecations(t *testing.T) {
 		t.Errorf("  Expected: %#v", expect)
 	}
 
-	invalidConfig := NukeConfig{
+	invalidConfig := Nuke{
 		AccountBlacklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1"},
-		Accounts: map[string]NukeConfigAccount{
+		Accounts: map[string]Account{
 			"555133742": {
 				Filters: map[string][]string{
 					"IamUserAccessKeys": {"X"},
@@ -138,7 +138,7 @@ func TestResolveDeprecations(t *testing.T) {
 }
 
 func TestConfigValidation(t *testing.T) {
-	config, err := LoadConfig("test-fixtures/example.yaml")
+	config, err := Load("test-fixtures/example.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}

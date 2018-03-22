@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
+	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/rebuy-de/aws-nuke/resources"
 )
@@ -12,7 +13,7 @@ import (
 type Nuke struct {
 	Parameters NukeParameters
 	Account    awsutil.Account
-	Config     *NukeConfig
+	Config     *config.Nuke
 
 	ResourceTypes types.Collection
 
