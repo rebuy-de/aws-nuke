@@ -53,7 +53,7 @@ func NewRootCommand() *cobra.Command {
 
 		n := NewNuke(params, *account)
 
-		n.Config, err = config.LoadConfig(n.Parameters.ConfigPath)
+		n.Config, err = config.Load(n.Parameters.ConfigPath)
 		if err != nil {
 			return err
 		}

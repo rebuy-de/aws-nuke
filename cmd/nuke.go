@@ -13,7 +13,7 @@ import (
 type Nuke struct {
 	Parameters NukeParameters
 	Account    awsutil.Account
-	Config     *config.NukeConfig
+	Config     *config.Nuke
 
 	ResourceTypes types.Collection
 
