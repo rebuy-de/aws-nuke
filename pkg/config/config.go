@@ -16,16 +16,16 @@ type ResourceTypes struct {
 	Excludes types.Collection `yaml:"excludes"`
 }
 
+type Account struct {
+	Filters       Filters       `yaml:"filters"`
+	ResourceTypes ResourceTypes `yaml:"resource-types"`
+}
+
 type Nuke struct {
 	AccountBlacklist []string           `yaml:"account-blacklist"`
 	Regions          []string           `yaml:"regions"`
 	Accounts         map[string]Account `yaml:"accounts"`
 	ResourceTypes    ResourceTypes      `yaml:"resource-types"`
-}
-
-type Account struct {
-	Filters       map[string][]string `yaml:"filters"`
-	ResourceTypes ResourceTypes       `yaml:"resource-types"`
 }
 
 func Load(path string) (*Nuke, error) {

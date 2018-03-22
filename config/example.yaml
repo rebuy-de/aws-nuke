@@ -1,24 +1,37 @@
 ---
 regions:
-  - "global" # This is for all global resource types e.g. IAM
-  - "eu-west-1"
+- "global" # This is for all global resource types e.g. IAM
+- "eu-west-1"
+
 account-blacklist:
 - 1234567890
 
+# optional: restrict nuking to these resources
 resource-types:
   targets:
-  - S3Object
+  - IAMUser
+  - IAMUserPolicyAttachment
+  - IAMUserAccessKey
   - S3Bucket
-  excludes:
-  - IAMRole
+  - S3Object
+  - Route53HostedZone
+  - EC2Instance
 
 accounts:
   555133742:
-    resource-types:
-      targets:
-      - S3Bucket
     filters:
-      IAMRole:
-      - "uber.admin"
-      IAMRolePolicyAttachment:
-      - "uber.admin -> AdministratorAccess"
+      IAMUser:
+      - "admin"
+      IAMUserPolicyAttachment:
+      - "admin -> AdministratorAccess"
+      IAMUserAccessKey:
+      - type: "glob"
+        value: "admin -> AKSDAFRETERSDF"
+      S3Bucket:
+      - "s3://my-bucket"
+      S3Object:
+      - type: "glob"
+        value: "s3://my-bucket/*"
+      Route53HostedZone:
+      - type: "contains"
+        value: "(my.zone.loc.)"

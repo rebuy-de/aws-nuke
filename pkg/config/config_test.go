@@ -54,12 +54,12 @@ func TestLoadExampleConfig(t *testing.T) {
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": Account{
-				Filters: map[string][]string{
-					"IAMRole": []string{
-						"uber.admin",
+				Filters: Filters{
+					"IAMRole": {
+						NewExactFilter("uber.admin"),
 					},
-					"IAMRolePolicyAttachment": []string{
-						"uber.admin -> AdministratorAccess",
+					"IAMRolePolicyAttachment": {
+						NewExactFilter("uber.admin -> AdministratorAccess"),
 					},
 				},
 			},
@@ -79,15 +79,25 @@ func TestResolveDeprecations(t *testing.T) {
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": {
-				Filters: map[string][]string{
-					"IamRole":                 {"uber.admin", "foo.bar"},
-					"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+				Filters: Filters{
+					"IamRole": {
+						NewExactFilter("uber.admin"),
+						NewExactFilter("foo.bar"),
+					},
+					"IAMRolePolicyAttachment": {
+						NewExactFilter("uber.admin -> AdministratorAccess"),
+					},
 				},
 			},
 			"2345678901": {
-				Filters: map[string][]string{
-					"ECRrepository":           {"foo:bar", "bar:foo"},
-					"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+				Filters: Filters{
+					"ECRrepository": {
+						NewExactFilter("foo:bar"),
+						NewExactFilter("bar:foo"),
+					},
+					"IAMRolePolicyAttachment": {
+						NewExactFilter("uber.admin -> AdministratorAccess"),
+					},
 				},
 			},
 		},
@@ -95,15 +105,25 @@ func TestResolveDeprecations(t *testing.T) {
 
 	expect := map[string]Account{
 		"555133742": {
-			Filters: map[string][]string{
-				"IAMRole":                 {"uber.admin", "foo.bar"},
-				"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+			Filters: Filters{
+				"IAMRole": {
+					NewExactFilter("uber.admin"),
+					NewExactFilter("foo.bar"),
+				},
+				"IAMRolePolicyAttachment": {
+					NewExactFilter("uber.admin -> AdministratorAccess"),
+				},
 			},
 		},
 		"2345678901": {
-			Filters: map[string][]string{
-				"ECRRepository":           {"foo:bar", "bar:foo"},
-				"IAMRolePolicyAttachment": {"uber.admin -> AdministratorAccess"},
+			Filters: Filters{
+				"ECRRepository": {
+					NewExactFilter("foo:bar"),
+					NewExactFilter("bar:foo"),
+				},
+				"IAMRolePolicyAttachment": {
+					NewExactFilter("uber.admin -> AdministratorAccess"),
+				},
 			},
 		},
 	}
@@ -123,9 +143,11 @@ func TestResolveDeprecations(t *testing.T) {
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": {
-				Filters: map[string][]string{
-					"IamUserAccessKeys": {"X"},
-					"IAMUserAccessKey":  {"Y"},
+				Filters: Filters{
+					"IamUserAccessKeys": {
+						NewExactFilter("X")},
+					"IAMUserAccessKey": {
+						NewExactFilter("Y")},
 				},
 			},
 		},

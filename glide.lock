@@ -1,8 +1,8 @@
-hash: 5f31f41b14ecd9d86bd91fad0be7d0868fa849fe61e9c0b2eec3f23c0da2d703
-updated: 2018-03-21T08:30:18.218391883+01:00
+hash: f42b84807c14eb65c46f208c2f5eede9941515b975982a0767e4e9c47bfc76df
+updated: 2018-03-22T18:10:19.180707305+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 3698d5a02699973b1c9c8731b1c81f83bfcfd72f
+  version: 0a302e6abb548c4a4d22cde8eab1693ee498f202
   subpackages:
   - aws
   - aws/awserr
@@ -79,6 +79,8 @@ imports:
   - service/lambda
   - service/lightsail
   - service/machinelearning
+  - service/mediaconvert
+  - service/medialive
   - service/mq
   - service/rds
   - service/redshift
@@ -87,12 +89,15 @@ imports:
   - service/route53
   - service/s3
   - service/servicediscovery
+  - service/ses
   - service/sfn
   - service/simpledb
   - service/sns
   - service/sqs
   - service/ssm
   - service/sts
+  - service/waf
+  - service/wafregional
   - service/workspaces
 - name: github.com/fatih/color
   version: 507f6050b8568533fb3f5504de8e5205fa62a114
@@ -106,6 +111,8 @@ imports:
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
 - name: github.com/mattn/go-isatty
   version: 57fdcb988a5c543893cc61bce354a6e24ab70022
+- name: github.com/mb0/glob
+  version: 1eb79d2de6c448664e7272f8b9fe1938239e3aaa
 - name: github.com/sirupsen/logrus
   version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
 - name: github.com/spf13/cobra
