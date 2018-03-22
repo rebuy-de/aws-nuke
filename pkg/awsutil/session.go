@@ -63,9 +63,6 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 
 	case c.HasProfile():
 		opts = session.Options{
-			Config: aws.Config{
-				Region: aws.String(region),
-			},
 			SharedConfigState: session.SharedConfigEnable,
 			Profile:           c.Profile,
 		}
@@ -73,13 +70,15 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 	case c.HasKeys():
 		opts = session.Options{
 			Config: aws.Config{
-				Region: aws.String(region),
 				Credentials: credentials.NewStaticCredentials(
 					strings.TrimSpace(c.AccessKeyID),
 					strings.TrimSpace(c.SecretAccessKey),
 					strings.TrimSpace(c.SessionToken),
 				)}}
 	}
+
+	opts.Config.Region = aws.String(region)
+	opts.Config.DisableRestProtocolURICleaning = aws.Bool(true)
 
 	sess, err := session.NewSessionWithOptions(opts)
 	if err != nil {
