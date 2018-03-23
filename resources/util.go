@@ -1,5 +1,7 @@
 package resources
 
+import "github.com/aws/aws-sdk-go/aws/awserr"
+
 func UnPtrBool(ptr *bool, def bool) bool {
 	if ptr == nil {
 		return def
@@ -17,4 +19,13 @@ func EqualStringPtr(v1, v2 *string) bool {
 	}
 
 	return *v1 == *v2
+}
+
+func IsAWSError(err error, code string) bool {
+	aerr, ok := err.(awserr.Error)
+	if !ok {
+		return false
+	}
+
+	return aerr.Code() == code
 }

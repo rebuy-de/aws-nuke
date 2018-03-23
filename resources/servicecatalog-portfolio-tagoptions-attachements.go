@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	log "github.com/sirupsen/logrus"
 )
 
 type ServiceCatalogTagOptionPortfolioAttachment struct {
@@ -31,6 +32,10 @@ func ListServiceCatalogTagOptionPortfolioAttachments(sess *session.Session) ([]R
 	for {
 		resp, err := svc.ListTagOptions(params)
 		if err != nil {
+			if IsAWSError(err, servicecatalog.ErrCodeTagOptionNotMigratedException) {
+				log.Info(err)
+				break
+			}
 			return nil, err
 		}
 
