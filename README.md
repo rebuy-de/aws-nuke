@@ -257,7 +257,7 @@ account-blacklist:
 
 resource-types:
   # don't nuke IAM users
-  exclude:
+  excludes:
   - IAMUser
 
 accounts:
