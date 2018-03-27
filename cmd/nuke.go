@@ -8,6 +8,7 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/rebuy-de/aws-nuke/resources"
+	log "github.com/sirupsen/logrus"
 )
 
 type Nuke struct {
@@ -174,7 +175,16 @@ func (n *Nuke) Filter(item *Item) {
 	}
 
 	for _, filter := range filters {
-		if filter == item.Resource.String() {
+		match, err := filter.Match(item.Resource.String())
+
+		if err != nil {
+			log.Errorf("failed to apply filter: %s", err)
+			item.State = ItemStateFiltered
+			item.Reason = "preventively filtered because filtering failed"
+			return
+		}
+
+		if match {
 			item.State = ItemStateFiltered
 			item.Reason = "filtered by config"
 			return

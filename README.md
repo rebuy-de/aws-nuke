@@ -152,36 +152,36 @@ Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
 eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
-	status code: 400, request id: 9665c066-6bb1-4643-9071-f03481f80d4e
+    status code: 400, request id: 9665c066-6bb1-4643-9071-f03481f80d4e
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - triggered remove
 eu-west-1 - EC2KeyPair - 'test' - triggered remove
 eu-west-1 - EC2RouteTable - 'rtb-ffe91e99' - DependencyViolation: The routeTable 'rtb-ffe91e99' has dependencies and cannot be deleted.
-	status code: 400, request id: 3f667620-3207-4576-ae68-0b75261c0504
+    status code: 400, request id: 3f667620-3207-4576-ae68-0b75261c0504
 eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - DependencyViolation: resource sg-f20f958a has a dependent object
-	status code: 400, request id: 5da5819d-8df5-4ced-b88f-9028e93d3cee
+    status code: 400, request id: 5da5819d-8df5-4ced-b88f-9028e93d3cee
 eu-west-1 - EC2Subnet - 'subnet-154d844e' - DependencyViolation: The subnet 'subnet-154d844e' has dependencies and cannot be deleted.
-	status code: 400, request id: 237186aa-b035-4f64-a6e3-518bed64e240
+    status code: 400, request id: 237186aa-b035-4f64-a6e3-518bed64e240
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - VolumeInUse: Volume vol-0ddfb15461a00c3e2 is currently attached to i-01b489457a60298dd
-	status code: 400, request id: f88ff792-a17f-4fdd-9219-78a937a8d058
+    status code: 400, request id: f88ff792-a17f-4fdd-9219-78a937a8d058
 eu-west-1 - EC2VPC - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
 eu-west-1 - S3Object - 's3://rebuy-terraform-state-138758637120/run-terraform.lock' - triggered remove
 
 Removal requested: 2 waiting, 6 failed, 5 skipped, 0 finished
 
 eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
-	status code: 400, request id: d85d26e8-9f6f-42f0-811a-3b05471b0254
+    status code: 400, request id: d85d26e8-9f6f-42f0-811a-3b05471b0254
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - waiting
 eu-west-1 - EC2KeyPair - 'test' - removed
 eu-west-1 - EC2RouteTable - 'rtb-ffe91e99' - DependencyViolation: The routeTable 'rtb-ffe91e99' has dependencies and cannot be deleted.
-	status code: 400, request id: adb44c0e-3f5b-4977-b2ae-7582f57fb4b7
+    status code: 400, request id: adb44c0e-3f5b-4977-b2ae-7582f57fb4b7
 eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - DependencyViolation: resource sg-f20f958a has a dependent object
-	status code: 400, request id: c4149482-0cd2-40e0-8fa0-84a61d55a158
+    status code: 400, request id: c4149482-0cd2-40e0-8fa0-84a61d55a158
 eu-west-1 - EC2Subnet - 'subnet-154d844e' - DependencyViolation: The subnet 'subnet-154d844e' has dependencies and cannot be deleted.
-	status code: 400, request id: ba0649ba-3be8-41ee-ae0f-6b74a1f0a873
+    status code: 400, request id: ba0649ba-3be8-41ee-ae0f-6b74a1f0a873
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - VolumeInUse: Volume vol-0ddfb15461a00c3e2 is currently attached to i-01b489457a60298dd
-	status code: 400, request id: 9ac3eac5-f1ef-4337-a780-228295a7ebc7
+    status code: 400, request id: 9ac3eac5-f1ef-4337-a780-228295a7ebc7
 eu-west-1 - EC2VPC - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
-	status code: 400, request id: 89f870e9-1ffa-42be-9f73-76c29f088e1a
+    status code: 400, request id: 89f870e9-1ffa-42be-9f73-76c29f088e1a
 
 Removal requested: 1 waiting, 6 failed, 5 skipped, 1 finished
 
@@ -276,6 +276,68 @@ If an exclude is used, then all its resource types will not be deleted.
 aws-nuke resource-types
 ```
 
+### Filtering Resources
+
+It is possible to filter this is important for not deleting the current user
+for example or for resources like S3 Buckets which have a globally shared
+namespace and might be hard to recreate. Currently the filtering is based on
+the resource identifier. The identifier will be printed as the first step of
+*aws-nuke* (eg `i-01b489457a60298dd` for an EC2 instance).
+
+The filters are part of the account-specific configuration and are grouped by
+resource types. This is an example of a config that deletes all resources but
+the `admin` user with its access permissions and two access keys:
+
+```yaml
+---
+regions:
+- global
+- eu-west-1
+
+account-blacklist:
+- 1234567890
+
+accounts:
+  0987654321:
+    filters:
+      IAMUser:
+      - "admin"
+      IAMUserPolicyAttachment:
+      - "admin -> AdministratorAccess"
+      IAMUserAccessKey:
+      - "admin -> AKSDAFRETERSDF"
+      - "admin -> AFGDSGRTEWSFEY"
+```
+
+Any resource whose resource identifier exactly matches any of the filters in
+the list will be skipped. These will be marked as "filtered by config" on the
+*aws-nuke* run.
+
+There are also additional comparision types than an exact match:
+
+* `exact` – The identifier must exactly match the given string. This is the default.
+* `contains` – The identifier must contain the given string.
+* `glob` – The identifier must match against the given [glob
+  pattern](https://en.wikipedia.org/wiki/Glob_(programming)). This means the
+  string might contains wildcards like `*` and `?`. Note that globbing is
+  designed for file paths, so the wildcards do not match the directory
+  separator (`/`). Details about the glob pattern can be found in the [library
+  documentation](https://godoc.org/github.com/mb0/glob).
+* `regex` – The identifier must match against the given regular expression.
+  Details about the syntax can be found in the [library
+  documentation](https://golang.org/pkg/regexp/syntax/).
+
+To use a non-default comparision type, it is required to specify a object with
+`type` and `value` instead of the plain string.
+
+These types can be used to simplify the configuration. For example, it is possible to protect all access keys of a single user by using `glob`:
+
+```yaml
+IAMUserAccessKey:
+- type: glob
+  value: "admin -> *"
+```
+
 ## Install
 
 ### Use Released Binaries
@@ -308,4 +370,3 @@ You can contribute to *aws-nuke* by forking this repository, making your
 changes and creating a Pull Request against our repository. If you are unsure
 how to solve a problem or have other questions about a contributions, please
 create a GitHub issue.
-
