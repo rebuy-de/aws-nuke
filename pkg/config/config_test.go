@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"reflect"
 	"strings"
 	"testing"
@@ -62,7 +63,15 @@ func TestLoadExampleConfig(t *testing.T) {
 						NewExactFilter("uber.admin -> AdministratorAccess"),
 					},
 				},
+				ResourceTypes: ResourceTypes{
+					types.Collection{"S3Bucket"},
+					nil,
+				},
 			},
+		},
+		ResourceTypes: ResourceTypes{
+			Targets: types.Collection{"S3Object", "S3Bucket"},
+			Excludes: types.Collection{"IAMRole"},
 		},
 	}
 
