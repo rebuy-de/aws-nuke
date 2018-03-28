@@ -142,7 +142,10 @@ func skipGlobalHandler(global bool) func(r *request.Request) {
 
 		rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), endpoints.AwsPartitionID, service)
 		if !ok {
-			// This means that the service does not exist and this shouldn't be handled here.
+			// This means that the service does not exist in the endpoints list.
+			if global {
+				r.Error = ErrSkipRequest(fmt.Sprintf("service '%s' is was not found in the endpoint list; assuming it is not global", service))
+			}
 			return
 		}
 
