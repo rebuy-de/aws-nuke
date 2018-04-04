@@ -6,10 +6,11 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 )
 
-var debugFlag = true
+var debugFlag = false
 
 func TestMain(m *testing.M) {
 	// call flag.Parse() here if TestMain uses flags
@@ -37,13 +38,23 @@ func ResourceTypeTest(tfType, tfName, nukeType string, t *testing.T) error {
 	// Validate target resources do not exist yet.
 	planfile, preCreateDiff, err := CreatePlan([]string{tfResourcePath})
 	if len(preCreateDiff) == 0 {
-		return fmt.Errorf(`no resources to create. The resource may already exist: "%s"`, tfResourcePath)
+		return fmt.Errorf(`no resources to create. The AWS resource may already exist or the terraform resource cannot be found: "%s"`, tfResourcePath)
 	}
 	fmt.Println("Plan to create the following resources:", preCreateDiff)
 
 	// Apply the plan. Terraform also creates the resources' dependencies.
 	if err := TerraformApplyPlan(planfile); err != nil {
 		return err
+	}
+
+	// Some resources require other resources to be created. The terraform name
+	// of these required resources start with "dep_".
+	var requiredResources []string
+	for _, r := range preCreateDiff {
+		name := strings.Split(r, ".")[1]
+		if strings.HasPrefix(name, "dep_") {
+			requiredResources = append(requiredResources, r)
+		}
 	}
 
 	// Validate resources have been applied.
@@ -67,8 +78,8 @@ func ResourceTypeTest(tfType, tfName, nukeType string, t *testing.T) error {
 	if err != nil {
 		return err
 	}
-	if len(postNukeDiff) < len(preCreateDiff) {
-		t.Errorf("not all resources created have been destroyed")
+	if len(postNukeDiff) < len(preCreateDiff)-len(requiredResources) {
+		t.Errorf("not all resources created have been destroyed. The following still exist: %v", postNukeDiff)
 	} else if len(postNukeDiff) > len(preCreateDiff) {
 		t.Errorf("more resources have been destroyed than created. The AWS account was likely not empty")
 	}
