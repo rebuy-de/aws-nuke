@@ -1,0 +1,13 @@
+regions:
+- "us-east-1"
+
+account-blacklist:
+- 1234567890
+
+accounts:
+  1234567899:
+    filters:
+      IAMUser:
+      - "admin"
+      IAMUserPolicyAttachment:
+      - "admin -> AdministratorAccess"
