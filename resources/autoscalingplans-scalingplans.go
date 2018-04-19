@@ -18,6 +18,7 @@ func init() {
 
 func ListAutoScalingPlansScalingPlans(sess *session.Session) ([]Resource, error) {
 	svc := autoscalingplans.New(sess)
+	svc.ClientInfo.SigningName = "autoscaling-plans"
 	resources := []Resource{}
 
 	params := &autoscalingplans.DescribeScalingPlansInput{
