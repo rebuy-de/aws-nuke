@@ -42,7 +42,7 @@ func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
 		bucketLocationResponse, err := svc.GetBucketLocation(&s3.GetBucketLocationInput{Bucket: out.Name})
 
 		if err != nil {
-			return nil, err
+			continue
 		}
 
 		location := UnPtrString(bucketLocationResponse.LocationConstraint, endpoints.UsEast1RegionID)
