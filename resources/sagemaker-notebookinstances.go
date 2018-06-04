@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sagemaker"
@@ -49,15 +47,9 @@ func ListSageMakerNotebookInstances(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *SageMakerNotebookInstance) Remove() error {
-
 	_, err := f.svc.DeleteNotebookInstance(&sagemaker.DeleteNotebookInstanceInput{
 		NotebookInstanceName: f.notebookInstanceName,
 	})
-	if err == nil {
-		return nil
-	} else if strings.Contains(err.Error(), "ValidationException: Status (Stopping)") {
-		return nil
-	}
 
 	return err
 }
