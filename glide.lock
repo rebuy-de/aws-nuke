@@ -1,8 +1,8 @@
-hash: f42b84807c14eb65c46f208c2f5eede9941515b975982a0767e4e9c47bfc76df
-updated: 2018-03-22T18:10:19.180707305+01:00
+hash: 9944ab49968deb4882cb37026feee5b8d4a4fc28c3c3e7ed413f24cdca174b48
+updated: 2018-06-04T16:37:36.521378038+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 0a302e6abb548c4a4d22cde8eab1693ee498f202
+  version: 5197757a58a794d49d2d0c50a932997157734100
   subpackages:
   - aws
   - aws/awserr
@@ -37,9 +37,12 @@ imports:
   - service/acm
   - service/apigateway
   - service/autoscaling
+  - service/autoscalingplans
+  - service/batch
   - service/cloud9
   - service/clouddirectory
   - service/cloudformation
+  - service/cloudfront
   - service/cloudhsmv2
   - service/cloudsearch
   - service/cloudtrail
@@ -72,6 +75,7 @@ imports:
   - service/firehose
   - service/glue
   - service/iam
+  - service/iot
   - service/kinesis
   - service/kinesisanalytics
   - service/kinesisvideo
@@ -81,13 +85,21 @@ imports:
   - service/machinelearning
   - service/mediaconvert
   - service/medialive
+  - service/mediapackage
+  - service/mediastore
+  - service/mediastoredata
+  - service/mobile
   - service/mq
+  - service/opsworks
+  - service/opsworkscm
   - service/rds
   - service/redshift
   - service/rekognition
   - service/resourcegroups
   - service/route53
   - service/s3
+  - service/sagemaker
+  - service/servicecatalog
   - service/servicediscovery
   - service/ses
   - service/sfn
@@ -95,12 +107,13 @@ imports:
   - service/sns
   - service/sqs
   - service/ssm
+  - service/storagegateway
   - service/sts
   - service/waf
   - service/wafregional
   - service/workspaces
 - name: github.com/fatih/color
-  version: 507f6050b8568533fb3f5504de8e5205fa62a114
+  version: 5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4
 - name: github.com/go-ini/ini
   version: 5b3e00af70a9484542169a976dcab8d03e601a17
 - name: github.com/inconshreveable/mousetrap
