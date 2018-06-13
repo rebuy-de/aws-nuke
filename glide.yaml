@@ -10,3 +10,6 @@ import:
   subpackages:
   - ssh/terminal
 - package: github.com/mb0/glob
+- package: golang.org/x/sync
+  subpackages:
+  - semaphore

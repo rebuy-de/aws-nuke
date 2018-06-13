@@ -1,8 +1,8 @@
-hash: 9944ab49968deb4882cb37026feee5b8d4a4fc28c3c3e7ed413f24cdca174b48
-updated: 2018-06-04T16:37:36.521378038+02:00
+hash: 32709da91b878dc423588ceb2a676177a3412143d3ff01c04e1aef4d9e54e17b
+updated: 2018-06-08T17:57:00.930971385+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 5197757a58a794d49d2d0c50a932997157734100
+  version: 152e9ff2c63af90874bf3eff1286acee291d0065
   subpackages:
   - aws
   - aws/awserr
@@ -25,6 +25,8 @@ imports:
   - internal/shareddefaults
   - private/protocol
   - private/protocol/ec2query
+  - private/protocol/eventstream
+  - private/protocol/eventstream/eventstreamapi
   - private/protocol/json/jsonutil
   - private/protocol/jsonrpc
   - private/protocol/query
@@ -136,6 +138,14 @@ imports:
   version: 81e90905daefcd6fd217b62423c0908922eadb30
   subpackages:
   - ssh/terminal
+- name: golang.org/x/net
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
+  subpackages:
+  - context
+- name: golang.org/x/sync
+  version: 1d60e4601c6fd243af51cc01ddf169918a5407ca
+  subpackages:
+  - semaphore
 - name: golang.org/x/sys
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
