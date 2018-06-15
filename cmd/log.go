@@ -16,9 +16,10 @@ var (
 )
 
 var (
-	ColorRegion       = *color.New(color.Bold)
-	ColorResourceType = *color.New()
-	ColorResourceID   = *color.New(color.Bold)
+	ColorRegion             = *color.New(color.Bold)
+	ColorResourceType       = *color.New()
+	ColorResourceID         = *color.New(color.Bold)
+	ColorResourceProperties = *color.New(color.Italic)
 )
 
 func Log(region Region, resourceType string, r resources.Resource, c color.Color, msg string) {
@@ -28,5 +29,12 @@ func Log(region Region, resourceType string, r resources.Resource, c color.Color
 	fmt.Printf(" - ")
 	ColorResourceID.Printf("'%s'", r.String())
 	fmt.Printf(" - ")
+
+	rProp, ok := r.(resources.ResourcePropertyGetter)
+	if ok {
+		ColorResourceProperties.Print(rProp.Properties())
+		fmt.Printf(" - ")
+	}
+
 	c.Printf("%s\n", msg)
 }

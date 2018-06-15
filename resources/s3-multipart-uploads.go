@@ -79,6 +79,13 @@ func (e *S3MultipartUpload) Remove() error {
 	return nil
 }
 
+func (e *S3MultipartUpload) Properties() Properties {
+	return NewProperties().
+		Set("Bucket", e.bucket).
+		Set("Key", e.key).
+		Set("UploadID", e.uploadID)
+}
+
 func (e *S3MultipartUpload) String() string {
 	return fmt.Sprintf("s3://%s/%s#%s", e.bucket, e.key, e.uploadID)
 }

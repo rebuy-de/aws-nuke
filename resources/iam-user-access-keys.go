@@ -62,6 +62,12 @@ func (e *IAMUserAccessKey) Remove() error {
 	return nil
 }
 
+func (e *IAMUserAccessKey) Properties() Properties {
+	return NewProperties().
+		Set("UserName", e.userName).
+		Set("AccessKeyID", e.accessKeyId)
+}
+
 func (e *IAMUserAccessKey) String() string {
 	return fmt.Sprintf("%s -> %s", e.userName, e.accessKeyId)
 }

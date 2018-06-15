@@ -62,6 +62,13 @@ func (e *IAMUserPolicyAttachment) Remove() error {
 	return nil
 }
 
+func (e *IAMUserPolicyAttachment) Properties() Properties {
+	return NewProperties().
+		Set("PolicyArn", e.policyArn).
+		Set("PolicyName", e.policyName).
+		Set("RoleName", e.roleName)
+}
+
 func (e *IAMUserPolicyAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
 }

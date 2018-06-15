@@ -70,6 +70,12 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 	return nil
 }
 
+func (e *IAMRolePolicyAttachment) Properties() Properties {
+	return NewProperties().
+		Set("RoleName", e.roleName).
+		Set("PolicyName", e.policyName)
+}
+
 func (e *IAMRolePolicyAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
 }
