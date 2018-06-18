@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/rebuy-de/aws-nuke.svg?branch=master)](https://travis-ci.org/rebuy-de/aws-nuke)
 [![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)]()
-[![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)]()
+[![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/releases)
 
 Nuke a whole AWS account and delete all its resources.
 
