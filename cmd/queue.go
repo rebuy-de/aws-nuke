@@ -1,8 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/rebuy-de/aws-nuke/resources"
-	"github.com/sirupsen/logrus"
 )
 
 type ItemState int
@@ -52,18 +53,17 @@ func (i *Item) List() ([]resources.Resource, error) {
 	return listers[i.Type](i.Region.Session)
 }
 
-func (i *Item) GetProperty(key string) string {
+func (i *Item) GetProperty(key string) (string, error) {
 	if key == "" {
-		return i.Resource.String()
+		return i.Resource.String(), nil
 	}
 
 	getter, ok := i.Resource.(resources.ResourcePropertyGetter)
 	if !ok {
-		logrus.Warnf("%T does not support custom properties", i.Resource)
-		return ""
+		return "", fmt.Errorf("%T does not support custom properties", i.Resource)
 	}
 
-	return getter.Properties().Get(key)
+	return getter.Properties().Get(key), nil
 }
 
 type Queue []*Item

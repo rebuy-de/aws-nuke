@@ -8,7 +8,6 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/rebuy-de/aws-nuke/resources"
-	log "github.com/sirupsen/logrus"
 )
 
 type Nuke struct {
@@ -143,7 +142,11 @@ func (n *Nuke) Scan() error {
 		items := Scan(region, resourceTypes)
 		for item := range items {
 			queue = append(queue, item)
-			n.Filter(item)
+			err := n.Filter(item)
+			if err != nil {
+				return err
+			}
+
 			item.Print()
 		}
 	}
@@ -156,7 +159,7 @@ func (n *Nuke) Scan() error {
 	return nil
 }
 
-func (n *Nuke) Filter(item *Item) {
+func (n *Nuke) Filter(item *Item) error {
 	accountConfig := n.Config.Accounts[n.Account.ID()]
 
 	checker, ok := item.Resource.(resources.Filter)
@@ -165,34 +168,35 @@ func (n *Nuke) Filter(item *Item) {
 		if err != nil {
 			item.State = ItemStateFiltered
 			item.Reason = err.Error()
-			return
+
+			// Not returning the error, since it could be because of a failed
+			// request to the API. We do not want to block the whole nuking,
+			// because of an issue on AWS side.
+			return nil
 		}
 	}
 
 	filters, ok := accountConfig.Filters[item.Type]
 	if !ok {
-		return
+		return nil
 	}
 
 	for _, filter := range filters {
-		prop := item.GetProperty(filter.Property)
+		prop, err := item.GetProperty(filter.Property)
 
 		match, err := filter.Match(prop)
 		if err != nil {
-			log.Errorf("failed to apply filter: %s", err)
-			item.State = ItemStateFiltered
-			item.Reason = "preventively filtered because filtering failed"
-			return
+			return err
 		}
 
 		if match {
 			item.State = ItemStateFiltered
 			item.Reason = "filtered by config"
-			return
+			return nil
 		}
 	}
 
-	return
+	return nil
 }
 
 func (n *Nuke) HandleQueue() {
