@@ -37,7 +37,7 @@ func Load(path string) (*Nuke, error) {
 	}
 
 	config := new(Nuke)
-	err = yaml.Unmarshal(raw, config)
+	err = yaml.UnmarshalStrict(raw, config)
 	if err != nil {
 		return nil, err
 	}
