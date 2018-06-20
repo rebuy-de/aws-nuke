@@ -62,6 +62,12 @@ func (s *scanner) list(region Region, resourceType string) {
 			return
 		}
 
+		_, ok = err.(awsutil.ErrUnknownEndpoint)
+		if ok {
+			log.Warnf("skipping request: %v", err)
+			return
+		}
+
 		dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
 		log.Errorf("Listing %s failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", resourceType, dump)
 		return

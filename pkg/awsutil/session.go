@@ -2,6 +2,7 @@ package awsutil
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -145,6 +146,13 @@ func skipGlobalHandler(global bool) func(r *request.Request) {
 			// This means that the service does not exist in the endpoints list.
 			if global {
 				r.Error = ErrSkipRequest(fmt.Sprintf("service '%s' is was not found in the endpoint list; assuming it is not global", service))
+			} else {
+				host := r.HTTPRequest.URL.Hostname()
+				_, err := net.LookupAddr(host)
+				if err != nil {
+					log.Debug(err)
+					r.Error = ErrUnknownEndpoint(fmt.Sprintf("DNS lookup failed for %s; assuming it does not exist in this region", host))
+				}
 			}
 			return
 		}
