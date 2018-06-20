@@ -99,9 +99,8 @@ func (r *Route53ResourceRecordSet) Remove() error {
 
 func (r *Route53ResourceRecordSet) Properties() Properties {
 	return NewProperties().
-		Set("ZoneID", *r.hostedZoneId).
-		Set("Name", *r.data.Name).
-		Set("Type", *r.data.Type)
+		Set("Name", r.data.Name).
+		Set("Type", r.data.Type)
 }
 
 func (r *Route53ResourceRecordSet) String() string {

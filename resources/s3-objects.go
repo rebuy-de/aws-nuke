@@ -100,8 +100,8 @@ func (e *S3Object) Properties() Properties {
 	return NewProperties().
 		Set("Bucket", e.bucket).
 		Set("Key", e.key).
-		Set("VersionID", *e.versionID).
-		Set("IsLatest", fmt.Sprint(e.latest))
+		Set("VersionID", e.versionID).
+		Set("IsLatest", e.latest)
 }
 
 func (e *S3Object) String() string {

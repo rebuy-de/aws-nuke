@@ -52,8 +52,7 @@ func (hz *Route53HostedZone) Remove() error {
 
 func (hz *Route53HostedZone) Properties() Properties {
 	return NewProperties().
-		Set("ZoneID", *hz.id).
-		Set("Name", *hz.name)
+		Set("Name", hz.name)
 }
 
 func (hz *Route53HostedZone) String() string {
