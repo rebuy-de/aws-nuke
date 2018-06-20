@@ -11,7 +11,7 @@ type IAMUserPolicyAttachment struct {
 	svc        *iam.IAM
 	policyArn  string
 	policyName string
-	roleName   string
+	userName   string
 }
 
 func init() {
@@ -41,7 +41,7 @@ func ListIAMUserPolicyAttachments(sess *session.Session) ([]Resource, error) {
 				svc:        svc,
 				policyArn:  *pol.PolicyArn,
 				policyName: *pol.PolicyName,
-				roleName:   *role.UserName,
+				userName:   *role.UserName,
 			})
 		}
 	}
@@ -53,7 +53,7 @@ func (e *IAMUserPolicyAttachment) Remove() error {
 	_, err := e.svc.DetachUserPolicy(
 		&iam.DetachUserPolicyInput{
 			PolicyArn: &e.policyArn,
-			UserName:  &e.roleName,
+			UserName:  &e.userName,
 		})
 	if err != nil {
 		return err
@@ -66,9 +66,9 @@ func (e *IAMUserPolicyAttachment) Properties() Properties {
 	return NewProperties().
 		Set("PolicyArn", e.policyArn).
 		Set("PolicyName", e.policyName).
-		Set("RoleName", e.roleName)
+		Set("UserName", e.userName)
 }
 
 func (e *IAMUserPolicyAttachment) String() string {
-	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
+	return fmt.Sprintf("%s -> %s", e.userName, e.policyName)
 }
