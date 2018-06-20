@@ -1,8 +1,8 @@
-hash: 32709da91b878dc423588ceb2a676177a3412143d3ff01c04e1aef4d9e54e17b
-updated: 2018-06-08T17:57:00.930971385+02:00
+hash: 5bb2ddbf958355a02147c802d26acd6d4ab726d62916d87cce3a8980d7b98446
+updated: 2018-06-20T11:11:30.684752902+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 152e9ff2c63af90874bf3eff1286acee291d0065
+  version: f0bbc646e13bfc451409e960cf33239aabb8671a
   subpackages:
   - aws
   - aws/awserr
@@ -14,6 +14,7 @@ imports:
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
   - aws/credentials/stscreds
+  - aws/csm
   - aws/defaults
   - aws/ec2metadata
   - aws/endpoints
@@ -152,5 +153,5 @@ imports:
   - unix
   - windows
 - name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
+  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 testImports: []
