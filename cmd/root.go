@@ -55,6 +55,7 @@ func NewRootCommand() *cobra.Command {
 
 		n.Config, err = config.Load(n.Parameters.ConfigPath)
 		if err != nil {
+			log.Error("Failed to parse config file.")
 			return err
 		}
 

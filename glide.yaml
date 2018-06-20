@@ -13,3 +13,5 @@ import:
 - package: golang.org/x/sync
   subpackages:
   - semaphore
+- package: gopkg.in/yaml.v2
+  version: ^2.2.1
