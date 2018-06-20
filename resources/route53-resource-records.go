@@ -97,6 +97,12 @@ func (r *Route53ResourceRecordSet) Remove() error {
 	return nil
 }
 
+func (r *Route53ResourceRecordSet) Properties() Properties {
+	return NewProperties().
+		Set("Name", r.data.Name).
+		Set("Type", r.data.Type)
+}
+
 func (r *Route53ResourceRecordSet) String() string {
 	return *r.data.Name
 }

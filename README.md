@@ -93,7 +93,7 @@ eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
 eu-west-1 - EC2VPC - 'vpc-c6159fa1' - would remove
 eu-west-1 - IAMUserAccessKey - 'my-user -> ABCDEFGHIJKLMNOPQRST' - would remove
-eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - would remove
+eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - [UserName: "my-user", PolicyArn: "arn:aws:iam::aws:policy/AdministratorAccess", PolicyName: "AdministratorAccess"] - would remove
 eu-west-1 - IAMUser - 'my-user' - would remove
 Scan complete: 13 total, 11 nukeable, 2 filtered.
 
@@ -143,7 +143,7 @@ eu-west-1 - EC2Subnet - 'subnet-154d844e' - would remove
 eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - would remove
 eu-west-1 - EC2VPC - 'vpc-c6159fa1' - would remove
 eu-west-1 - IAMUserAccessKey - 'my-user -> ABCDEFGHIJKLMNOPQRST' - filtered by config
-eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - filtered by config
+eu-west-1 - IAMUserPolicyAttachment - 'my-user -> AdministratorAccess' - [UserName: "my-user", PolicyArn: "arn:aws:iam::aws:policy/AdministratorAccess", PolicyName: "AdministratorAccess"] - would remove
 eu-west-1 - IAMUser - 'my-user' - filtered by config
 Scan complete: 13 total, 8 nukeable, 5 filtered.
 
@@ -313,6 +313,29 @@ Any resource whose resource identifier exactly matches any of the filters in
 the list will be skipped. These will be marked as "filtered by config" on the
 *aws-nuke* run.
 
+#### Filter Properties
+
+Some resources support filtering via properties. When a resource support these
+properties, they will be listed in the output like in this example:
+
+```
+global - IAMUserPolicyAttachment - 'admin -> AdministratorAccess' - [RoleName: "admin", PolicyArn: "arn:aws:iam::aws:policy/AdministratorAccess", PolicyName: "AdministratorAccess"] - would remove
+```
+
+To use properties, it is required to specify a object with `properties` and
+`value` instead of the plain string.
+
+These types can be used to simplify the configuration. For example, it is
+possible to protect all access keys of a single user:
+
+```yaml
+IAMUserAccessKey:
+- property: UserName
+  value: "admin"
+```
+
+#### Filter Types
+
 There are also additional comparision types than an exact match:
 
 * `exact` – The identifier must exactly match the given string. This is the default.
@@ -330,12 +353,24 @@ There are also additional comparision types than an exact match:
 To use a non-default comparision type, it is required to specify a object with
 `type` and `value` instead of the plain string.
 
-These types can be used to simplify the configuration. For example, it is possible to protect all access keys of a single user by using `glob`:
+These types can be used to simplify the configuration. For example, it is
+possible to protect all access keys of a single user by using `glob`:
 
 ```yaml
 IAMUserAccessKey:
 - type: glob
   value: "admin -> *"
+```
+
+#### Using Them Together
+
+It is also possible to use Filter Properties and Filter Types together. For example to protect all Hosted Zone of a specific TLD:
+
+```yaml
+Route53HostedZone:
+- property: Name
+  type: glob
+  value: "*.rebuy.cloud."
 ```
 
 ## Install

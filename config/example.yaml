@@ -23,15 +23,17 @@ accounts:
       IAMUser:
       - "admin"
       IAMUserPolicyAttachment:
-      - "admin -> AdministratorAccess"
+      - property: RoleName
+        value: "admin"
       IAMUserAccessKey:
-      - type: "glob"
-        value: "admin -> AKSDAFRETERSDF"
+      - property: UserName
+        value: "admin"
       S3Bucket:
       - "s3://my-bucket"
       S3Object:
       - type: "glob"
         value: "s3://my-bucket/*"
       Route53HostedZone:
-      - type: "contains"
-        value: "(my.zone.loc.)"
+      - property: Name
+        type: "glob"
+        value: "*.zone.loc."

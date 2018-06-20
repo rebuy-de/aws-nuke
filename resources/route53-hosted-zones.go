@@ -50,6 +50,11 @@ func (hz *Route53HostedZone) Remove() error {
 	return nil
 }
 
+func (hz *Route53HostedZone) Properties() Properties {
+	return NewProperties().
+		Set("Name", hz.name)
+}
+
 func (hz *Route53HostedZone) String() string {
 	return fmt.Sprintf("%s (%s)", *hz.id, *hz.name)
 }

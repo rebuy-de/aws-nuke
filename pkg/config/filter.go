@@ -11,7 +11,8 @@ import (
 type FilterType string
 
 const (
-	FilterTypeExact    FilterType = "exact"
+	FilterTypeEmpty    FilterType = ""
+	FilterTypeExact               = "exact"
 	FilterTypeGlob                = "glob"
 	FilterTypeRegex               = "regex"
 	FilterTypeContains            = "contains"
@@ -20,12 +21,16 @@ const (
 type Filters map[string][]Filter
 
 type Filter struct {
-	Type  FilterType
-	Value string
+	Property string
+	Type     FilterType
+	Value    string
 }
 
 func (f Filter) Match(o string) (bool, error) {
 	switch f.Type {
+	case FilterTypeEmpty:
+		fallthrough
+
 	case FilterTypeExact:
 		return f.Value == o, nil
 
@@ -64,6 +69,7 @@ func (f *Filter) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	f.Type = FilterType(m["type"])
 	f.Value = m["value"]
+	f.Property = m["property"]
 	return nil
 }
 

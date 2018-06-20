@@ -175,8 +175,9 @@ func (n *Nuke) Filter(item *Item) {
 	}
 
 	for _, filter := range filters {
-		match, err := filter.Match(item.Resource.String())
+		prop := item.GetProperty(filter.Property)
 
+		match, err := filter.Match(prop)
 		if err != nil {
 			log.Errorf("failed to apply filter: %s", err)
 			item.State = ItemStateFiltered

@@ -6,8 +6,9 @@ import (
 )
 
 type EC2VPC struct {
-	svc *ec2.EC2
-	id  *string
+	svc       *ec2.EC2
+	id        *string
+	isDefault *bool
 }
 
 func init() {
@@ -25,8 +26,9 @@ func ListEC2VPCs(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, vpc := range resp.Vpcs {
 		resources = append(resources, &EC2VPC{
-			svc: svc,
-			id:  vpc.VpcId,
+			svc:       svc,
+			id:        vpc.VpcId,
+			isDefault: vpc.IsDefault,
 		})
 	}
 
@@ -44,6 +46,12 @@ func (e *EC2VPC) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *EC2VPC) Properties() Properties {
+	return NewProperties().
+		Set("ID", e.id).
+		Set("IsDefault", e.isDefault)
 }
 
 func (e *EC2VPC) String() string {

@@ -96,6 +96,14 @@ func (e *S3Object) Remove() error {
 	return nil
 }
 
+func (e *S3Object) Properties() Properties {
+	return NewProperties().
+		Set("Bucket", e.bucket).
+		Set("Key", e.key).
+		Set("VersionID", e.versionID).
+		Set("IsLatest", e.latest)
+}
+
 func (e *S3Object) String() string {
 	if e.versionID != nil && *e.versionID != "null" && !e.latest {
 		return fmt.Sprintf("s3://%s/%s#%s", e.bucket, e.key, *e.versionID)
