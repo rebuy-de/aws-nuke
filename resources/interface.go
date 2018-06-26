@@ -13,12 +13,16 @@ type ResourceLister func(s *session.Session) ([]Resource, error)
 
 type Resource interface {
 	Remove() error
-	String() string
 }
 
 type Filter interface {
 	Resource
 	Filter() error
+}
+
+type LegacyStringer interface {
+	Resource
+	String() string
 }
 
 type ResourcePropertyGetter interface {

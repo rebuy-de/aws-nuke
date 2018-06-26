@@ -255,7 +255,7 @@ func (n *Nuke) HandleWait(item *Item, cache map[string][]resources.Resource) {
 	}
 
 	for _, r := range left {
-		if r.String() == item.Resource.String() {
+		if item.Equals(r) {
 			checker, ok := r.(resources.Filter)
 			if ok {
 				err := checker.Filter()
