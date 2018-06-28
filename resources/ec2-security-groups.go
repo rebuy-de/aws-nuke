@@ -81,6 +81,11 @@ func (sg *EC2SecurityGroup) Remove() error {
 	return nil
 }
 
+func (sg *EC2SecurityGroup) Properties() Properties {
+	return NewProperties().
+		Set("GroupName", sg.name)
+}
+
 func (sg *EC2SecurityGroup) String() string {
 	return *sg.id
 }
