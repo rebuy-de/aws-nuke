@@ -1,8 +1,8 @@
-hash: aa2bb192973ac96106698ce46882a6973cf387adda979f0608da5936a5d2a41d
-updated: 2018-06-20T14:22:08.563529112+02:00
+hash: 01142183b627232b1d2238b543ea77a4fca1a892530134b37e01959e4dcfbacc
+updated: 2018-06-29T22:46:48.304701692+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: f0bbc646e13bfc451409e960cf33239aabb8671a
+  version: 5e98666858b97db54a61044bb1150d3b81436860
   subpackages:
   - aws
   - aws/awserr
@@ -38,7 +38,9 @@ imports:
   - private/protocol/xml/xmlutil
   - private/signer/v2
   - service/acm
+  - service/acmpca
   - service/apigateway
+  - service/appstream
   - service/autoscaling
   - service/autoscalingplans
   - service/batch
@@ -68,6 +70,7 @@ imports:
   - service/ecr
   - service/ecs
   - service/efs
+  - service/eks
   - service/elasticache
   - service/elasticbeanstalk
   - service/elasticsearchservice
@@ -91,8 +94,10 @@ imports:
   - service/mediapackage
   - service/mediastore
   - service/mediastoredata
+  - service/mediatailor
   - service/mobile
   - service/mq
+  - service/neptune
   - service/opsworks
   - service/opsworkscm
   - service/rds
@@ -102,6 +107,7 @@ imports:
   - service/route53
   - service/s3
   - service/sagemaker
+  - service/secretsmanager
   - service/servicecatalog
   - service/servicediscovery
   - service/ses
@@ -117,6 +123,10 @@ imports:
   - service/workspaces
 - name: github.com/fatih/color
   version: 5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4
+- name: github.com/glenn-brown/golang-pkg-pcre
+  version: 48bb82a8b8ceea98f4e97825b43870f6ba1970d6
+  subpackages:
+  - src/pkg/pcre
 - name: github.com/go-ini/ini
   version: 5b3e00af70a9484542169a976dcab8d03e601a17
 - name: github.com/inconshreveable/mousetrap

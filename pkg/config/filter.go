@@ -51,10 +51,9 @@ func (f Filter) Match(o string) (bool, error) {
 		return re.MatchString(o), nil
 
 	case FilterTypePcre:
-		re, cerr := pcre.Compile(string(f.Value),0)
-		err := errors.New(cerr.Message)
+		re, err := pcre.Compile(string(f.Value), 0)
 		if err != nil {
-			return false, err
+			return false, errors.New(err.Message)
 		}
 		m := re.MatcherString(o, 0)
 		return m.Matches(), nil
