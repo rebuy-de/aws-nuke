@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type S3MultipartUpload struct {
@@ -79,8 +80,8 @@ func (e *S3MultipartUpload) Remove() error {
 	return nil
 }
 
-func (e *S3MultipartUpload) Properties() Properties {
-	return NewProperties().
+func (e *S3MultipartUpload) Properties() types.Properties {
+	return types.NewProperties().
 		Set("Bucket", e.bucket).
 		Set("Key", e.key).
 		Set("UploadID", e.uploadID)

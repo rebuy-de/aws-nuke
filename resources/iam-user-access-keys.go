@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type IAMUserAccessKey struct {
@@ -62,8 +63,8 @@ func (e *IAMUserAccessKey) Remove() error {
 	return nil
 }
 
-func (e *IAMUserAccessKey) Properties() Properties {
-	return NewProperties().
+func (e *IAMUserAccessKey) Properties() types.Properties {
+	return types.NewProperties().
 		Set("UserName", e.userName).
 		Set("AccessKeyID", e.accessKeyId)
 }

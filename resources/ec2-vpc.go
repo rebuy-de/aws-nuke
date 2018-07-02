@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2VPC struct {
@@ -48,8 +49,8 @@ func (e *EC2VPC) Remove() error {
 	return nil
 }
 
-func (e *EC2VPC) Properties() Properties {
-	return NewProperties().
+func (e *EC2VPC) Properties() types.Properties {
+	return types.NewProperties().
 		Set("ID", e.id).
 		Set("IsDefault", e.isDefault)
 }

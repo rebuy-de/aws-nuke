@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2SecurityGroup struct {
@@ -81,8 +82,8 @@ func (sg *EC2SecurityGroup) Remove() error {
 	return nil
 }
 
-func (sg *EC2SecurityGroup) Properties() Properties {
-	return NewProperties().
+func (sg *EC2SecurityGroup) Properties() types.Properties {
+	return types.NewProperties().
 		Set("Name", sg.name)
 }
 

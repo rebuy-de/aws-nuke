@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type IAMUserPolicyAttachment struct {
@@ -62,8 +63,8 @@ func (e *IAMUserPolicyAttachment) Remove() error {
 	return nil
 }
 
-func (e *IAMUserPolicyAttachment) Properties() Properties {
-	return NewProperties().
+func (e *IAMUserPolicyAttachment) Properties() types.Properties {
+	return types.NewProperties().
 		Set("PolicyArn", e.policyArn).
 		Set("PolicyName", e.policyName).
 		Set("UserName", e.userName)

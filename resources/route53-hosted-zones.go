@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func init() {
@@ -50,8 +51,8 @@ func (hz *Route53HostedZone) Remove() error {
 	return nil
 }
 
-func (hz *Route53HostedZone) Properties() Properties {
-	return NewProperties().
+func (hz *Route53HostedZone) Properties() types.Properties {
+	return types.NewProperties().
 		Set("Name", hz.name)
 }
 
