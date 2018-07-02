@@ -373,6 +373,17 @@ Route53HostedZone:
   value: "*.rebuy.cloud."
 ```
 
+####  Inverting Filter Results
+
+Any filter result can be inverted by using `invert: true`, for example:
+```yaml
+CloudFormationStack:
+- property: Name
+  value: "foo"
+  invert: true
+```
+In this case *any* CloudFormationStack ***but*** the ones called "foo" will be filtered. Be aware that *aws-nuke* internally takes every resource and applies every filter on it. If a filter matches, it marks the node as filtered.
+
 ## Install
 
 ### Use Released Binaries

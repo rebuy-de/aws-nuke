@@ -189,6 +189,10 @@ func (n *Nuke) Filter(item *Item) error {
 			return err
 		}
 
+		if IsTrue(filter.Invert) {
+			match = !match
+		}
+
 		if match {
 			item.State = ItemStateFiltered
 			item.Reason = "filtered by config"
