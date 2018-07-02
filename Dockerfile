@@ -3,7 +3,7 @@
 
 FROM golang:1.8-alpine
 
-RUN apk add --no-cache git make gcc pcre-dev libc-dev
+RUN apk add --no-cache git make gcc pcre-dev libc-dev musl-dev
 
 # Configure Go
 ENV GOPATH /go
