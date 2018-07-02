@@ -11,7 +11,7 @@ script:
   docker run
   --name aws-nuke
   --entrypoint "sh"
-  -e CGO_ENABLED=0
+  -e CGO_ENABLED=1
   --workdir "/go/src/github.com/rebuy-de/aws-nuke"
   aws-nuke
   -euxc "make xc && mkdir releases && mv aws-nuke-* releases"
