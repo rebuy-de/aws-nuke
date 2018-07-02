@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/mb0/glob"
-	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 	"errors"
+	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 )
 
 type FilterType string

@@ -1,8 +1,8 @@
 hash: 01142183b627232b1d2238b543ea77a4fca1a892530134b37e01959e4dcfbacc
-updated: 2018-06-29T22:46:48.304701692+02:00
+updated: 2018-07-02T14:23:07.150388456+02:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 5e98666858b97db54a61044bb1150d3b81436860
+  version: 852052a10992d92f68b9a60862a3312292524903
   subpackages:
   - aws
   - aws/awserr
@@ -125,8 +125,6 @@ imports:
   version: 5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4
 - name: github.com/glenn-brown/golang-pkg-pcre
   version: 48bb82a8b8ceea98f4e97825b43870f6ba1970d6
-  subpackages:
-  - src/pkg/pcre
 - name: github.com/go-ini/ini
   version: 5b3e00af70a9484542169a976dcab8d03e601a17
 - name: github.com/inconshreveable/mousetrap
