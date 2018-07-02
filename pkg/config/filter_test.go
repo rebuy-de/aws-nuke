@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/rebuy-de/aws-nuke/pkg/config"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 func TestUnmarshalFilter(t *testing.T) {
@@ -42,6 +42,11 @@ func TestUnmarshalFilter(t *testing.T) {
 			yaml:     `{"type":"contains","value":"mba"}`,
 			match:    []string{"bimbaz", "mba", "bi mba z"},
 			mismatch: []string{"bim-baz"},
+		},
+		{
+			yaml:     `{"type": "pcre","value":"^((?!foo).)*$"}`,
+			match:    []string{"goo", "moo", "mustard", ""},
+			mismatch: []string{"foo", "foom", "foozball", "foofoo", "barfoo"},
 		},
 	}
 

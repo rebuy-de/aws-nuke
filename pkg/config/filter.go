@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/mb0/glob"
+	"errors"
+	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 )
 
 type FilterType string
@@ -16,6 +18,7 @@ const (
 	FilterTypeGlob                = "glob"
 	FilterTypeRegex               = "regex"
 	FilterTypeContains            = "contains"
+	FilterTypePcre                = "pcre"
 )
 
 type Filters map[string][]Filter
@@ -46,6 +49,14 @@ func (f Filter) Match(o string) (bool, error) {
 			return false, err
 		}
 		return re.MatchString(o), nil
+
+	case FilterTypePcre:
+		re, err := pcre.Compile(string(f.Value), 0)
+		if err != nil {
+			return false, errors.New(err.Message)
+		}
+		m := re.MatcherString(o, 0)
+		return m.Matches(), nil
 
 	default:
 		return false, fmt.Errorf("unknown type %s", f.Type)

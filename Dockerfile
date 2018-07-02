@@ -3,7 +3,7 @@
 
 FROM golang:1.8-alpine
 
-RUN apk add --no-cache git make
+RUN apk add --no-cache git make gcc pcre-dev libc-dev musl-dev
 
 # Configure Go
 ENV GOPATH /go
@@ -23,6 +23,6 @@ RUN go install
 
 COPY . /go/src/github.com/rebuy-de/aws-nuke
 WORKDIR /go/src/github.com/rebuy-de/aws-nuke
-RUN CGO_ENABLED=0 make install
+RUN CGO_ENABLED=1 make install
 
 ENTRYPOINT ["/go/bin/aws-nuke"]

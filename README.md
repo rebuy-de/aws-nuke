@@ -349,6 +349,9 @@ There are also additional comparision types than an exact match:
 * `regex` – The identifier must match against the given regular expression.
   Details about the syntax can be found in the [library
   documentation](https://golang.org/pkg/regexp/syntax/).
+* `pcre` – The identifier must match against the given Perl-compatible regular
+  expression (PCRE). Details about the syntax can be found in the original
+  [library documentation](https://www.pcre.org/current/doc/html/pcre2pattern.html) or at the [Perl regular expressions page](http://perldoc.perl.org/perlre.html).
 
 To use a non-default comparision type, it is required to specify a object with
 `type` and `value` instead of the plain string.
