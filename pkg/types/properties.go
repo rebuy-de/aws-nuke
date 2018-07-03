@@ -51,3 +51,30 @@ func (p Properties) Get(key string) string {
 
 	return value
 }
+
+func (p Properties) Equals(o Properties) bool {
+	if p == nil && o == nil {
+		return true
+	}
+
+	if p == nil || o == nil {
+		return false
+	}
+
+	if len(p) != len(o) {
+		return false
+	}
+
+	for k, pv := range p {
+		ov, ok := o[k]
+		if !ok {
+			return false
+		}
+
+		if pv != ov {
+			return false
+		}
+	}
+
+	return true
+}

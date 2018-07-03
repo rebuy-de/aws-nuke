@@ -55,7 +55,11 @@ func (i *Item) List() ([]resources.Resource, error) {
 
 func (i *Item) GetProperty(key string) (string, error) {
 	if key == "" {
-		return i.Resource.String(), nil
+		stringer, ok := i.Resource.(resources.LegacyStringer)
+		if !ok {
+			return "", fmt.Errorf("%T does not support legacy IDs", i.Resource)
+		}
+		return stringer.String(), nil
 	}
 
 	getter, ok := i.Resource.(resources.ResourcePropertyGetter)
@@ -64,6 +68,34 @@ func (i *Item) GetProperty(key string) (string, error) {
 	}
 
 	return getter.Properties().Get(key), nil
+}
+
+func (i *Item) Equals(o resources.Resource) bool {
+	iType := fmt.Sprintf("%T", i.Resource)
+	oType := fmt.Sprintf("%T", o)
+	if iType != oType {
+		return false
+	}
+
+	iStringer, iOK := i.Resource.(resources.LegacyStringer)
+	oStringer, oOK := o.(resources.LegacyStringer)
+	if iOK != oOK {
+		return false
+	}
+	if iOK && oOK {
+		return iStringer.String() == oStringer.String()
+	}
+
+	iGetter, iOK := i.Resource.(resources.ResourcePropertyGetter)
+	oGetter, oOK := o.(resources.ResourcePropertyGetter)
+	if iOK != oOK {
+		return false
+	}
+	if iOK && oOK {
+		return iGetter.Properties().Equals(oGetter.Properties())
+	}
+
+	return false
 }
 
 type Queue []*Item

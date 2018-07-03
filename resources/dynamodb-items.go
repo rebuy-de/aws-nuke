@@ -6,12 +6,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/sirupsen/logrus"
 )
 
 type DynamoDBTableItem struct {
 	svc   *dynamodb.DynamoDB
 	id    map[string]*dynamodb.AttributeValue
-	table Resource
+	table *DynamoDBTable
 }
 
 func init() {
@@ -27,9 +28,16 @@ func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
 	}
 
 	resources := make([]Resource, 0)
-	for _, dynamoTable := range tables {
+	for _, dynamoTableResource := range tables {
+		dynamoTable, ok := dynamoTableResource.(*DynamoDBTable)
+		if !ok {
+			// This should never happen (tm).
+			logrus.Errorf("Unable to cast DynamoDBTable.")
+			continue
+		}
+
 		describeParams := &dynamodb.DescribeTableInput{
-			TableName: aws.String(dynamoTable.String()),
+			TableName: &dynamoTable.id,
 		}
 
 		descResp, descErr := svc.DescribeTable(describeParams)
@@ -39,7 +47,7 @@ func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
 
 		key := *descResp.Table.KeySchema[0].AttributeName
 		params := &dynamodb.ScanInput{
-			TableName:            aws.String(dynamoTable.String()),
+			TableName:            &dynamoTable.id,
 			ProjectionExpression: aws.String(key),
 		}
 
@@ -63,7 +71,7 @@ func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
 func (i *DynamoDBTableItem) Remove() error {
 	params := &dynamodb.DeleteItemInput{
 		Key:       i.id,
-		TableName: aws.String(i.table.String()),
+		TableName: &i.table.id,
 	}
 
 	_, err := i.svc.DeleteItem(params)
