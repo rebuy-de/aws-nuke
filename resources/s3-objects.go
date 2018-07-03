@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type S3Object struct {
@@ -96,8 +97,8 @@ func (e *S3Object) Remove() error {
 	return nil
 }
 
-func (e *S3Object) Properties() Properties {
-	return NewProperties().
+func (e *S3Object) Properties() types.Properties {
+	return types.NewProperties().
 		Set("Bucket", e.bucket).
 		Set("Key", e.key).
 		Set("VersionID", e.versionID).

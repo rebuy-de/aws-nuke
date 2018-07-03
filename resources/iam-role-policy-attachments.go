@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type IAMRolePolicyAttachment struct {
@@ -70,8 +71,8 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 	return nil
 }
 
-func (e *IAMRolePolicyAttachment) Properties() Properties {
-	return NewProperties().
+func (e *IAMRolePolicyAttachment) Properties() types.Properties {
+	return types.NewProperties().
 		Set("RoleName", e.roleName).
 		Set("PolicyName", e.policyName)
 }

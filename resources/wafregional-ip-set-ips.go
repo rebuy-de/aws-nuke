@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/aws/aws-sdk-go/service/wafregional"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type WAFRegionalIPSetIP struct {
@@ -81,8 +82,8 @@ func (r *WAFRegionalIPSetIP) Remove() error {
 	return err
 }
 
-func (r *WAFRegionalIPSetIP) Properties() Properties {
-	return NewProperties().
+func (r *WAFRegionalIPSetIP) Properties() types.Properties {
+	return types.NewProperties().
 		Set("IPSetID", r.ipSetid).
 		Set("Type", r.descriptor.Type).
 		Set("Value", r.descriptor.Value)

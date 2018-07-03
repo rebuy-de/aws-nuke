@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type Route53ResourceRecordSet struct {
@@ -97,8 +98,8 @@ func (r *Route53ResourceRecordSet) Remove() error {
 	return nil
 }
 
-func (r *Route53ResourceRecordSet) Properties() Properties {
-	return NewProperties().
+func (r *Route53ResourceRecordSet) Properties() types.Properties {
+	return types.NewProperties().
 		Set("Name", r.data.Name).
 		Set("Type", r.data.Type)
 }

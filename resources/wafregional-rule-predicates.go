@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/aws/aws-sdk-go/service/wafregional"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type WAFRegionalRulePredicate struct {
@@ -78,8 +79,8 @@ func (r *WAFRegionalRulePredicate) Remove() error {
 	return err
 }
 
-func (r *WAFRegionalRulePredicate) Properties() Properties {
-	return NewProperties().
+func (r *WAFRegionalRulePredicate) Properties() types.Properties {
+	return types.NewProperties().
 		Set("RuleID", r.ruleID).
 		Set("Type", r.predicate.Type).
 		Set("Negated", r.predicate.Negated).
