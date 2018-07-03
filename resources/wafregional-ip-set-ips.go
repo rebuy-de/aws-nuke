@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/waf"
@@ -87,8 +85,4 @@ func (r *WAFRegionalIPSetIP) Properties() types.Properties {
 		Set("IPSetID", r.ipSetid).
 		Set("Type", r.descriptor.Type).
 		Set("Value", r.descriptor.Value)
-}
-
-func (r *WAFRegionalIPSetIP) String() string {
-	return fmt.Sprintf("%s -> %s:%s", *r.ipSetid, *r.descriptor.Type, *r.descriptor.Value)
 }

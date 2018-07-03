@@ -28,6 +28,8 @@ func (p Properties) Set(key string, value interface{}) Properties {
 	switch v := value.(type) {
 	case *string:
 		p[key] = *v
+	case []byte:
+		p[key] = string(v)
 	case *bool:
 		p[key] = fmt.Sprint(*v)
 	case *int64:
