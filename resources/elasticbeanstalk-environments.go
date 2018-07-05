@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticbeanstalk"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ElasticBeanstalkEnvironment struct {
-	svc *elasticbeanstalk.ElasticBeanstalk
-	ID  *string
+	svc  *elasticbeanstalk.ElasticBeanstalk
+	ID   *string
+	name *string
 }
 
 func init() {
@@ -32,8 +34,9 @@ func ListElasticBeanstalkEnvironments(sess *session.Session) ([]Resource, error)
 
 		for _, environment := range output.Environments {
 			resources = append(resources, &ElasticBeanstalkEnvironment{
-				svc: svc,
-				ID:  environment.EnvironmentId,
+				svc:  svc,
+				ID:   environment.EnvironmentId,
+				name: environment.EnvironmentName,
 			})
 		}
 
@@ -56,6 +59,11 @@ func (f *ElasticBeanstalkEnvironment) Remove() error {
 	})
 
 	return err
+}
+
+func (e *ElasticBeanstalkEnvironment) Properties() types.Properties {
+	return types.NewProperties().
+		Set("Name", e.name)
 }
 
 func (f *ElasticBeanstalkEnvironment) String() string {
