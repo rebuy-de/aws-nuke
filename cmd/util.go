@@ -38,3 +38,7 @@ func ResolveResourceTypes(base types.Collection, include, exclude []types.Collec
 
 	return base
 }
+
+func IsTrue(s string) bool {
+	return strings.TrimSpace(strings.ToLower(s)) == "true"
+}

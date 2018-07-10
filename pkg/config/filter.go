@@ -24,6 +24,7 @@ type Filter struct {
 	Property string
 	Type     FilterType
 	Value    string
+	Invert   string
 }
 
 func (f Filter) Match(o string) (bool, error) {
@@ -70,6 +71,7 @@ func (f *Filter) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	f.Type = FilterType(m["type"])
 	f.Value = m["value"]
 	f.Property = m["property"]
+	f.Invert = m["invert"]
 	return nil
 }
 
