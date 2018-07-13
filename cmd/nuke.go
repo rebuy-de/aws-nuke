@@ -66,7 +66,7 @@ func (n *Nuke) Run() error {
 	}
 
 	if !n.Parameters.NoDryRun {
-		fmt.Println("Would delete these resources. Provide --no-dry-run to actually destroy resources.")
+		fmt.Println("The above resources would be deleted with the supplied configuration. Provide --no-dry-run to actually destroy resources.")
 		return nil
 	}
 
