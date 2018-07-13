@@ -27,14 +27,26 @@ func (p Properties) Set(key string, value interface{}) Properties {
 
 	switch v := value.(type) {
 	case *string:
+		if v == nil {
+			return p
+		}
 		p[key] = *v
 	case []byte:
 		p[key] = string(v)
 	case *bool:
+		if v == nil {
+			return p
+		}
 		p[key] = fmt.Sprint(*v)
 	case *int64:
+		if v == nil {
+			return p
+		}
 		p[key] = fmt.Sprint(*v)
 	case *int:
+		if v == nil {
+			return p
+		}
 		p[key] = fmt.Sprint(*v)
 	default:
 		// Fallback to Stringer interface. This produces gibberish on pointers,
