@@ -16,6 +16,7 @@ resource-types:
   - S3Object
   - Route53HostedZone
   - EC2Instance
+  - CloudFormationStack
 
 accounts:
   555133742:
@@ -37,3 +38,6 @@ accounts:
       - property: Name
         type: "glob"
         value: "*.zone.loc."
+      CloudFormationStack:
+      - property: "tag:team"
+        value: "myTeam"
