@@ -42,8 +42,7 @@ func (cfs *CloudFormationStack) Remove() error {
 
 func (cfs *CloudFormationStack) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.
-		Set("Name", cfs.stack.StackName)
+	properties.Set("Name", cfs.stack.StackName)
 	for _, tagValue := range cfs.stack.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
