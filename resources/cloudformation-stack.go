@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
-	)
+)
 
 func init() {
 	register("CloudFormationStack", ListCloudFormationStacks)
@@ -21,7 +21,7 @@ func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, stack := range resp.Stacks {
 		resources = append(resources, &CloudFormationStack{
-			svc:  svc,
+			svc:   svc,
 			stack: stack,
 		})
 	}
@@ -29,7 +29,7 @@ func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 }
 
 type CloudFormationStack struct {
-	svc  *cloudformation.CloudFormation
+	svc   *cloudformation.CloudFormation
 	stack *cloudformation.Stack
 }
 
@@ -45,9 +45,10 @@ func (cfs *CloudFormationStack) Properties() types.Properties {
 	properties.
 		Set("Name", cfs.stack.StackName)
 	for _, tagValue := range cfs.stack.Tags {
-		properties.Set("tag:"+*tagValue.Key, tagValue.Value);
+		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
-	return properties;
+
+	return properties
 }
 
 func (cfs *CloudFormationStack) String() string {
