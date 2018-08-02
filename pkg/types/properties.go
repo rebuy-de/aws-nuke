@@ -57,6 +57,22 @@ func (p Properties) Set(key string, value interface{}) Properties {
 	return p
 }
 
+func (p Properties) SetTag(tagKey *string, tagValue interface{}) Properties {
+	if tagKey == nil {
+		return p
+	}
+
+	keyStr := *tagKey
+
+	sanitizedTagKey := strings.Trim(keyStr, " ")
+	if sanitizedTagKey == "" {
+		return p
+	}
+
+	key := "tag:" + keyStr
+	return p.Set(key, tagValue)
+}
+
 func (p Properties) Get(key string) string {
 	value, ok := p[key]
 	if !ok {
