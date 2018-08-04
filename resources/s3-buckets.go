@@ -3,9 +3,11 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func init() {
@@ -72,6 +74,35 @@ func (e *S3Bucket) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *S3Bucket) retrieveTags() ([]*s3.Tag, error) {
+	input := &s3.GetBucketTaggingInput{
+		Bucket: aws.String(e.name),
+	}
+
+	result, err := e.svc.GetBucketTagging(input)
+	if err != nil {
+		return nil, err
+	}
+
+	return result.TagSet, nil
+}
+
+func (e *S3Bucket) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", e.name)
+
+	tags, err := e.retrieveTags()
+	if err != nil {
+		return properties
+	}
+
+	for _, tag := range tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (e *S3Bucket) String() string {
