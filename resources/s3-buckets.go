@@ -24,9 +24,12 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, name := range buckets {
+		tags, _ := retrieveTags(svc, name)
+
 		resources = append(resources, &S3Bucket{
 			svc:  svc,
 			name: name,
+			tags: tags,
 		})
 	}
 
@@ -61,6 +64,7 @@ func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
 type S3Bucket struct {
 	svc  *s3.S3
 	name string
+	tags []*s3.Tag
 }
 
 func (e *S3Bucket) Remove() error {
@@ -76,14 +80,14 @@ func (e *S3Bucket) Remove() error {
 	return nil
 }
 
-func (e *S3Bucket) retrieveTags() ([]*s3.Tag, error) {
+func retrieveTags(svc *s3.S3, bucketName string) ([]*s3.Tag, error) {
 	input := &s3.GetBucketTaggingInput{
-		Bucket: aws.String(e.name),
+		Bucket: aws.String(bucketName),
 	}
 
-	result, err := e.svc.GetBucketTagging(input)
+	result, err := svc.GetBucketTagging(input)
 	if err != nil {
-		return nil, err
+		return make([]*s3.Tag, 0), err
 	}
 
 	return result.TagSet, nil
@@ -93,12 +97,7 @@ func (e *S3Bucket) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Name", e.name)
 
-	tags, err := e.retrieveTags()
-	if err != nil {
-		return properties
-	}
-
-	for _, tag := range tags {
+	for _, tag := range e.tags {
 		properties.SetTag(tag.Key, tag.Value)
 	}
 
