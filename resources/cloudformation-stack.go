@@ -13,18 +13,28 @@ func init() {
 func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 	svc := cloudformation.New(sess)
 
-	resp, err := svc.DescribeStacks(nil)
-	if err != nil {
-		return nil, err
+	params := &cloudformation.DescribeStacksInput{}
+	resources := make([]Resource, 0)
+
+	for {
+		resp, err := svc.DescribeStacks(params)
+		if err != nil {
+			return nil, err
+		}
+		for _, stack := range resp.Stacks {
+			resources = append(resources, &CloudFormationStack{
+				svc:   svc,
+				stack: stack,
+			})
+		}
+
+		if resp.NextToken == nil {
+			break
+		}
+
+		params.NextToken = resp.NextToken
 	}
 
-	resources := make([]Resource, 0)
-	for _, stack := range resp.Stacks {
-		resources = append(resources, &CloudFormationStack{
-			svc:   svc,
-			stack: stack,
-		})
-	}
 	return resources, nil
 }
 
