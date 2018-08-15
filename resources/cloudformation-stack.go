@@ -44,9 +44,20 @@ type CloudFormationStack struct {
 }
 
 func (cfs *CloudFormationStack) Remove() error {
-	_, err := cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
+	retainableResources, err := cfs.svc.ListStackResources(&cloudformation.ListStackResourcesInput{
 		StackName: cfs.stack.StackName,
 	})
+
+	retain := make([]*string, 0)
+	for _, r := range retainableResources.StackResourceSummaries {
+		retain = append(retain, r.LogicalResourceId)
+	}
+
+	cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
+		StackName:       cfs.stack.StackName,
+		RetainResources: retain,
+	})
+
 	return err
 }
 
