@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"errors"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -44,10 +46,35 @@ type CloudFormationStack struct {
 }
 
 func (cfs *CloudFormationStack) Remove() error {
-	_, err := cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
-		StackName: cfs.stack.StackName,
-	})
-	return err
+	if *cfs.stack.StackStatus != cloudformation.StackStatusDeleteFailed {
+		cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
+			StackName: cfs.stack.StackName,
+		})
+		return errors.New("CFS might not be deleted after this run.")
+	} else {
+		// This means the CFS has undeleteable resources.
+		// In order to move on with nuking, we retain them in the deletion.
+		retainableResources, err := cfs.svc.ListStackResources(&cloudformation.ListStackResourcesInput{
+			StackName: cfs.stack.StackName,
+		})
+		if err != nil {
+			return err
+		}
+
+		retain := make([]*string, 0)
+		for _, r := range retainableResources.StackResourceSummaries {
+			retain = append(retain, r.LogicalResourceId)
+		}
+
+		_, err = cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
+			StackName:       cfs.stack.StackName,
+			RetainResources: retain,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 }
 
 func (cfs *CloudFormationStack) Properties() types.Properties {
