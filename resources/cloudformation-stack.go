@@ -46,16 +46,24 @@ type CloudFormationStack struct {
 }
 
 func (cfs *CloudFormationStack) Remove() error {
-	if *cfs.stack.StackStatus != cloudformation.StackStatusDeleteFailed {
+	o, err := cfs.svc.DescribeStacks(&cloudformation.DescribeStacksInput{
+		StackName: cfs.stack.StackName,
+	})
+	stack := o.Stacks[0]
+	if err != nil {
+		return err
+	}
+
+	if *stack.StackStatus != cloudformation.StackStatusDeleteFailed {
 		cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
-			StackName: cfs.stack.StackName,
+			StackName: stack.StackName,
 		})
 		return errors.New("CFS might not be deleted after this run.")
 	} else {
 		// This means the CFS has undeleteable resources.
 		// In order to move on with nuking, we retain them in the deletion.
 		retainableResources, err := cfs.svc.ListStackResources(&cloudformation.ListStackResourcesInput{
-			StackName: cfs.stack.StackName,
+			StackName: stack.StackName,
 		})
 		if err != nil {
 			return err
@@ -67,7 +75,7 @@ func (cfs *CloudFormationStack) Remove() error {
 		}
 
 		_, err = cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
-			StackName:       cfs.stack.StackName,
+			StackName:       stack.StackName,
 			RetainResources: retain,
 		})
 		if err != nil {
