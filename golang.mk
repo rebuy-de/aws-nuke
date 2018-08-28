@@ -1,10 +1,3 @@
-# Source: https://github.com/rebuy-de/golang-template
-# Version: 1.3.1
-# Dependencies:
-# * Glide
-# * gocov (https://github.com/axw/gocov)
-# * gocov-html (https://github.com/matm/gocov-html)
-
 NAME=$(notdir $(PACKAGE))
 
 BUILD_VERSION=$(shell git describe --always --dirty --tags | tr '-' '.' )
@@ -19,6 +12,8 @@ BUILD_FLAGS=-ldflags "\
 	-X '$(PACKAGE)/cmd.BuildHash=$(BUILD_HASH)' \
 	-X '$(PACKAGE)/cmd.BuildEnvironment=$(BUILD_USER)@$(BUILD_MACHINE)' \
 "
+
+BUILD_ARTIFACT=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)
 
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GOPKGS=$(shell glide nv)
@@ -59,12 +54,15 @@ cov:
 build: vendor
 	go build \
 		$(BUILD_FLAGS) \
-		-o $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)
-	ln -sf $(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH) $(NAME)
+		-o $(BUILD_ARTIFACT)
+	ln -sf $(BUILD_ARTIFACT) $(NAME)
+
+compress: build
+	tar czf $(BUILD_ARTIFACT).tar.gz $(BUILD_ARTIFACT)
 
 xc:
-	GOOS=linux GOARCH=amd64 make build
-	GOOS=darwin GOARCH=amd64 make build
+	GOOS=linux GOARCH=amd64 make compress
+	GOOS=darwin GOARCH=amd64 make compress
 
 install: test
 	go install \
