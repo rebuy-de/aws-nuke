@@ -17,7 +17,7 @@ func NewAccount(creds Credentials) (*Account, error) {
 		Credentials: creds,
 	}
 
-	defaultSession, err := account.Session(DefaultRegionID)
+	defaultSession, err := account.NewSession(DefaultRegionID)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func NewAccount(creds Credentials) (*Account, error) {
 		return nil, err
 	}
 
-	globalSession, err := account.Session(GlobalRegionID)
+	globalSession, err := account.NewSession(GlobalRegionID)
 	if err != nil {
 		return nil, err
 	}
