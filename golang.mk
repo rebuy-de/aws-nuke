@@ -7,6 +7,7 @@ BUILD_MACHINE=$(shell echo $$HOSTNAME)
 BUILD_USER=$(shell whoami)
 
 BUILD_FLAGS=-ldflags "\
+	-s -w \
 	-X '$(PACKAGE)/cmd.BuildVersion=$(BUILD_VERSION)' \
 	-X '$(PACKAGE)/cmd.BuildDate=$(BUILD_DATE)' \
 	-X '$(PACKAGE)/cmd.BuildHash=$(BUILD_HASH)' \
