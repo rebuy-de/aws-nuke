@@ -101,6 +101,10 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 }
 
 func (c *Credentials) Session(region string) (*session.Session, error) {
+	if c.cache == nil {
+		c.cache = map[string]*session.Session{}
+	}
+
 	sess, ok := c.cache[region]
 	if ok {
 		return sess, nil
