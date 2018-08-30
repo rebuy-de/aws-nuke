@@ -24,8 +24,6 @@ type Credentials struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	SessionToken    string
-
-	cache map[string]*session.Session
 }
 
 func (c *Credentials) HasProfile() bool {
@@ -98,20 +96,6 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 	sess.Handlers.Validate.PushFront(skipGlobalHandler(global))
 
 	return sess, nil
-}
-
-func (c *Credentials) Session(region string) (*session.Session, error) {
-	sess, ok := c.cache[region]
-	if ok {
-		return sess, nil
-	}
-
-	sess, err := c.NewSession(region)
-	if err != nil {
-		c.cache[region] = sess
-	}
-
-	return sess, err
 }
 
 func skipMissingServiceInRegionHandler(r *request.Request) {

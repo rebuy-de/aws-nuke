@@ -129,7 +129,7 @@ func (n *Nuke) Scan() error {
 	queue := make(Queue, 0)
 
 	for _, regionName := range n.Config.Regions {
-		sess, err := n.Account.Session(regionName)
+		sess, err := n.Account.NewSession(regionName)
 		if err != nil {
 			return err
 		}
