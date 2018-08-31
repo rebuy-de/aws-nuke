@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -24,6 +25,8 @@ type Credentials struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	SessionToken    string
+
+	session *session.Session
 }
 
 func (c *Credentials) HasProfile() bool {
@@ -46,8 +49,50 @@ func (c *Credentials) Validate() error {
 	return nil
 }
 
+func (c *Credentials) rootSession() (*session.Session, error) {
+	if c.session == nil {
+		var opts session.Options
+
+		region := DefaultRegionID
+		log.Debugf("creating new root session in %s", region)
+
+		switch {
+		case c.HasProfile() == c.HasKeys():
+			return nil, fmt.Errorf("You have to specify a profile or credentials for at least one region.")
+
+		case c.HasProfile():
+			opts = session.Options{
+				SharedConfigState:       session.SharedConfigEnable,
+				Profile:                 c.Profile,
+				AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
+			}
+
+		case c.HasKeys():
+			opts = session.Options{
+				Config: aws.Config{
+					Credentials: credentials.NewStaticCredentials(
+						strings.TrimSpace(c.AccessKeyID),
+						strings.TrimSpace(c.SecretAccessKey),
+						strings.TrimSpace(c.SessionToken),
+					)}}
+		}
+
+		opts.Config.Region = aws.String(region)
+		opts.Config.DisableRestProtocolURICleaning = aws.Bool(true)
+
+		sess, err := session.NewSessionWithOptions(opts)
+		if err != nil {
+			return nil, err
+		}
+
+		c.session = sess
+	}
+
+	return c.session, nil
+}
+
 func (c *Credentials) NewSession(region string) (*session.Session, error) {
-	var opts session.Options
+	log.Debugf("creating new session in %s", region)
 
 	global := false
 
@@ -56,33 +101,14 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 		global = true
 	}
 
-	switch {
-	case c.HasProfile() == c.HasKeys():
-		return nil, fmt.Errorf("You have to specify a profile or credentials for at least one region.")
-
-	case c.HasProfile():
-		opts = session.Options{
-			SharedConfigState: session.SharedConfigEnable,
-			Profile:           c.Profile,
-		}
-
-	case c.HasKeys():
-		opts = session.Options{
-			Config: aws.Config{
-				Credentials: credentials.NewStaticCredentials(
-					strings.TrimSpace(c.AccessKeyID),
-					strings.TrimSpace(c.SecretAccessKey),
-					strings.TrimSpace(c.SessionToken),
-				)}}
-	}
-
-	opts.Config.Region = aws.String(region)
-	opts.Config.DisableRestProtocolURICleaning = aws.Bool(true)
-
-	sess, err := session.NewSessionWithOptions(opts)
+	root, err := c.rootSession()
 	if err != nil {
 		return nil, err
 	}
+
+	sess := root.Copy(&aws.Config{
+		Region: &region,
+	})
 
 	sess.Handlers.Send.PushFront(func(r *request.Request) {
 		log.Debugf("sending AWS request:\n%s", DumpRequest(r.HTTPRequest))
