@@ -106,6 +106,10 @@ func NewRootCommand() *cobra.Command {
 		&params.Force, "force", false,
 		"Don't ask for confirmation before deleting resources. "+
 			"Instead it waits 15s before continuing.")
+	command.PersistentFlags().IntVar(
+		&params.MaxWaitRetries, "max-wait-retries", 0,
+		"If specified, the program will exit if resources are stuck in waiting for this many iterations."+
+			"0 (default) disables early exit)")
 
 	command.AddCommand(NewVersionCommand())
 	command.AddCommand(NewResourceTypesCommand())

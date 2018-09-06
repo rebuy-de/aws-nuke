@@ -84,6 +84,7 @@ func (n *Nuke) Run() error {
 	}
 
 	failCount := 0
+	waitingCount := 0
 
 	for {
 		n.HandleQueue()
@@ -95,6 +96,16 @@ func (n *Nuke) Run() error {
 			failCount = failCount + 1
 		} else {
 			failCount = 0
+		}
+		if n.Parameters.MaxWaitRetries != 0 && n.items.Count(ItemStateWaiting, ItemStatePending) > 0 && n.items.Count(ItemStateNew) == 0 {
+			if waitingCount >= n.Parameters.MaxWaitRetries {
+				fmt.Printf("Max wait retries of %d exceeded.\n\n", n.Parameters.MaxWaitRetries)
+
+				break
+			}
+			waitingCount = waitingCount + 1
+		} else {
+			waitingCount = 0
 		}
 		if n.items.Count(ItemStateNew, ItemStatePending, ItemStateFailed, ItemStateWaiting) == 0 {
 			break
