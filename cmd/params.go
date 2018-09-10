@@ -13,6 +13,8 @@ type NukeParameters struct {
 
 	NoDryRun bool
 	Force    bool
+
+	MaxWaitRetries int
 }
 
 func (p *NukeParameters) Validate() error {
