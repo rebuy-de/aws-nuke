@@ -3,9 +3,11 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 func init() {
@@ -62,11 +64,31 @@ type S3Bucket struct {
 }
 
 func (e *S3Bucket) Remove() error {
+	err := e.RemoveAllObjects()
+	if err != nil {
+		return err
+	}
+
 	params := &s3.DeleteBucketInput{
 		Bucket: &e.name,
 	}
 
-	_, err := e.svc.DeleteBucket(params)
+	_, err = e.svc.DeleteBucket(params)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (e *S3Bucket) RemoveAllObjects() error {
+	params := &s3.ListObjectsInput{
+		Bucket: &e.name,
+	}
+
+	iterator := s3manager.NewDeleteListIterator(e.svc, params)
+
+	err := s3manager.NewBatchDeleteWithClient(e.svc).Delete(aws.BackgroundContext(), iterator)
 	if err != nil {
 		return err
 	}
