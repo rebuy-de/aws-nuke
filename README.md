@@ -33,7 +33,7 @@ To reduce the blast radius of accidents, there are some safety precautions:
    you want to nuke is part of this blacklist, *aws-nuke* will abort. It is
    recommended, that you add every production account to this blacklist.
 6. To ensure you don't just ignore the blacklisting feature, the blacklist must
-   contains at least one Account ID.
+   contain at least one Account ID.
 7. The config file contains account specific settings (eg. filters). The
    account you want to nuke must be explicitly listed there.
 8. To ensure to not accidentally delete a random account, it is required to
