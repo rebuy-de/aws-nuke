@@ -70,8 +70,11 @@ func (cfs *CloudFormationStack) Remove() error {
 		}
 
 		retain := make([]*string, 0)
+
 		for _, r := range retainableResources.StackResourceSummaries {
-			retain = append(retain, r.LogicalResourceId)
+			if *r.ResourceStatus != "DELETE_COMPLETE" {
+				retain = append(retain, r.LogicalResourceId)
+			}
 		}
 
 		_, err = cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
