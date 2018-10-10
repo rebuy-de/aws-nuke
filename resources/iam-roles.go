@@ -20,7 +20,6 @@ func init() {
 
 func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
-	// REMOVE: Baesd on https://github.com/rebuy-de/aws-nuke/blob/master/resources/ecr-repository.go
 	params := &iam.ListRolesInput{}
 	resources := make([]Resource, 0)
 
