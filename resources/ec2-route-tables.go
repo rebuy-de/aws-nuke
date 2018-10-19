@@ -3,11 +3,12 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2RouteTable struct {
-	svc *ec2.EC2
-	id  *string
+	svc        *ec2.EC2
+	routeTable *ec2.RouteTable
 }
 
 func init() {
@@ -25,8 +26,8 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.RouteTables {
 		resources = append(resources, &EC2RouteTable{
-			svc: svc,
-			id:  out.RouteTableId,
+			svc:        svc,
+			routeTable: out,
 		})
 	}
 
@@ -35,7 +36,7 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 
 func (e *EC2RouteTable) Remove() error {
 	params := &ec2.DeleteRouteTableInput{
-		RouteTableId: e.id,
+		RouteTableId: e.routeTable.RouteTableId,
 	}
 
 	_, err := e.svc.DeleteRouteTable(params)
@@ -46,6 +47,14 @@ func (e *EC2RouteTable) Remove() error {
 	return nil
 }
 
+func (e *EC2RouteTable) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.routeTable.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
+}
+
 func (e *EC2RouteTable) String() string {
-	return *e.id
+	return *e.routeTable.RouteTableId
 }
