@@ -46,9 +46,31 @@ func ListIoTThings(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (f *IoTThing) Remove() error {
+func (f *IoTThing) DetachAllPrincipals() error {
+	output, err := f.svc.ListThingPrincipals(&iot.ListThingPrincipalsInput{
+		ThingName: f.name,
+	})
+	if err != nil {
+		return err
+	}
+	for _, principal := range output.Principals {
+		_, err := f.svc.DetachThingPrincipal(&iot.DetachThingPrincipalInput{
+			Principal: principal,
+			ThingName: f.name,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
 
-	_, err := f.svc.DeleteThing(&iot.DeleteThingInput{
+func (f *IoTThing) Remove() error {
+	err := f.DetachAllPrincipals()
+	if err != nil {
+		return err
+	}
+	_, err = f.svc.DeleteThing(&iot.DeleteThingInput{
 		ThingName:       f.name,
 		ExpectedVersion: f.version,
 	})
