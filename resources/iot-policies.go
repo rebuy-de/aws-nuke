@@ -44,41 +44,8 @@ func ListIoTPolicies(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (f *IoTPolicy) DetachAllPrincipals() error {
-	params := &iot.ListTargetsForPolicyInput{
-		PolicyName: f.name,
-		PageSize:   aws.Int64(25),
-	}
-	for {
-		output, err := f.svc.ListTargetsForPolicy(params)
-		if err != nil {
-			return err
-		}
-
-		for _, target := range output.Targets {
-			_, err = f.svc.DetachPrincipalPolicy(&iot.DetachPrincipalPolicyInput{
-				PolicyName: f.name,
-				Principal:  target,
-			})
-			if err != nil {
-				return err
-			}
-		}
-		if output.NextMarker == nil {
-			break
-		}
-
-		params.Marker = output.NextMarker
-	}
-	return nil
-}
-
 func (f *IoTPolicy) Remove() error {
-	err := f.DetachAllPrincipals()
-	if err != nil {
-		return err
-	}
-	_, err = f.svc.DeletePolicy(&iot.DeletePolicyInput{
+	_, err := f.svc.DeletePolicy(&iot.DeletePolicyInput{
 		PolicyName: f.name,
 	})
 
