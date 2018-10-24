@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
@@ -59,6 +60,65 @@ func TestPropertiesEquals(t *testing.T) {
 				t.Errorf("Test Case reverse check failed. Want %t. Got %t.", !tc.result, tc.result)
 				t.Errorf("p1: %s", tc.p1.String())
 				t.Errorf("p2: %s", tc.p2.String())
+			}
+		})
+	}
+}
+
+func TestPropertiesSetTag(t *testing.T) {
+	cases := []struct {
+		name  string
+		key   *string
+		value interface{}
+		want  string
+	}{
+		{
+			name:  "string",
+			key:   aws.String("name"),
+			value: "blubber",
+			want:  `[tag:name: "blubber"]`,
+		},
+		{
+			name:  "string_ptr",
+			key:   aws.String("name"),
+			value: aws.String("blubber"),
+			want:  `[tag:name: "blubber"]`,
+		},
+		{
+			name:  "int",
+			key:   aws.String("int"),
+			value: 42,
+			want:  `[tag:int: "42"]`,
+		},
+		{
+			name:  "nil",
+			key:   aws.String("nothing"),
+			value: nil,
+			want:  `[]`,
+		},
+		{
+			name:  "empty_key",
+			key:   aws.String(""),
+			value: "empty",
+			want:  `[]`,
+		},
+		{
+			name:  "nil_key",
+			key:   nil,
+			value: "empty",
+			want:  `[]`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			p := types.NewProperties()
+
+			p.SetTag(tc.key, tc.value)
+			have := p.String()
+
+			if tc.want != have {
+				t.Errorf("'%s' != '%s'", tc.want, have)
 			}
 		})
 	}
