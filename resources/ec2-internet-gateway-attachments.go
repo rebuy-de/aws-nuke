@@ -12,8 +12,8 @@ import (
 type EC2InternetGatewayAttachment struct {
 	svc     *ec2.EC2
 	vpcId   *string
+	vpcTags []*ec2.Tag
 	igwId   *string
-	// The IGW is more specific than the VPC so we use those tags
 	igwTags []*ec2.Tag
 }
 
@@ -49,6 +49,7 @@ func ListEC2InternetGatewayAttachments(sess *session.Session) ([]Resource, error
 			resources = append(resources, &EC2InternetGatewayAttachment{
 				svc:     svc,
 				vpcId:   vpc.VpcId,
+				vpcTags: vpc.Tags,
 				igwId:   igw.InternetGatewayId,
 				igwTags: igw.Tags,
 			})
@@ -75,7 +76,10 @@ func (e *EC2InternetGatewayAttachment) Remove() error {
 func (e *EC2InternetGatewayAttachment) Properties() types.Properties {
 	properties := types.NewProperties()
 	for _, tagValue := range e.igwTags {
-		properties.SetTag(tagValue.Key, tagValue.Value)
+		properties.SetTagWithPrefix("igw", tagValue.Key, tagValue.Value)
+	}
+	for _, tagValue := range e.vpcTags {
+		properties.SetTagWithPrefix("vpc", tagValue.Key, tagValue.Value)
 	}
 	return properties
 }

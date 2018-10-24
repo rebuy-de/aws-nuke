@@ -3,9 +3,9 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
@@ -14,7 +14,7 @@ type EC2VPNGatewayAttachment struct {
 	vpcId   string
 	vpnId   string
 	state   string
-	// The VGW is more specific than the VPC so we use those tags
+	vpcTags []*ec2.Tag
 	vgwTags []*ec2.Tag
 }
 
@@ -51,6 +51,7 @@ func ListEC2VPNGatewayAttachments(sess *session.Session) ([]Resource, error) {
 				svc:     svc,
 				vpcId:   *vpc.VpcId,
 				vpnId:   *vgw.VpnGatewayId,
+				vpcTags: vpc.Tags,
 				vgwTags: vgw.Tags,
 			})
 		}
@@ -83,7 +84,10 @@ func (v *EC2VPNGatewayAttachment) Remove() error {
 func (v *EC2VPNGatewayAttachment) Properties() types.Properties {
 	properties := types.NewProperties()
 	for _, tagValue := range v.vgwTags {
-		properties.SetTag(tagValue.Key, tagValue.Value)
+		properties.SetTagWithPrefix("vgw", tagValue.Key, tagValue.Value)
+	}
+	for _, tagValue := range v.vpcTags {
+		properties.SetTagWithPrefix("vpc", tagValue.Key, tagValue.Value)
 	}
 	return properties
 }
