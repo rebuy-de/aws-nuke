@@ -19,21 +19,30 @@ func init() {
 
 func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
-
-	resp, err := svc.ListInstanceProfiles(nil)
-	if err != nil {
-		return nil, err
-	}
-
+	params := &iam.ListInstanceProfilesInput{}
 	resources := make([]Resource, 0)
-	for _, out := range resp.InstanceProfiles {
-		for _, role := range out.Roles {
-			resources = append(resources, &IAMInstanceProfileRole{
-				svc:     svc,
-				profile: *out.InstanceProfileName,
-				role:    *role.RoleName,
-			})
+
+	for {
+		resp, err := svc.ListInstanceProfiles(params)
+		if err != nil {
+			return nil, err
 		}
+
+		for _, out := range resp.InstanceProfiles {
+			for _, role := range out.Roles {
+				resources = append(resources, &IAMInstanceProfileRole{
+					svc:     svc,
+					profile: *out.InstanceProfileName,
+					role:    *role.RoleName,
+				})
+			}
+		}
+
+		if *resp.IsTruncated == false {
+			break
+		}
+
+		params.Marker = resp.Marker
 	}
 
 	return resources, nil

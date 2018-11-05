@@ -58,19 +58,28 @@ func (p Properties) Set(key string, value interface{}) Properties {
 }
 
 func (p Properties) SetTag(tagKey *string, tagValue interface{}) Properties {
+	return p.SetTagWithPrefix("", tagKey, tagValue)
+}
+
+func (p Properties) SetTagWithPrefix(prefix string, tagKey *string, tagValue interface{}) Properties {
 	if tagKey == nil {
 		return p
 	}
 
-	keyStr := *tagKey
+	keyStr := strings.TrimSpace(*tagKey)
+	prefix = strings.TrimSpace(prefix)
 
-	sanitizedTagKey := strings.Trim(keyStr, " ")
-	if sanitizedTagKey == "" {
+	if keyStr == "" {
 		return p
 	}
 
-	key := "tag:" + keyStr
-	return p.Set(key, tagValue)
+	if prefix != "" {
+		keyStr = fmt.Sprintf("%s:%s", prefix, keyStr)
+	}
+
+	keyStr = fmt.Sprintf("tag:%s", keyStr)
+
+	return p.Set(keyStr, tagValue)
 }
 
 func (p Properties) Get(key string) string {

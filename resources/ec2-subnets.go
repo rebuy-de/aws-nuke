@@ -3,11 +3,12 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2Subnet struct {
-	svc *ec2.EC2
-	id  *string
+	svc    *ec2.EC2
+	subnet *ec2.Subnet
 }
 
 func init() {
@@ -26,8 +27,8 @@ func ListEC2Subnets(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Subnets {
 		resources = append(resources, &EC2Subnet{
-			svc: svc,
-			id:  out.SubnetId,
+			svc:    svc,
+			subnet: out,
 		})
 	}
 
@@ -36,7 +37,7 @@ func ListEC2Subnets(sess *session.Session) ([]Resource, error) {
 
 func (e *EC2Subnet) Remove() error {
 	params := &ec2.DeleteSubnetInput{
-		SubnetId: e.id,
+		SubnetId: e.subnet.SubnetId,
 	}
 
 	_, err := e.svc.DeleteSubnet(params)
@@ -47,6 +48,14 @@ func (e *EC2Subnet) Remove() error {
 	return nil
 }
 
+func (e *EC2Subnet) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.subnet.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
+}
+
 func (e *EC2Subnet) String() string {
-	return *e.id
+	return *e.subnet.SubnetId
 }
