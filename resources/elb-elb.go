@@ -29,6 +29,11 @@ func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 		tagRequestELBNames = append(tagRequestELBNames, elb.LoadBalancerName)
 	}
 
+	if len(tagRequestELBNames) == 0 {
+		// Describing tags will fail, if there is no ELB, therefor we exit early.
+		return make([]Resource, 0), nil
+	}
+
 	// Tags for ELBs need to be fetched separately
 	tagResp, err := svc.DescribeTags(&elb.DescribeTagsInput{
 		LoadBalancerNames: tagRequestELBNames,
