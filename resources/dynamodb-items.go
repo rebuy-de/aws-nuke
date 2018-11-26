@@ -48,6 +48,8 @@ func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
 		var params *dynamodb.ScanInput
 
 		key := *descResp.Table.KeySchema[0].AttributeName
+		// Don't use ProjectionExpression in case it is "hash", because it
+		// is a reserved keyword and creates errors.
 		if key == "hash" {
 			params = &dynamodb.ScanInput{
 				TableName:            &dynamoTable.id,
