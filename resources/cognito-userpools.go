@@ -7,9 +7,10 @@ import (
 )
 
 type CognitoUserPool struct {
-	svc  *cognitoidentityprovider.CognitoIdentityProvider
-	name *string
-	id   *string
+	svc    *cognitoidentityprovider.CognitoIdentityProvider
+	name   *string
+	id     *string
+	domain *string
 }
 
 func init() {
@@ -31,10 +32,23 @@ func ListCognitoUserPools(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, pool := range output.UserPools {
+			describeParams := &cognitoidentityprovider.DescribeUserPoolInput{
+				UserPoolId: pool.Id,
+			}
+			userpool, err := svc.DescribeUserPool(describeParams)
+			if err != nil {
+				return nil, err
+			}
+			domain := ""
+			if userpool.UserPool.Domain != nil {
+				domain = *userpool.UserPool.Domain
+			}
+
 			resources = append(resources, &CognitoUserPool{
-				svc:  svc,
-				name: pool.Name,
-				id:   pool.Id,
+				svc:    svc,
+				name:   pool.Name,
+				id:     pool.Id,
+				domain: &domain,
 			})
 		}
 
@@ -49,6 +63,16 @@ func ListCognitoUserPools(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *CognitoUserPool) Remove() error {
+	if *f.domain != "" {
+		domainParams := &cognitoidentityprovider.DeleteUserPoolDomainInput{
+			Domain:     f.domain,
+			UserPoolId: f.id,
+		}
+		_, err := f.svc.DeleteUserPoolDomain(domainParams)
+		if err != nil {
+			return err
+		}
+	}
 
 	_, err := f.svc.DeleteUserPool(&cognitoidentityprovider.DeleteUserPoolInput{
 		UserPoolId: f.id,
