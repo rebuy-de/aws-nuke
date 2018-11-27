@@ -16,7 +16,7 @@ BUILD_FLAGS=-ldflags "\
 
 BUILD_ARTIFACT=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)
 
-GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
+GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GOPKGS=$(shell glide nv)
 
 default: build
