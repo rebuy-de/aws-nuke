@@ -1,8 +1,8 @@
-hash: aa2bb192973ac96106698ce46882a6973cf387adda979f0608da5936a5d2a41d
-updated: 2018-06-20T14:22:08.563529112+02:00
+hash: 5b568cd75aa2304878509fc015e65f473fee24236459be880f09c5d882483a0f
+updated: 2018-11-30T10:28:44.891342671+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: f0bbc646e13bfc451409e960cf33239aabb8671a
+  version: ceab7b7ac6f535d1397f124620720b5145f1ad59
   subpackages:
   - aws
   - aws/awserr
@@ -14,6 +14,7 @@ imports:
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
   - aws/credentials/stscreds
+  - aws/crr
   - aws/csm
   - aws/defaults
   - aws/ec2metadata
@@ -21,8 +22,11 @@ imports:
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/ini
+  - internal/s3err
   - internal/sdkio
   - internal/sdkrand
+  - internal/sdkuri
   - internal/shareddefaults
   - private/protocol
   - private/protocol/ec2query
@@ -38,7 +42,9 @@ imports:
   - private/protocol/xml/xmlutil
   - private/signer/v2
   - service/acm
+  - service/acmpca
   - service/apigateway
+  - service/appstream
   - service/autoscaling
   - service/autoscalingplans
   - service/batch
@@ -57,6 +63,8 @@ imports:
   - service/codedeploy
   - service/codepipeline
   - service/codestar
+  - service/cognitoidentity
+  - service/cognitoidentityprovider
   - service/configservice
   - service/databasemigrationservice
   - service/datapipeline
@@ -68,6 +76,7 @@ imports:
   - service/ecr
   - service/ecs
   - service/efs
+  - service/eks
   - service/elasticache
   - service/elasticbeanstalk
   - service/elasticsearchservice
@@ -91,8 +100,10 @@ imports:
   - service/mediapackage
   - service/mediastore
   - service/mediastoredata
+  - service/mediatailor
   - service/mobile
   - service/mq
+  - service/neptune
   - service/opsworks
   - service/opsworkscm
   - service/rds
@@ -101,7 +112,10 @@ imports:
   - service/resourcegroups
   - service/route53
   - service/s3
+  - service/s3/s3iface
+  - service/s3/s3manager
   - service/sagemaker
+  - service/secretsmanager
   - service/servicecatalog
   - service/servicediscovery
   - service/ses
@@ -117,12 +131,12 @@ imports:
   - service/workspaces
 - name: github.com/fatih/color
   version: 5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4
-- name: github.com/go-ini/ini
-  version: 5b3e00af70a9484542169a976dcab8d03e601a17
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- name: github.com/konsorten/go-windows-terminal-sequences
+  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
 - name: github.com/mattn/go-colorable
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
 - name: github.com/mattn/go-isatty
@@ -130,7 +144,7 @@ imports:
 - name: github.com/mb0/glob
   version: 1eb79d2de6c448664e7272f8b9fe1938239e3aaa
 - name: github.com/sirupsen/logrus
-  version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
+  version: bcd833dfe83d3cebad139e4a29ed79cb2318bf95
 - name: github.com/spf13/cobra
   version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
 - name: github.com/spf13/pflag
@@ -153,5 +167,5 @@ imports:
   - unix
   - windows
 - name: gopkg.in/yaml.v2
-  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 testImports: []
