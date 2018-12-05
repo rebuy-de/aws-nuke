@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,8 +42,6 @@ func ListServiceSpecificCredentials(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		// ServiceSpecificCredentials comes back as an array
-		// so loop through that here
 		for _, credential := range serviceCredentials.ServiceSpecificCredentials {
 			resources = append(resources, &IAMServiceSpecificCredential{
 				svc:         svc,
@@ -69,6 +68,13 @@ func (e *IAMServiceSpecificCredential) Remove() error {
 	return nil
 }
 
+func (e *IAMServiceSpecificCredential) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("ServiceName", e.serviceName)
+	properties.Set("ID", e.id)
+	return properties
+}
+
 func (e *IAMServiceSpecificCredential) String() string {
-	return e.userName + " -> [" + e.serviceName + "] " + e.name
+	return e.userName + " -> " + e.name
 }
