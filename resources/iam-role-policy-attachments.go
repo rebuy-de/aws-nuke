@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMRolePolicyAttachment struct {
@@ -39,7 +40,9 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 			for {
 				polResp, err := svc.ListAttachedRolePolicies(polParams)
 				if err != nil {
-					return nil, err
+					logrus.Errorf("failed to list attached policies for role %s: %v",
+						*role.RoleName, err)
+					break
 				}
 				for _, pol := range polResp.AttachedPolicies {
 					resources = append(resources, &IAMRolePolicyAttachment{
