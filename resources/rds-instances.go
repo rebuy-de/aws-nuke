@@ -7,8 +7,9 @@ import (
 )
 
 type RDSInstance struct {
-	svc *rds.RDS
-	id  string
+	svc                *rds.RDS
+	id                 string
+	deletionProtection bool
 }
 
 func init() {
@@ -27,8 +28,9 @@ func ListRDSInstances(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBInstances {
 		resources = append(resources, &RDSInstance{
-			svc: svc,
-			id:  *instance.DBInstanceIdentifier,
+			svc:                svc,
+			id:                 *instance.DBInstanceIdentifier,
+			deletionProtection: *instance.DeletionProtection,
 		})
 	}
 
@@ -36,6 +38,17 @@ func ListRDSInstances(sess *session.Session) ([]Resource, error) {
 }
 
 func (i *RDSInstance) Remove() error {
+	if (i.deletionProtection) {
+		modifyParams := &rds.ModifyDBInstanceInput{
+			DBInstanceIdentifier: &i.id,
+			DeletionProtection:   aws.Bool(false),
+		}
+		_, err := i.svc.ModifyDBInstance(modifyParams)
+		if err != nil {
+			return err
+		}
+	}
+
 	params := &rds.DeleteDBInstanceInput{
 		DBInstanceIdentifier: &i.id,
 		SkipFinalSnapshot:    aws.Bool(true),
