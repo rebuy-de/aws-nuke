@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -18,19 +19,31 @@ func init() {
 
 func ListEC2VPCEndpointServiceConfigurations(sess *session.Session) ([]Resource, error) {
 	svc := ec2.New(sess)
+	resources := make([]Resource, 0)
 
-	resp, err := svc.DescribeVpcEndpointServiceConfigurations(nil)
-	if err != nil {
-		return nil, err
+	params := &ec2.DescribeVpcEndpointServiceConfigurationsInput{
+		MaxResults: aws.Int64(100),
 	}
 
-	resources := make([]Resource, 0)
-	for _, serviceConfig := range resp.ServiceConfigurations {
-		resources = append(resources, &EC2VPCEndpointServiceConfiguration{
-			svc:  svc,
-			id:   serviceConfig.ServiceId,
-			name: serviceConfig.ServiceName,
-		})
+	for {
+		resp, err := svc.DescribeVpcEndpointServiceConfigurations(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, serviceConfig := range resp.ServiceConfigurations {
+			resources = append(resources, &EC2VPCEndpointServiceConfiguration{
+				svc:  svc,
+				id:   serviceConfig.ServiceId,
+				name: serviceConfig.ServiceName,
+			})
+		}
+
+		if resp.NextToken == nil {
+			break
+		}
+
+		params.NextToken = resp.NextToken
 	}
 
 	return resources, nil
