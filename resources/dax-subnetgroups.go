@@ -46,6 +46,13 @@ func ListDAXSubnetGroups(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func (f *DAXSubnetGroup) Filter() error {
+	if *f.subnetGroupName == "default" {
+		return fmt.Errorf("Cannot delete default DAX Subnet group")
+	}
+	return nil
+}
+
 func (f *DAXSubnetGroup) Remove() error {
 
 	_, err := f.svc.DeleteSubnetGroup(&dax.DeleteSubnetGroupInput{
