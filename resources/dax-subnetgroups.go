@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dax"
+	"fmt"
 )
 
 type DAXSubnetGroup struct {
@@ -44,6 +45,13 @@ func ListDAXSubnetGroups(sess *session.Session) ([]Resource, error) {
 	}
 
 	return resources, nil
+}
+
+func (f *DAXSubnetGroup) Filter() error {
+	if *f.subnetGroupName == "default" {
+		return fmt.Errorf("Cannot delete default DAX Subnet group")
+	}
+	return nil
 }
 
 func (f *DAXSubnetGroup) Remove() error {

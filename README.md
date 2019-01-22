@@ -1,12 +1,12 @@
 # aws-nuke
 
 [![Build Status](https://travis-ci.org/rebuy-de/aws-nuke.svg?branch=master)](https://travis-ci.org/rebuy-de/aws-nuke)
-[![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)]()
+[![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/releases)
 
-Nuke a whole AWS account and delete all its resources.
+Remove all resources from an AWS account.
 
-> **Development Status** *aws-nuke* is stable, but currently not all AWS
+> **Development Status** *aws-nuke* is stable, but it is likely that not all AWS
 resources are covered by it. Be encouraged to add missing resources and create
 a Pull Request or to create an [Issue](https://github.com/rebuy-de/aws-nuke/issues/new).
 
@@ -14,6 +14,9 @@ a Pull Request or to create an [Issue](https://github.com/rebuy-de/aws-nuke/issu
 
 Be aware that *aws-nuke* is a very destructive tool, hence you have to be very
 careful while using it. Otherwise you might delete production data.
+
+**We strongly advice you to not run this application on any AWS account, where
+you cannot afford to lose all resources.**
 
 To reduce the blast radius of accidents, there are some safety precautions:
 
@@ -32,8 +35,8 @@ To reduce the blast radius of accidents, there are some safety precautions:
 5. The config file contains a blacklist field. If the Account ID of the account
    you want to nuke is part of this blacklist, *aws-nuke* will abort. It is
    recommended, that you add every production account to this blacklist.
-6. To ensure you just ignore the blacklisting feature, the blacklist must
-   contains at least one Account ID.
+6. To ensure you don't just ignore the blacklisting feature, the blacklist must
+   contain at least one Account ID.
 7. The config file contains account specific settings (eg. filters). The
    account you want to nuke must be explicitly listed there.
 8. To ensure to not accidentally delete a random account, it is required to
@@ -283,6 +286,12 @@ for example or for resources like S3 Buckets which have a globally shared
 namespace and might be hard to recreate. Currently the filtering is based on
 the resource identifier. The identifier will be printed as the first step of
 *aws-nuke* (eg `i-01b489457a60298dd` for an EC2 instance).
+
+**Note: Even with filters you should not run aws-nuke on any AWS account, where
+you cannot afford to lose all resources. It is easy to make mistakes in the
+filter configuration. Also, since aws-nuke is in continous development, there
+is always a possibility to introduce new bugs, no matter how careful we review
+new code.**
 
 The filters are part of the account-specific configuration and are grouped by
 resource types. This is an example of a config that deletes all resources but
