@@ -17,20 +17,28 @@ func init() {
 
 func ListElasticacheReplicationGroups(sess *session.Session) ([]Resource, error) {
 	svc := elasticache.New(sess)
-
-	params := &elasticache.DescribeReplicationGroupsInput{MaxRecords: aws.Int64(100)}
-	resp, err := svc.DescribeReplicationGroups(params)
-	if err != nil {
-		return nil, err
-	}
-
 	var resources []Resource
 
-	for _, replicationGroup := range resp.ReplicationGroups {
-		resources = append(resources, &ElasticacheReplicationGroup{
-			svc:     svc,
-			groupID: replicationGroup.ReplicationGroupId,
-		})
+	params := &elasticache.DescribeReplicationGroupsInput{MaxRecords: aws.Int64(100)}
+
+	for {
+		resp, err := svc.DescribeReplicationGroups(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, replicationGroup := range resp.ReplicationGroups {
+			resources = append(resources, &ElasticacheReplicationGroup{
+				svc:     svc,
+				groupID: replicationGroup.ReplicationGroupId,
+			})
+		}
+
+		if resp.Marker == nil {
+			break
+		}
+
+		params.Marker = resp.Marker
 	}
 
 	return resources, nil
