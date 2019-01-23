@@ -1,14 +1,17 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
 type EC2VPCPeeringConnection struct {
-	svc *ec2.EC2
-	id  *string
+	svc    *ec2.EC2
+	id     *string
+	status *string
 }
 
 func init() {
@@ -36,26 +39,34 @@ func ListEC2VPCPeeringConnections(sess *session.Session) ([]Resource, error) {
 
 	for _, peeringConfig := range resp.VpcPeeringConnections {
 		resources = append(resources, &EC2VPCPeeringConnection{
-			svc: svc,
-			id:  peeringConfig.VpcPeeringConnectionId,
+			svc:    svc,
+			id:     peeringConfig.VpcPeeringConnectionId,
+			status: peeringConfig.Status.Code,
 		})
 	}
 
 	return resources, nil
 }
 
-func (e *EC2VPCPeeringConnection) Remove() error {
+func (p *EC2VPCPeeringConnection) Filter() error {
+	if *p.status == "deleting" || *p.status == "deleted" {
+		return fmt.Errorf("already deleted")
+	}
+	return nil
+}
+
+func (p *EC2VPCPeeringConnection) Remove() error {
 	params := &ec2.DeleteVpcPeeringConnectionInput{
-		VpcPeeringConnectionId: e.id,
+		VpcPeeringConnectionId: p.id,
 	}
 
-	_, err := e.svc.DeleteVpcPeeringConnection(params)
+	_, err := p.svc.DeleteVpcPeeringConnection(params)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (e *EC2VPCPeeringConnection) String() string {
-	return *e.id
+func (p *EC2VPCPeeringConnection) String() string {
+	return *p.id
 }
