@@ -53,6 +53,7 @@ func (e *EC2Subnet) Properties() types.Properties {
 	for _, tagValue := range e.subnet.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+	properties.Set("DefaultForAz", e.subnet.DefaultForAz)
 	return properties
 }
 
