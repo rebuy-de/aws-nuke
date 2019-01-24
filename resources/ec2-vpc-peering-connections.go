@@ -3,7 +3,6 @@ package resources
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -23,14 +22,7 @@ func ListEC2VPCPeeringConnections(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 
 	// filter should be set as deleted vpc connetions are returned
-	params := &ec2.DescribeVpcPeeringConnectionsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name:   aws.String("status-code"),
-				Values: []*string{aws.String("pending-acceptance"), aws.String("failed"), aws.String("expired"), aws.String("provisioning"), aws.String("active")},
-			},
-		},
-	}
+	params := &ec2.DescribeVpcPeeringConnectionsInput{}
 
 	resp, err := svc.DescribeVpcPeeringConnections(params)
 	if err != nil {
