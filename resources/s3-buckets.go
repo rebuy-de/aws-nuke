@@ -68,11 +68,11 @@ func (e *S3Bucket) Remove() error {
 		Bucket: &e.name,
 	})
 
-	err = e.RemoveAllObjects()
 	if err != nil {
 		return err
 	}
 
+	err = e.RemoveAllObjects()
 	if err != nil {
 		return err
 	}
