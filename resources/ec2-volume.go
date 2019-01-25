@@ -3,11 +3,12 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2Volume struct {
-	svc *ec2.EC2
-	id  string
+	svc    *ec2.EC2
+	volume *ec2.Volume
 }
 
 func init() {
@@ -25,8 +26,8 @@ func ListEC2Volumes(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Volumes {
 		resources = append(resources, &EC2Volume{
-			svc: svc,
-			id:  *out.VolumeId,
+			svc:    svc,
+			volume: out,
 		})
 	}
 
@@ -35,11 +36,19 @@ func ListEC2Volumes(sess *session.Session) ([]Resource, error) {
 
 func (e *EC2Volume) Remove() error {
 	_, err := e.svc.DeleteVolume(&ec2.DeleteVolumeInput{
-		VolumeId: &e.id,
+		VolumeId: e.volume.VolumeId,
 	})
 	return err
 }
 
+func (e *EC2Volume) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.volume.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
+}
+
 func (e *EC2Volume) String() string {
-	return e.id
+	return *e.volume.VolumeId
 }

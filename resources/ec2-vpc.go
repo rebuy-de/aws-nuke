@@ -8,8 +8,7 @@ import (
 
 type EC2VPC struct {
 	svc       *ec2.EC2
-	id        *string
-	isDefault *bool
+	vpc       *ec2.Vpc
 }
 
 func init() {
@@ -28,8 +27,7 @@ func ListEC2VPCs(sess *session.Session) ([]Resource, error) {
 	for _, vpc := range resp.Vpcs {
 		resources = append(resources, &EC2VPC{
 			svc:       svc,
-			id:        vpc.VpcId,
-			isDefault: vpc.IsDefault,
+			vpc:       vpc,
 		})
 	}
 
@@ -38,7 +36,7 @@ func ListEC2VPCs(sess *session.Session) ([]Resource, error) {
 
 func (e *EC2VPC) Remove() error {
 	params := &ec2.DeleteVpcInput{
-		VpcId: e.id,
+		VpcId: e.vpc.VpcId,
 	}
 
 	_, err := e.svc.DeleteVpc(params)
@@ -50,11 +48,15 @@ func (e *EC2VPC) Remove() error {
 }
 
 func (e *EC2VPC) Properties() types.Properties {
-	return types.NewProperties().
-		Set("ID", e.id).
-		Set("IsDefault", e.isDefault)
+	properties := types.NewProperties()
+	for _, tagValue := range e.vpc.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("ID", e.vpc.VpcId)
+	properties.Set("IsDefault", e.vpc.IsDefault)
+	return properties
 }
 
 func (e *EC2VPC) String() string {
-	return *e.id
+	return *e.vpc.VpcId
 }

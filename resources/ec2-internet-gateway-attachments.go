@@ -6,12 +6,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2InternetGatewayAttachment struct {
-	svc   *ec2.EC2
-	vpcId *string
-	igwId *string
+	svc     *ec2.EC2
+	vpcId   *string
+	vpcTags []*ec2.Tag
+	igwId   *string
+	igwTags []*ec2.Tag
 }
 
 func init() {
@@ -30,7 +33,7 @@ func ListEC2InternetGatewayAttachments(sess *session.Session) ([]Resource, error
 	for _, vpc := range resp.Vpcs {
 		params := &ec2.DescribeInternetGatewaysInput{
 			Filters: []*ec2.Filter{
-				&ec2.Filter{
+				{
 					Name:   aws.String("attachment.vpc-id"),
 					Values: []*string{vpc.VpcId},
 				},
@@ -42,11 +45,13 @@ func ListEC2InternetGatewayAttachments(sess *session.Session) ([]Resource, error
 			return nil, err
 		}
 
-		for _, out := range resp.InternetGateways {
+		for _, igw := range resp.InternetGateways {
 			resources = append(resources, &EC2InternetGatewayAttachment{
-				svc:   svc,
-				vpcId: vpc.VpcId,
-				igwId: out.InternetGatewayId,
+				svc:     svc,
+				vpcId:   vpc.VpcId,
+				vpcTags: vpc.Tags,
+				igwId:   igw.InternetGatewayId,
+				igwTags: igw.Tags,
 			})
 		}
 	}
@@ -66,6 +71,17 @@ func (e *EC2InternetGatewayAttachment) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *EC2InternetGatewayAttachment) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.igwTags {
+		properties.SetTagWithPrefix("igw", tagValue.Key, tagValue.Value)
+	}
+	for _, tagValue := range e.vpcTags {
+		properties.SetTagWithPrefix("vpc", tagValue.Key, tagValue.Value)
+	}
+	return properties
 }
 
 func (e *EC2InternetGatewayAttachment) String() string {
