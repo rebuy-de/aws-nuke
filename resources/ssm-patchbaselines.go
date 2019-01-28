@@ -59,12 +59,35 @@ func ListSSMPatchBaselines(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *SSMPatchBaseline) Remove() error {
-
-	_, err := f.svc.DeletePatchBaseline(&ssm.DeletePatchBaselineInput{
+	err := f.DeregisterFromPatchGroups()
+	if err != nil {
+		return err
+	}
+	_, err = f.svc.DeletePatchBaseline(&ssm.DeletePatchBaselineInput{
 		BaselineId: f.ID,
 	})
 
 	return err
+}
+
+func (f *SSMPatchBaseline) DeregisterFromPatchGroups() error {
+
+	patchBaseLine, err := f.svc.GetPatchBaseline(&ssm.GetPatchBaselineInput{
+		BaselineId: f.ID,
+	})
+	if err != nil {
+		return err
+	}
+	for _, patchGroup := range patchBaseLine.PatchGroups {
+		_, err := f.svc.DeregisterPatchBaselineForPatchGroup(&ssm.DeregisterPatchBaselineForPatchGroupInput{
+			BaselineId: f.ID,
+			PatchGroup: patchGroup,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (f *SSMPatchBaseline) String() string {
