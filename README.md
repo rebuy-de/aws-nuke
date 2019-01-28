@@ -27,7 +27,7 @@ To reduce the blast radius of accidents, there are some safety precautions:
    listing all nukeable resources.
 3. To avoid just displaying a account ID, which might gladly be ignored by
    humans, it is required to actually set an [Account
-   Alias](http://docs.aws.amazon.com/IAM/latest/UserGuide/console_account-alias.html)
+   Alias](https://docs.aws.amazon.com/IAM/latest/UserGuide/console_account-alias.html)
    for your account. Otherwise *aws-nuke* will abort.
 4. The Account Alias must not contain the string `prod`. This string is
    hardcoded and it is recommended to add it to every actual production account
