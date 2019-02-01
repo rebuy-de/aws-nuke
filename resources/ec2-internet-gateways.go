@@ -3,11 +3,12 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2InternetGateway struct {
 	svc *ec2.EC2
-	id  *string
+	igw *ec2.InternetGateway
 }
 
 func init() {
@@ -23,10 +24,10 @@ func ListEC2InternetGateways(sess *session.Session) ([]Resource, error) {
 	}
 
 	resources := make([]Resource, 0)
-	for _, out := range resp.InternetGateways {
+	for _, igw := range resp.InternetGateways {
 		resources = append(resources, &EC2InternetGateway{
 			svc: svc,
-			id:  out.InternetGatewayId,
+			igw: igw,
 		})
 	}
 
@@ -35,7 +36,7 @@ func ListEC2InternetGateways(sess *session.Session) ([]Resource, error) {
 
 func (e *EC2InternetGateway) Remove() error {
 	params := &ec2.DeleteInternetGatewayInput{
-		InternetGatewayId: e.id,
+		InternetGatewayId: e.igw.InternetGatewayId,
 	}
 
 	_, err := e.svc.DeleteInternetGateway(params)
@@ -46,6 +47,14 @@ func (e *EC2InternetGateway) Remove() error {
 	return nil
 }
 
+func (e *EC2InternetGateway) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.igw.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
+}
+
 func (e *EC2InternetGateway) String() string {
-	return *e.id
+	return *e.igw.InternetGatewayId
 }

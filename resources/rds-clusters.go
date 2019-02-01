@@ -7,8 +7,9 @@ import (
 )
 
 type RDSDBCluster struct {
-	svc *rds.RDS
-	id  string
+	svc                *rds.RDS
+	id                 string
+	deletionProtection bool
 }
 
 func init() {
@@ -27,8 +28,9 @@ func ListRDSClusters(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBClusters {
 		resources = append(resources, &RDSDBCluster{
-			svc: svc,
-			id:  *instance.DBClusterIdentifier,
+			svc:                svc,
+			id:                 *instance.DBClusterIdentifier,
+			deletionProtection: *instance.DeletionProtection,
 		})
 	}
 
@@ -36,6 +38,17 @@ func ListRDSClusters(sess *session.Session) ([]Resource, error) {
 }
 
 func (i *RDSDBCluster) Remove() error {
+	if (i.deletionProtection) {
+		modifyParams := &rds.ModifyDBClusterInput{
+			DBClusterIdentifier: &i.id,
+			DeletionProtection:  aws.Bool(false),
+		}
+		_, err := i.svc.ModifyDBCluster(modifyParams)
+		if err != nil {
+			return err
+		}
+	}
+
 	params := &rds.DeleteDBClusterInput{
 		DBClusterIdentifier: &i.id,
 		SkipFinalSnapshot:   aws.Bool(true),

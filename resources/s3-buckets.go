@@ -64,7 +64,15 @@ type S3Bucket struct {
 }
 
 func (e *S3Bucket) Remove() error {
-	err := e.RemoveAllObjects()
+	_, err := e.svc.DeleteBucketPolicy(&s3.DeleteBucketPolicyInput{
+		Bucket: &e.name,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	err = e.RemoveAllObjects()
 	if err != nil {
 		return err
 	}

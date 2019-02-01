@@ -17,20 +17,29 @@ func init() {
 
 func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
-
-	resp, err := svc.ListPolicies(&iam.ListPoliciesInput{
+	params := &iam.ListPoliciesInput{
 		Scope: aws.String("Local"),
-	})
-	if err != nil {
-		return nil, err
 	}
-
 	resources := make([]Resource, 0)
-	for _, out := range resp.Policies {
-		resources = append(resources, &IAMPolicy{
-			svc: svc,
-			arn: *out.Arn,
-		})
+
+	for {
+		resp, err := svc.ListPolicies(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, out := range resp.Policies {
+			resources = append(resources, &IAMPolicy{
+				svc: svc,
+				arn: *out.Arn,
+			})
+		}
+
+		if *resp.IsTruncated == false {
+			break
+		}
+
+		params.Marker = resp.Marker
 	}
 
 	return resources, nil

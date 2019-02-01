@@ -1,9 +1,11 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMLoginProfile struct {
@@ -30,14 +32,17 @@ func ListIAMLoginProfiles(sess *session.Session) ([]Resource, error) {
 			if aerr, ok := err.(awserr.Error); ok {
 				switch aerr.Code() {
 				case iam.ErrCodeNoSuchEntityException:
-					break
-				default:
-					return nil, err
+					// The user does not have a login profile and we do not
+					// need to print an error for that.
+					continue
 				}
-			} else {
-				return nil, err
 			}
+
+			logrus.Errorf("failed to list login profile for user %s: %v",
+				*out.UserName, err)
+			continue
 		}
+
 		if lpresp.LoginProfile != nil {
 			resources = append(resources, &IAMLoginProfile{
 				svc:  svc,
@@ -55,6 +60,11 @@ func (e *IAMLoginProfile) Remove() error {
 		return err
 	}
 	return nil
+}
+
+func (e *IAMLoginProfile) Properties() types.Properties {
+	return types.NewProperties().
+		Set("UserName", e.name)
 }
 
 func (e *IAMLoginProfile) String() string {

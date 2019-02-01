@@ -45,10 +45,20 @@ func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
 			return nil, descErr
 		}
 
+		var params *dynamodb.ScanInput
+
 		key := *descResp.Table.KeySchema[0].AttributeName
-		params := &dynamodb.ScanInput{
-			TableName:            &dynamoTable.id,
-			ProjectionExpression: aws.String(key),
+		// Don't use ProjectionExpression in case it is "hash", because it
+		// is a reserved keyword and creates errors.
+		if key == "hash" {
+			params = &dynamodb.ScanInput{
+				TableName:            &dynamoTable.id,
+			}
+		} else {
+			params = &dynamodb.ScanInput{
+				TableName:            &dynamoTable.id,
+				ProjectionExpression: aws.String(key),
+			}
 		}
 
 		scanResp, scanErr := svc.Scan(params)

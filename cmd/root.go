@@ -77,17 +77,17 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().StringVar(
 		&creds.AccessKeyID, "access-key-id", "",
 		"AWS access key ID for accessing the AWS API. "+
-			"Must be used together with --secret-access-key."+
+			"Must be used together with --secret-access-key. "+
 			"Cannot be used together with --profile.")
 	command.PersistentFlags().StringVar(
 		&creds.SecretAccessKey, "secret-access-key", "",
 		"AWS secret access key for accessing the AWS API. "+
-			"Must be used together with --access-key-id."+
+			"Must be used together with --access-key-id. "+
 			"Cannot be used together with --profile.")
 	command.PersistentFlags().StringVar(
 		&creds.SessionToken, "session-token", "",
 		"AWS session token for accessing the AWS API. "+
-			"Must be used together with --access-key-id and --secret-access-key."+
+			"Must be used together with --access-key-id and --secret-access-key. "+
 			"Cannot be used together with --profile.")
 
 	command.PersistentFlags().StringSliceVarP(
@@ -108,8 +108,8 @@ func NewRootCommand() *cobra.Command {
 			"Instead it waits 15s before continuing.")
 	command.PersistentFlags().IntVar(
 		&params.MaxWaitRetries, "max-wait-retries", 0,
-		"If specified, the program will exit if resources are stuck in waiting for this many iterations."+
-			"0 (default) disables early exit)")
+		"If specified, the program will exit if resources are stuck in waiting for this many iterations. "+
+			"0 (default) disables early exit.")
 
 	command.AddCommand(NewVersionCommand())
 	command.AddCommand(NewResourceTypesCommand())
