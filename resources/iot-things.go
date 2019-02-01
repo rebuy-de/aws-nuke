@@ -47,7 +47,6 @@ func ListIoTThings(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *IoTThing) Remove() error {
-
 	_, err := f.svc.DeleteThing(&iot.DeleteThingInput{
 		ThingName:       f.name,
 		ExpectedVersion: f.version,
