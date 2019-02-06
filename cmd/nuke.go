@@ -17,8 +17,6 @@ type Nuke struct {
 
 	ResourceTypes types.Collection
 
-	ForceSleep time.Duration
-
 	items Queue
 }
 
@@ -26,7 +24,6 @@ func NewNuke(params NukeParameters, account awsutil.Account) *Nuke {
 	n := Nuke{
 		Parameters: params,
 		Account:    account,
-		ForceSleep: 15 * time.Second,
 	}
 
 	return &n
@@ -34,6 +31,8 @@ func NewNuke(params NukeParameters, account awsutil.Account) *Nuke {
 
 func (n *Nuke) Run() error {
 	var err error
+
+	forceSleep := time.Duration(n.Parameters.ForceSleep) * time.Second
 
 	fmt.Printf("aws-nuke version %s - %s - %s\n\n", BuildVersion, BuildDate, BuildHash)
 
@@ -45,8 +44,8 @@ func (n *Nuke) Run() error {
 	fmt.Printf("Do you really want to nuke the account with "+
 		"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
 	if n.Parameters.Force {
-		fmt.Printf("Waiting %v before continuing.\n", n.ForceSleep)
-		time.Sleep(n.ForceSleep)
+		fmt.Printf("Waiting %v before continuing.\n", forceSleep)
+		time.Sleep(forceSleep)
 	} else {
 		fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
 		err = Prompt(n.Account.Alias())
@@ -73,8 +72,8 @@ func (n *Nuke) Run() error {
 	fmt.Printf("Do you really want to nuke these resources on the account with "+
 		"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
 	if n.Parameters.Force {
-		fmt.Printf("Waiting %v before continuing.\n", n.ForceSleep)
-		time.Sleep(n.ForceSleep)
+		fmt.Printf("Waiting %v before continuing.\n", forceSleep)
+		time.Sleep(forceSleep)
 	} else {
 		fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
 		err = Prompt(n.Account.Alias())
