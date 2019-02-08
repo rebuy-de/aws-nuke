@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
 )
@@ -24,6 +25,13 @@ func ListSNSEndpoints(sess *session.Session) ([]Resource, error) {
 	for {
 		resp, err := svc.ListPlatformApplications(platformParams)
 		if err != nil {
+			awsErr, ok := err.(awserr.Error)
+			if ok && awsErr.Code() == "InvalidAction" && awsErr.Message() == "Operation (ListPlatformApplications) is not supported in this region" {
+				// AWS answers with InvalidAction on regions that do not
+				// support ListPlatformApplications.
+				break
+			}
+
 			return nil, err
 		}
 
