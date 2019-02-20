@@ -14,6 +14,11 @@ func init() {
 	register("S3Bucket", ListS3Buckets)
 }
 
+type S3Bucket struct {
+	svc  *s3.S3
+	name string
+}
+
 func ListS3Buckets(s *session.Session) ([]Resource, error) {
 	svc := s3.New(s)
 
@@ -58,16 +63,23 @@ func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
 	return buckets, nil
 }
 
-type S3Bucket struct {
-	svc  *s3.S3
-	name string
-}
-
 func (e *S3Bucket) Remove() error {
 	_, err := e.svc.DeleteBucketPolicy(&s3.DeleteBucketPolicyInput{
 		Bucket: &e.name,
 	})
+	if err != nil {
+		return err
+	}
 
+	_, err = e.svc.PutBucketLogging(&s3.PutBucketLoggingInput{
+		Bucket:              &e.name,
+		BucketLoggingStatus: &s3.BucketLoggingStatus{},
+	})
+	if err != nil {
+		return err
+	}
+
+	err = e.RemoveAllVersions()
 	if err != nil {
 		return err
 	}
@@ -77,16 +89,20 @@ func (e *S3Bucket) Remove() error {
 		return err
 	}
 
-	params := &s3.DeleteBucketInput{
+	_, err = e.svc.DeleteBucket(&s3.DeleteBucketInput{
+		Bucket: &e.name,
+	})
+
+	return err
+}
+
+func (e *S3Bucket) RemoveAllVersions() error {
+	params := &s3.ListObjectVersionsInput{
 		Bucket: &e.name,
 	}
 
-	_, err = e.svc.DeleteBucket(params)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	iterator := NewDeleteVersionListIterator(e.svc, params)
+	return s3manager.NewBatchDeleteWithClient(e.svc).Delete(aws.BackgroundContext(), iterator)
 }
 
 func (e *S3Bucket) RemoveAllObjects() error {
@@ -95,13 +111,7 @@ func (e *S3Bucket) RemoveAllObjects() error {
 	}
 
 	iterator := s3manager.NewDeleteListIterator(e.svc, params)
-
-	err := s3manager.NewBatchDeleteWithClient(e.svc).Delete(aws.BackgroundContext(), iterator)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s3manager.NewBatchDeleteWithClient(e.svc).Delete(aws.BackgroundContext(), iterator)
 }
 
 func (e *S3Bucket) String() string {
