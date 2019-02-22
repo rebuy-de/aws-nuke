@@ -16,8 +16,7 @@ resource-types:
 accounts:
   555133742:
     presets:
-      filters:
-      - "terraform"
+    - "terraform"
     resource-types:
       targets:
       - S3Bucket
@@ -28,8 +27,8 @@ accounts:
       - "uber.admin -> AdministratorAccess"
 
 presets:
-  filters:
-    terraform:
+  terraform:
+    filters:
       S3Bucket:
       - type: glob
         value: "my-statebucket-*"

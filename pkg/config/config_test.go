@@ -56,9 +56,7 @@ func TestLoadExampleConfig(t *testing.T) {
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": Account{
-				Presets: PresetReferences{
-					Filters: []string{"terraform"},
-				},
+				Presets: []string{"terraform"},
 				Filters: Filters{
 					"IAMRole": {
 						NewExactFilter("uber.admin"),
@@ -77,9 +75,9 @@ func TestLoadExampleConfig(t *testing.T) {
 			Targets:  types.Collection{"DynamoDBTable", "S3Bucket", "S3Object"},
 			Excludes: types.Collection{"IAMRole"},
 		},
-		Presets: PresetDefinitions{
-			Filters: map[string]Filters{
-				"terraform": {
+		Presets: map[string]PresetDefinitions{
+			"terraform": PresetDefinitions{
+				Filters: Filters{
 					"S3Bucket": {
 						Filter{
 							Type:  FilterTypeGlob,
