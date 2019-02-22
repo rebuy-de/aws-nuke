@@ -56,7 +56,7 @@ func TestLoadExampleConfig(t *testing.T) {
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": Account{
-				Presets: Presets{
+				Presets: PresetReferences{
 					Filters: []string{"terraform"},
 				},
 				Filters: Filters{
@@ -214,5 +214,43 @@ func TestConfigValidation(t *testing.T) {
 				t.Fatalf("Didn't excpect an error, but got one: %v", err)
 			}
 		})
+	}
+}
+
+func TestFilterMerge(t *testing.T) {
+	config, err := Load("test-fixtures/example.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	filters, err := config.Filters("555133742")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expect := Filters{
+		"S3Bucket": []Filter{
+			Filter{
+				Type: "glob", Value: "my-statebucket-*",
+			},
+		},
+		"IAMRole": []Filter{
+			Filter{
+				Type:  "exact",
+				Value: "uber.admin",
+			},
+		},
+		"IAMRolePolicyAttachment": []Filter{
+			Filter{
+				Type:  "exact",
+				Value: "uber.admin -> AdministratorAccess",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(filters, expect) {
+		t.Errorf("Read struct mismatches:")
+		t.Errorf("  Got:      %#v", filters)
+		t.Errorf("  Expected: %#v", expect)
 	}
 }

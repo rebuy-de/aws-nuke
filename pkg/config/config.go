@@ -17,9 +17,9 @@ type ResourceTypes struct {
 }
 
 type Account struct {
-	Filters       Filters       `yaml:"filters"`
-	ResourceTypes ResourceTypes `yaml:"resource-types"`
-	Presets       Presets       `yaml:"presets"`
+	Filters       Filters          `yaml:"filters"`
+	ResourceTypes ResourceTypes    `yaml:"resource-types"`
+	Presets       PresetReferences `yaml:"presets"`
 }
 
 type Nuke struct {
@@ -31,10 +31,10 @@ type Nuke struct {
 }
 
 type PresetDefinitions struct {
-	Filters map[string]Filters `filters`
+	Filters map[string]Filters `yaml:"filters"`
 }
 
-type Presets struct {
+type PresetReferences struct {
 	Filters []string `yaml:"filters"`
 }
 
@@ -104,6 +104,35 @@ func (c *Nuke) ValidateAccount(accountID string, aliases []string) error {
 	}
 
 	return nil
+}
+
+func (c *Nuke) Filters(accountID string) (Filters, error) {
+	account := c.Accounts[accountID]
+	filters := account.Filters
+
+	if filters == nil {
+		filters = Filters{}
+	}
+
+	if account.Presets.Filters == nil {
+		return filters, nil
+	}
+
+	for _, presetName := range account.Presets.Filters {
+		notFound := fmt.Errorf("Could not find filter preset '%s'", presetName)
+		if c.Presets.Filters == nil {
+			return nil, notFound
+		}
+
+		presetFilters, ok := c.Presets.Filters[presetName]
+		if !ok {
+			return nil, notFound
+		}
+
+		filters.Merge(presetFilters)
+	}
+
+	return filters, nil
 }
 
 func (c *Nuke) resolveDeprecations() error {
