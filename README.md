@@ -360,6 +360,7 @@ IAMUserAccessKey:
   value: "admin -> *"
 ```
 
+
 #### Using Them Together
 
 It is also possible to use Filter Properties and Filter Types together. For
@@ -385,6 +386,56 @@ CloudFormationStack:
 In this case *any* CloudFormationStack ***but*** the ones called "foo" will be
 filtered. Be aware that *aws-nuke* internally takes every resource and applies
 every filter on it. If a filter matches, it marks the node as filtered.
+
+
+#### Filter Presets
+
+It might be the case that some filters are the same across multiple accounts.
+This especially could happen, if provisioning tools like Terraform are used or
+if IAM resources follow the same pattern.
+
+For this case *aws-nuke* supports presets of filters, that can applied on
+multiple accounts. A configuration could look like this:
+
+```yaml
+---
+regions:
+- "global"
+- "eu-west-1"
+
+account-blacklist:
+- 1234567890
+
+accounts:
+  555421337:
+    presets:
+    - "common"
+  555133742:
+    presets:
+    - "common"
+    - "terraform"
+  555134237:
+    presets:
+    - "common"
+    - "terraform"
+    filters:
+      EC2KeyPair:
+      - "notebook"
+
+presets:
+  terraform:
+    filters:
+      S3Bucket:
+      - type: glob
+        value: "my-statebucket-*"
+      DynamoDBTable:
+      - "terraform-lock"
+  common:
+    filter:
+      IAMRole:
+      - "OrganizationAccountAccessRole"
+```
+
 
 ## Install
 
