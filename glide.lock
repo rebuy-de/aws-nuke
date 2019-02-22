@@ -1,8 +1,8 @@
-hash: 5b568cd75aa2304878509fc015e65f473fee24236459be880f09c5d882483a0f
-updated: 2018-11-30T10:28:44.891342671+01:00
+hash: 0bb679e76898a5f0085968b7694b64d40b68abce3b1ffe3974269dce6dd1429a
+updated: 2019-02-22T10:59:57.165911901+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: ceab7b7ac6f535d1397f124620720b5145f1ad59
+  version: 416a7057457ed9af569ea3682f7319ec3466044d
   subpackages:
   - aws
   - aws/awserr
@@ -13,6 +13,7 @@ imports:
   - aws/credentials
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
+  - aws/credentials/processcreds
   - aws/credentials/stscreds
   - aws/crr
   - aws/csm
@@ -85,6 +86,7 @@ imports:
   - service/elbv2
   - service/emr
   - service/firehose
+  - service/fsx
   - service/glue
   - service/iam
   - service/iot
@@ -144,7 +146,7 @@ imports:
 - name: github.com/mb0/glob
   version: 1eb79d2de6c448664e7272f8b9fe1938239e3aaa
 - name: github.com/sirupsen/logrus
-  version: bcd833dfe83d3cebad139e4a29ed79cb2318bf95
+  version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/spf13/cobra
   version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
 - name: github.com/spf13/pflag
