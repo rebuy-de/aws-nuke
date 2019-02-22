@@ -39,7 +39,7 @@ func (i *Item) Print() {
 	case ItemStateWaiting:
 		Log(i.Region, i.Type, i.Resource, ReasonWaitPending, "waiting")
 	case ItemStateFailed:
-		Log(i.Region, i.Type, i.Resource, ReasonError, i.Reason)
+		Log(i.Region, i.Type, i.Resource, ReasonError, "failed")
 	case ItemStateFiltered:
 		Log(i.Region, i.Type, i.Resource, ReasonSkip, i.Reason)
 	case ItemStateFinished:

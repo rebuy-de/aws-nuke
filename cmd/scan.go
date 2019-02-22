@@ -47,8 +47,8 @@ func (s *scanner) list(region Region, resourceType string) {
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Errorf("%v\n\n%s", r.(error), string(debug.Stack()))
-			dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
-			log.Errorf("Listing %s failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new, if you think this is an application error.\n%s", resourceType, dump)
+			dump := util.Indent(fmt.Sprintf("%v", err), "    ")
+			log.Errorf("Listing %s failed:\n%s", resourceType, dump)
 		}
 	}()
 	defer s.semaphore.Release(1)
@@ -68,8 +68,8 @@ func (s *scanner) list(region Region, resourceType string) {
 			return
 		}
 
-		dump := util.Indent(fmt.Sprintf("%v", err), "    !!! ")
-		log.Errorf("Listing %s failed. Please report this to https://github.com/rebuy-de/aws-nuke/issues/new.\n%s", resourceType, dump)
+		dump := util.Indent(fmt.Sprintf("%v", err), "    ")
+		log.Errorf("Listing %s failed:\n%s", resourceType, dump)
 		return
 	}
 

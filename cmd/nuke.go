@@ -8,6 +8,7 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/rebuy-de/aws-nuke/resources"
+	"github.com/sirupsen/logrus"
 )
 
 type Nuke struct {
@@ -90,8 +91,21 @@ func (n *Nuke) Run() error {
 
 		if n.items.Count(ItemStatePending, ItemStateWaiting, ItemStateNew) == 0 && n.items.Count(ItemStateFailed) > 0 {
 			if failCount >= 2 {
-				return fmt.Errorf("There are resources in failed state, but none are ready for deletion, anymore.")
+				logrus.Errorf("There are resources in failed state, but none are ready for deletion, anymore.")
+				fmt.Println()
+
+				for _, item := range n.items {
+					if item.State != ItemStateFailed {
+						continue
+					}
+
+					item.Print()
+					logrus.Error(item.Reason)
+				}
+
+				return fmt.Errorf("failed")
 			}
+
 			failCount = failCount + 1
 		} else {
 			failCount = 0

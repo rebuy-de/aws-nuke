@@ -154,37 +154,26 @@ Do you really want to nuke these resources on the account with the ID 0000000000
 Do you want to continue? Enter account alias to continue.
 > aws-nuke-example
 
-eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
-    status code: 400, request id: 9665c066-6bb1-4643-9071-f03481f80d4e
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - failed
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - triggered remove
 eu-west-1 - EC2KeyPair - 'test' - triggered remove
-eu-west-1 - EC2RouteTable - 'rtb-ffe91e99' - DependencyViolation: The routeTable 'rtb-ffe91e99' has dependencies and cannot be deleted.
-    status code: 400, request id: 3f667620-3207-4576-ae68-0b75261c0504
-eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - DependencyViolation: resource sg-f20f958a has a dependent object
-    status code: 400, request id: 5da5819d-8df5-4ced-b88f-9028e93d3cee
-eu-west-1 - EC2Subnet - 'subnet-154d844e' - DependencyViolation: The subnet 'subnet-154d844e' has dependencies and cannot be deleted.
-    status code: 400, request id: 237186aa-b035-4f64-a6e3-518bed64e240
-eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - VolumeInUse: Volume vol-0ddfb15461a00c3e2 is currently attached to i-01b489457a60298dd
-    status code: 400, request id: f88ff792-a17f-4fdd-9219-78a937a8d058
-eu-west-1 - EC2VPC - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
+eu-west-1 - EC2RouteTable - 'rtb-ffe91e99' - failed
+eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - failed
+eu-west-1 - EC2Subnet - 'subnet-154d844e' - failed
+eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - failed
+eu-west-1 - EC2VPC - 'vpc-c6159fa1' - failed
 eu-west-1 - S3Object - 's3://rebuy-terraform-state-138758637120/run-terraform.lock' - triggered remove
 
 Removal requested: 2 waiting, 6 failed, 5 skipped, 0 finished
 
-eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - DependencyViolation: The dhcpOptions 'dopt-bf2ec3d8' has dependencies and cannot be deleted.
-    status code: 400, request id: d85d26e8-9f6f-42f0-811a-3b05471b0254
+eu-west-1 - EC2DHCPOption - 'dopt-bf2ec3d8' - failed
 eu-west-1 - EC2Instance - 'i-01b489457a60298dd' - waiting
 eu-west-1 - EC2KeyPair - 'test' - removed
-eu-west-1 - EC2RouteTable - 'rtb-ffe91e99' - DependencyViolation: The routeTable 'rtb-ffe91e99' has dependencies and cannot be deleted.
-    status code: 400, request id: adb44c0e-3f5b-4977-b2ae-7582f57fb4b7
-eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - DependencyViolation: resource sg-f20f958a has a dependent object
-    status code: 400, request id: c4149482-0cd2-40e0-8fa0-84a61d55a158
-eu-west-1 - EC2Subnet - 'subnet-154d844e' - DependencyViolation: The subnet 'subnet-154d844e' has dependencies and cannot be deleted.
-    status code: 400, request id: ba0649ba-3be8-41ee-ae0f-6b74a1f0a873
-eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - VolumeInUse: Volume vol-0ddfb15461a00c3e2 is currently attached to i-01b489457a60298dd
-    status code: 400, request id: 9ac3eac5-f1ef-4337-a780-228295a7ebc7
-eu-west-1 - EC2VPC - 'vpc-c6159fa1' - DependencyViolation: The vpc 'vpc-c6159fa1' has dependencies and cannot be deleted.
-    status code: 400, request id: 89f870e9-1ffa-42be-9f73-76c29f088e1a
+eu-west-1 - EC2RouteTable - 'rtb-ffe91e99' - failed
+eu-west-1 - EC2SecurityGroup - 'sg-f20f958a' - failed
+eu-west-1 - EC2Subnet - 'subnet-154d844e' - failed
+eu-west-1 - EC2Volume - 'vol-0ddfb15461a00c3e2' - failed
+eu-west-1 - EC2VPC - 'vpc-c6159fa1' - failed
 
 Removal requested: 1 waiting, 6 failed, 5 skipped, 1 finished
 
@@ -193,8 +182,8 @@ Removal requested: 1 waiting, 6 failed, 5 skipped, 1 finished
 
 As you see *aws-nuke* now tries to delete all resources which aren't filtered,
 without caring about the dependencies between them. This results in API errors
-which can be ignored. They are displayed anyway, because it might be helpful
-for debugging, if the error is not about dependencies.
+which can be ignored. These errors are shown at the end of the *aws-nuke* run,
+if they keep to appear.
 
 *aws-nuke* retries deleting all resources until all specified ones are deleted
 or until there are only resources with errors left.
@@ -373,7 +362,8 @@ IAMUserAccessKey:
 
 #### Using Them Together
 
-It is also possible to use Filter Properties and Filter Types together. For example to protect all Hosted Zone of a specific TLD:
+It is also possible to use Filter Properties and Filter Types together. For
+example to protect all Hosted Zone of a specific TLD:
 
 ```yaml
 Route53HostedZone:
@@ -391,7 +381,10 @@ CloudFormationStack:
   value: "foo"
   invert: true
 ```
-In this case *any* CloudFormationStack ***but*** the ones called "foo" will be filtered. Be aware that *aws-nuke* internally takes every resource and applies every filter on it. If a filter matches, it marks the node as filtered.
+
+In this case *any* CloudFormationStack ***but*** the ones called "foo" will be
+filtered. Be aware that *aws-nuke* internally takes every resource and applies
+every filter on it. If a filter matches, it marks the node as filtered.
 
 ## Install
 
