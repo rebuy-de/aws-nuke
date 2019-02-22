@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func TestConfigBlacklist(t *testing.T) {
@@ -55,6 +56,9 @@ func TestLoadExampleConfig(t *testing.T) {
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": Account{
+				Presets: Presets{
+					Filters: []string{"terraform"},
+				},
 				Filters: Filters{
 					"IAMRole": {
 						NewExactFilter("uber.admin"),
@@ -70,8 +74,20 @@ func TestLoadExampleConfig(t *testing.T) {
 			},
 		},
 		ResourceTypes: ResourceTypes{
-			Targets: types.Collection{"S3Object", "S3Bucket"},
+			Targets:  types.Collection{"DynamoDBTable", "S3Bucket", "S3Object"},
 			Excludes: types.Collection{"IAMRole"},
+		},
+		Presets: PresetDefinitions{
+			Filters: map[string]Filters{
+				"terraform": {
+					"S3Bucket": {
+						Filter{
+							Type:  FilterTypeGlob,
+							Value: "my-statebucket-*",
+						},
+					},
+				},
+			},
 		},
 	}
 

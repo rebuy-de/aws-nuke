@@ -19,6 +19,7 @@ type ResourceTypes struct {
 type Account struct {
 	Filters       Filters       `yaml:"filters"`
 	ResourceTypes ResourceTypes `yaml:"resource-types"`
+	Presets       Presets       `yaml:"presets"`
 }
 
 type Nuke struct {
@@ -26,6 +27,15 @@ type Nuke struct {
 	Regions          []string           `yaml:"regions"`
 	Accounts         map[string]Account `yaml:"accounts"`
 	ResourceTypes    ResourceTypes      `yaml:"resource-types"`
+	Presets          PresetDefinitions  `yaml:"presets"`
+}
+
+type PresetDefinitions struct {
+	Filters map[string]Filters `filters`
+}
+
+type Presets struct {
+	Filters []string `yaml:"filters"`
 }
 
 func Load(path string) (*Nuke, error) {
