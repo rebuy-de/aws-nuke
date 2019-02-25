@@ -20,6 +20,12 @@ const (
 
 type Filters map[string][]Filter
 
+func (f Filters) Merge(f2 Filters) {
+	for resourceType, filter := range f2 {
+		f[resourceType] = append(f[resourceType], filter...)
+	}
+}
+
 type Filter struct {
 	Property string
 	Type     FilterType

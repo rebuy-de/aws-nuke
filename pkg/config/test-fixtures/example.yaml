@@ -1,18 +1,22 @@
 ---
 regions:
-  - "eu-west-1"
+- "eu-west-1"
+
 account-blacklist:
 - 1234567890
 
 resource-types:
   targets:
-  - S3Object
+  - DynamoDBTable
   - S3Bucket
+  - S3Object
   excludes:
   - IAMRole
 
 accounts:
   555133742:
+    presets:
+    - "terraform"
     resource-types:
       targets:
       - S3Bucket
@@ -21,3 +25,10 @@ accounts:
       - "uber.admin"
       IAMRolePolicyAttachment:
       - "uber.admin -> AdministratorAccess"
+
+presets:
+  terraform:
+    filters:
+      S3Bucket:
+      - type: glob
+        value: "my-statebucket-*"

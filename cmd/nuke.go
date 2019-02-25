@@ -185,7 +185,6 @@ func (n *Nuke) Scan() error {
 }
 
 func (n *Nuke) Filter(item *Item) error {
-	accountConfig := n.Config.Accounts[n.Account.ID()]
 
 	checker, ok := item.Resource.(resources.Filter)
 	if ok {
@@ -201,12 +200,17 @@ func (n *Nuke) Filter(item *Item) error {
 		}
 	}
 
-	filters, ok := accountConfig.Filters[item.Type]
+	accountFilters, err := n.Config.Filters(n.Account.ID())
+	if err != nil {
+		return err
+	}
+
+	itemFilters, ok := accountFilters[item.Type]
 	if !ok {
 		return nil
 	}
 
-	for _, filter := range filters {
+	for _, filter := range itemFilters {
 		prop, err := item.GetProperty(filter.Property)
 
 		match, err := filter.Match(prop)

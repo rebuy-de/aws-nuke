@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func TestConfigBlacklist(t *testing.T) {
@@ -55,6 +56,7 @@ func TestLoadExampleConfig(t *testing.T) {
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": Account{
+				Presets: []string{"terraform"},
 				Filters: Filters{
 					"IAMRole": {
 						NewExactFilter("uber.admin"),
@@ -70,8 +72,20 @@ func TestLoadExampleConfig(t *testing.T) {
 			},
 		},
 		ResourceTypes: ResourceTypes{
-			Targets: types.Collection{"S3Object", "S3Bucket"},
+			Targets:  types.Collection{"DynamoDBTable", "S3Bucket", "S3Object"},
 			Excludes: types.Collection{"IAMRole"},
+		},
+		Presets: map[string]PresetDefinitions{
+			"terraform": PresetDefinitions{
+				Filters: Filters{
+					"S3Bucket": {
+						Filter{
+							Type:  FilterTypeGlob,
+							Value: "my-statebucket-*",
+						},
+					},
+				},
+			},
 		},
 	}
 
@@ -198,5 +212,43 @@ func TestConfigValidation(t *testing.T) {
 				t.Fatalf("Didn't excpect an error, but got one: %v", err)
 			}
 		})
+	}
+}
+
+func TestFilterMerge(t *testing.T) {
+	config, err := Load("test-fixtures/example.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	filters, err := config.Filters("555133742")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expect := Filters{
+		"S3Bucket": []Filter{
+			Filter{
+				Type: "glob", Value: "my-statebucket-*",
+			},
+		},
+		"IAMRole": []Filter{
+			Filter{
+				Type:  "exact",
+				Value: "uber.admin",
+			},
+		},
+		"IAMRolePolicyAttachment": []Filter{
+			Filter{
+				Type:  "exact",
+				Value: "uber.admin -> AdministratorAccess",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(filters, expect) {
+		t.Errorf("Read struct mismatches:")
+		t.Errorf("  Got:      %#v", filters)
+		t.Errorf("  Expected: %#v", expect)
 	}
 }

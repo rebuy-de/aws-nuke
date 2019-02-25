@@ -19,13 +19,19 @@ type ResourceTypes struct {
 type Account struct {
 	Filters       Filters       `yaml:"filters"`
 	ResourceTypes ResourceTypes `yaml:"resource-types"`
+	Presets       []string      `yaml:"presets"`
 }
 
 type Nuke struct {
-	AccountBlacklist []string           `yaml:"account-blacklist"`
-	Regions          []string           `yaml:"regions"`
-	Accounts         map[string]Account `yaml:"accounts"`
-	ResourceTypes    ResourceTypes      `yaml:"resource-types"`
+	AccountBlacklist []string                     `yaml:"account-blacklist"`
+	Regions          []string                     `yaml:"regions"`
+	Accounts         map[string]Account           `yaml:"accounts"`
+	ResourceTypes    ResourceTypes                `yaml:"resource-types"`
+	Presets          map[string]PresetDefinitions `yaml:"presets"`
+}
+
+type PresetDefinitions struct {
+	Filters Filters `yaml:"filters"`
 }
 
 func Load(path string) (*Nuke, error) {
@@ -94,6 +100,35 @@ func (c *Nuke) ValidateAccount(accountID string, aliases []string) error {
 	}
 
 	return nil
+}
+
+func (c *Nuke) Filters(accountID string) (Filters, error) {
+	account := c.Accounts[accountID]
+	filters := account.Filters
+
+	if filters == nil {
+		filters = Filters{}
+	}
+
+	if account.Presets == nil {
+		return filters, nil
+	}
+
+	for _, presetName := range account.Presets {
+		notFound := fmt.Errorf("Could not find filter preset '%s'", presetName)
+		if c.Presets == nil {
+			return nil, notFound
+		}
+
+		preset, ok := c.Presets[presetName]
+		if !ok {
+			return nil, notFound
+		}
+
+		filters.Merge(preset.Filters)
+	}
+
+	return filters, nil
 }
 
 func (c *Nuke) resolveDeprecations() error {
