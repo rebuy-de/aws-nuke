@@ -17,6 +17,8 @@ func init() {
 }
 
 func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
+	resources := make([]Resource, 0)
+
 	svc := elb.New(sess)
 
 	elbResp, err := svc.DescribeLoadBalancers(nil)
@@ -24,32 +26,25 @@ func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
-	var tagRequestELBNames []*string
-	for _, elb := range elbResp.LoadBalancerDescriptions {
-		tagRequestELBNames = append(tagRequestELBNames, elb.LoadBalancerName)
-	}
-
-	if len(tagRequestELBNames) == 0 {
-		// Describing tags will fail, if there is no ELB, therefor we exit early.
-		return make([]Resource, 0), nil
-	}
-
-	// Tags for ELBs need to be fetched separately
-	tagResp, err := svc.DescribeTags(&elb.DescribeTagsInput{
-		LoadBalancerNames: tagRequestELBNames,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	resources := make([]Resource, 0)
-	for _, elbTagInfo := range tagResp.TagDescriptions {
-		resources = append(resources, &ELBLoadBalancer{
-			svc:  svc,
-			name: elbTagInfo.LoadBalancerName,
-			tags: elbTagInfo.Tags,
+	for _, elbLoadBalancer := range elbResp.LoadBalancerDescriptions {
+		// Tags for ELBs need to be fetched separately
+		tagResp, err := svc.DescribeTags(&elb.DescribeTagsInput{
+			LoadBalancerNames: []*string{elbLoadBalancer.LoadBalancerName},
 		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, elbTagInfo := range tagResp.TagDescriptions {
+			resources = append(resources, &ELBLoadBalancer{
+				svc:  svc,
+				name: elbTagInfo.LoadBalancerName,
+				tags: elbTagInfo.Tags,
+			})
+		}
 	}
+
 	return resources, nil
 }
 
