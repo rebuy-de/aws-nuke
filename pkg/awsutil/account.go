@@ -3,6 +3,7 @@ package awsutil
 import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/pkg/errors"
 )
 
 type Account struct {
@@ -19,22 +20,22 @@ func NewAccount(creds Credentials) (*Account, error) {
 
 	defaultSession, err := account.NewSession(DefaultRegionID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to create default session in %s", DefaultRegionID)
 	}
 
 	identityOutput, err := sts.New(defaultSession).GetCallerIdentity(nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed get caller identity")
 	}
 
 	globalSession, err := account.NewSession(GlobalRegionID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to create global session in %s", GlobalRegionID)
 	}
 
 	aliasesOutput, err := iam.New(globalSession).ListAccountAliases(nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed get account alias")
 	}
 
 	aliases := []string{}

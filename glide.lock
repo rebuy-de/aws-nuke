@@ -1,8 +1,8 @@
-hash: 0bb679e76898a5f0085968b7694b64d40b68abce3b1ffe3974269dce6dd1429a
-updated: 2019-02-22T10:59:57.165911901+01:00
+hash: eb946151bb194b220c9c01df8e2d61d62fc4986a1ff64e7c329961015a0c7d40
+updated: 2019-03-01T11:56:25.608799393+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 416a7057457ed9af569ea3682f7319ec3466044d
+  version: 3f4520a9e0e2eff8bf1ef6da734d373c4c368429
   subpackages:
   - aws
   - aws/awserr
@@ -145,6 +145,8 @@ imports:
   version: 57fdcb988a5c543893cc61bce354a6e24ab70022
 - name: github.com/mb0/glob
   version: 1eb79d2de6c448664e7272f8b9fe1938239e3aaa
+- name: github.com/pkg/errors
+  version: ba968bfe8b2f7e042a574c888954fccecfa385b4
 - name: github.com/sirupsen/logrus
   version: e1e72e9de974bd926e5c56f83753fba2df402ce5
 - name: github.com/spf13/cobra
