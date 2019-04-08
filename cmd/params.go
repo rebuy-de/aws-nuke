@@ -11,8 +11,9 @@ type NukeParameters struct {
 	Targets  []string
 	Excludes []string
 
-	NoDryRun bool
-	Force    bool
+	NoDryRun   bool
+	Force      bool
+	ForceSleep int
 
 	MaxWaitRetries int
 }
