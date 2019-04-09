@@ -471,7 +471,7 @@ $ docker build . -t rebuy-de/aws_nuke
 $ docker run -a stdin -a stdout -ti rebuy-de/aws_nuke -c config/nuke-config.yml --profile aws-nuke-example
 ```
 
-The -a flag tells docker run to bind to the container’s STDIN, STDOUT or STDERR. 
+The -a flag tells docker run to bind to the container's STDIN, STDOUT or STDERR. 
 This makes it possible to manipulate the output and input as needed. 
 
 The -t flag allocates a pseudo-TTY and the -i flag keeps STDIN open even 
