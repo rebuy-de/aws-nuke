@@ -13,8 +13,9 @@ type NukeParameters struct {
 	AccessKeyID     string
 	SecretAccessKey string
 
-	NoDryRun bool
-	Force    bool
+	NoDryRun   bool
+	Force      bool
+	ForceSleep int
 
 	MaxWaitRetries int
 }

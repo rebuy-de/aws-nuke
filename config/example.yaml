@@ -41,3 +41,7 @@ accounts:
       CloudFormationStack:
       - property: "tag:team"
         value: "myTeam"
+      EC2Snapshot:
+      - property: "tag:team"
+        type: regex
+        value: ".+"

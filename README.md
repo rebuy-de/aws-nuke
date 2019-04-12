@@ -458,6 +458,25 @@ Then you just need to run `make build` to compile a binary into the project
 directory or `make install` go install *aws-nuke* into `$GOPATH/bin`. With
 `make xc` you can cross compile *aws-nuke* for other platforms.
 
+### Docker
+
+To use the provided Docker implementation, first you need to make sure you've 
+created the config file and that it exists in the `config` directory.
+Make sure you are in the project's root directory, then you need to build 
+the image and run the container:
+
+```bash
+$ docker build . -t rebuy-de/aws_nuke
+
+$ docker run -a stdin -a stdout -ti rebuy-de/aws_nuke -c config/nuke-config.yml --profile aws-nuke-example
+```
+
+The -a flag tells docker run to bind to the container's STDIN, STDOUT or STDERR. 
+This makes it possible to manipulate the output and input as needed. 
+
+The -t flag allocates a pseudo-TTY and the -i flag keeps STDIN open even 
+if not attached.
+
 ## Contact Channels
 
 Feel free to create a GitHub Issue for any questions, bug reports or feature
