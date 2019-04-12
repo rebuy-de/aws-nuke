@@ -45,3 +45,6 @@ accounts:
       - property: "tag:team"
         type: regex
         value: ".+"
+      EC2Image:
+      - property: "tag:release"
+        value: "production"

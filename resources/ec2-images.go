@@ -10,7 +10,7 @@ import (
 type EC2Image struct {
 	svc  *ec2.EC2
 	id   string
-	tags []*ec2.Tags
+	tags []*ec2.Tag
 }
 
 func init() {
@@ -34,7 +34,7 @@ func ListEC2Images(sess *session.Session) ([]Resource, error) {
 		resources = append(resources, &EC2Image{
 			svc:  svc,
 			id:   *out.ImageId,
-			tags: *out.Tags,
+			tags: out.Tags,
 		})
 	}
 
