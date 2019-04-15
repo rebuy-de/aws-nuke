@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2Image struct {
-	svc *ec2.EC2
-	id  string
+	svc  *ec2.EC2
+	id   string
+	tags []*ec2.Tag
 }
 
 func init() {
@@ -30,8 +32,9 @@ func ListEC2Images(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Images {
 		resources = append(resources, &EC2Image{
-			svc: svc,
-			id:  *out.ImageId,
+			svc:  svc,
+			id:   *out.ImageId,
+			tags: out.Tags,
 		})
 	}
 
@@ -43,6 +46,14 @@ func (e *EC2Image) Remove() error {
 		ImageId: &e.id,
 	})
 	return err
+}
+
+func (e *EC2Image) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
 }
 
 func (e *EC2Image) String() string {
