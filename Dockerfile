@@ -25,4 +25,6 @@ COPY . /go/src/github.com/rebuy-de/aws-nuke
 WORKDIR /go/src/github.com/rebuy-de/aws-nuke
 RUN CGO_ENABLED=0 make install
 
+RUN adduser -D aws-nuke && chown aws-nuke /go/src/github.com/rebuy-de/aws-nuke
+USER aws-nuke
 ENTRYPOINT ["/go/bin/aws-nuke"]
