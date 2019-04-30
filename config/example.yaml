@@ -17,6 +17,7 @@ resource-types:
   - Route53HostedZone
   - EC2Instance
   - CloudFormationStack
+  - MSKCluster
 
 accounts:
   555133742:
