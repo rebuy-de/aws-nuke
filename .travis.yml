@@ -6,16 +6,16 @@ services:
   - docker
 
 script:
-- docker build -t aws-nuke --no-cache .
+- docker build --target=builder -t aws-nuke --no-cache .
 - >
   docker run
   --name aws-nuke
   --entrypoint "sh"
   -e CGO_ENABLED=0
-  --workdir "/go/src/github.com/rebuy-de/aws-nuke"
+  --workdir "/src"
   aws-nuke
-  -euxc "make xc && mkdir releases && mv aws-nuke-* releases"
-- docker cp -L aws-nuke:/go/src/github.com/rebuy-de/aws-nuke/releases ./releases
+  -euxc "make xc && mkdir releases && mv dist/aws-nuke-* releases"
+- docker cp -L aws-nuke:/src/releases ./releases
 - ls -l *
 
 deploy:
@@ -27,4 +27,3 @@ deploy:
   on:
     repo: rebuy-de/aws-nuke
     tags: true
-
