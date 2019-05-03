@@ -1,30 +1,32 @@
 # Source: https://github.com/rebuy-de/golang-template
-# Version: 1.3.1
 
-FROM golang:1.11-alpine
+FROM golang:1.12-alpine as builder
 
-RUN apk add --no-cache git make
+RUN apk add --no-cache git make curl openssl
 
 # Configure Go
-ENV GOPATH /go
-ENV PATH /go/bin:$PATH
+ENV GOPATH=/go PATH=/go/bin:$PATH CGO_ENABLED=0 GO111MODULE=on
 RUN mkdir -p ${GOPATH}/src ${GOPATH}/bin
 
 # Install Go Tools
-RUN go get -u golang.org/x/lint/golint
+RUN GO111MODULE= go get -u golang.org/x/lint/golint
 
-# Install Glide
-RUN go get -u github.com/Masterminds/glide/...
+COPY . /src
+WORKDIR /src
+RUN set -x \
+ && make test \
+ && make build \
+ && cp --dereference /src/dist/* /usr/local/bin/
 
-WORKDIR /go/src/github.com/Masterminds/glide
+RUN set -x \
+ && aws-nuke version
 
-RUN git checkout v0.12.3
-RUN go install
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates
 
-COPY . /go/src/github.com/rebuy-de/aws-nuke
-WORKDIR /go/src/github.com/rebuy-de/aws-nuke
-RUN CGO_ENABLED=0 make install
+COPY --from=builder /usr/local/bin/* /usr/local/bin/
 
-RUN adduser -D aws-nuke && chown aws-nuke /go/src/github.com/rebuy-de/aws-nuke
+RUN adduser -D aws-nuke
 USER aws-nuke
-ENTRYPOINT ["/go/bin/aws-nuke"]
+
+ENTRYPOINT ["/usr/local/bin/aws-nuke"]

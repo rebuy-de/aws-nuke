@@ -1,75 +1,79 @@
+# Source: https://github.com/rebuy-de/golang-template
+
+TARGETS?="."
+PACKAGE=$(shell GOPATH= go list $(TARGET))
 NAME=$(notdir $(PACKAGE))
 
 BUILD_VERSION=$(shell git describe --always --dirty --tags | tr '-' '.' )
-BUILD_DATE=$(shell date)
+BUILD_DATE=$(shell LC_ALL=C date)
 BUILD_HASH=$(shell git rev-parse HEAD)
 BUILD_MACHINE=$(shell echo $$HOSTNAME)
 BUILD_USER=$(shell whoami)
+BUILD_ENVIRONMENT=$(BUILD_USER)@$(BUILD_MACHINE)
 
+BUILD_XDST=$(PACKAGE)/cmd
 BUILD_FLAGS=-ldflags "\
-	-s -w \
-	-X '$(PACKAGE)/cmd.BuildVersion=$(BUILD_VERSION)' \
-	-X '$(PACKAGE)/cmd.BuildDate=$(BUILD_DATE)' \
-	-X '$(PACKAGE)/cmd.BuildHash=$(BUILD_HASH)' \
-	-X '$(PACKAGE)/cmd.BuildEnvironment=$(BUILD_USER)@$(BUILD_MACHINE)' \
+	$(ADDITIONAL_LDFLAGS) -s -w \
+	-X '$(BUILD_XDST).BuildVersion=$(BUILD_VERSION)' \
+	-X '$(BUILD_XDST).BuildDate=$(BUILD_DATE)' \
+	-X '$(BUILD_XDST).BuildHash=$(BUILD_HASH)' \
+	-X '$(BUILD_XDST).BuildEnvironment=$(BUILD_ENVIRONMENT)' \
 "
 
-BUILD_ARTIFACT=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)
-
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
-GOPKGS=$(shell glide nv)
+GOPKGS=$(shell go list ./...)
+
+OUTPUT_FILE=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOEXE)
+OUTPUT_LINK=$(NAME)$(shell go env GOEXE)
 
 default: build
 
-glide.lock: glide.yaml
-	glide update
-
-vendor: glide.lock glide.yaml
-	glide install
+vendor: go.mod go.sum
+	go mod vendor
 	touch vendor
 
 format:
 	gofmt -s -w $(GOFILES)
 
-vet:
+vet: vendor
 	go vet $(GOPKGS)
 
 lint:
 	$(foreach pkg,$(GOPKGS),golint $(pkg);)
 
-test_gopath:
-	test $$(go list) = "$(PACKAGE)"
-
 test_packages: vendor
 	go test $(GOPKGS)
 
 test_format:
-	gofmt -l $(GOFILES)
+	gofmt -s -l $(GOFILES)
 
-test: test_gopath test_format vet lint test_packages
+test: test_format vet lint test_packages
 
 cov:
 	gocov test -v $(GOPKGS) \
 		| gocov-html > coverage.html
 
-build: vendor
-	go build \
+_build: vendor
+	mkdir -p dist
+	$(foreach TARGET,$(TARGETS),go build \
 		$(BUILD_FLAGS) \
-		-o $(BUILD_ARTIFACT)
-	ln -sf $(BUILD_ARTIFACT) $(NAME)
+		-o dist/$(OUTPUT_FILE) \
+		$(TARGET);\
+	)
 
-compress: build
-	tar czf $(BUILD_ARTIFACT).tar.gz $(BUILD_ARTIFACT)
+build: _build
+	$(foreach TARGET,$(TARGETS),ln -sf $(OUTPUT_FILE) dist/$(OUTPUT_LINK);)
+
+compress: _build
+	tar czf dist/$(OUTPUT_FILE).tar.gz dist/$(OUTPUT_FILE)
 
 xc:
 	GOOS=linux GOARCH=amd64 make compress
 	GOOS=darwin GOARCH=amd64 make compress
 
 install: vendor test
-	go install \
-		$(BUILD_FLAGS)
+	$(foreach TARGET,$(TARGETS),go install \
+		$(BUILD_FLAGS);)
 
 clean:
-	rm -f $(NAME)*
-
-.PHONY: build install test
+	rm dist/*
