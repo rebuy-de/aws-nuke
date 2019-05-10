@@ -3,4 +3,9 @@
 /aws-nuke-*
 /dist
 /releases
+/snap
+/stage
+/prime
+/parts
 .glide
+aws-nuke*

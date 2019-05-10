@@ -1,0 +1,19 @@
+name: aws-nuke
+version: 2.10.0
+summary: Nuke a whole AWS account and delete all its resources.
+description: |
+  Nuke a whole AWS account and delete all its resources.
+license: MIT
+
+confinement: classic
+grade: devel
+base: core18
+
+parts:
+  aws-nuke:
+    plugin: dump
+    source: https://github.com/rebuy-de/aws-nuke/releases/download/v2.10.0/aws-nuke-v2.10.0-linux-amd64.tar.gz
+
+apps:
+  aws-nuke:
+    command: aws-nuke-v2.10.0-linux-amd64
