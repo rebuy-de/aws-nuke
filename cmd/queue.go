@@ -26,7 +26,7 @@ type Item struct {
 	State  ItemState
 	Reason string
 
-	Region Region
+	Region *Region
 	Type   string
 }
 
@@ -50,7 +50,11 @@ func (i *Item) Print() {
 // List gets all resource items of the same resource type like the Item.
 func (i *Item) List() ([]resources.Resource, error) {
 	listers := resources.GetListers()
-	return listers[i.Type](i.Region.Session)
+	sess, err := i.Region.Session(i.Type)
+	if err != nil {
+		return nil, err
+	}
+	return listers[i.Type](sess)
 }
 
 func (i *Item) GetProperty(key string) (string, error) {

@@ -53,7 +53,7 @@ func TestLoadExampleConfig(t *testing.T) {
 
 	expect := Nuke{
 		AccountBlacklist: []string{"1234567890"},
-		Regions:          []string{"eu-west-1"},
+		Regions:          []string{"eu-west-1", "demo10"},
 		Accounts: map[string]Account{
 			"555133742": Account{
 				Presets: []string{"terraform"},
@@ -83,6 +83,23 @@ func TestLoadExampleConfig(t *testing.T) {
 							Type:  FilterTypeGlob,
 							Value: "my-statebucket-*",
 						},
+					},
+				},
+			},
+		},
+		CustomEndpoints: []*CustomRegion{
+			&CustomRegion{
+				Region:                "demo10",
+				TLSInsecureSkipVerify: true,
+				Services: CustomServices{
+					&CustomService{
+						Service: "ec2",
+						URL:     "https://demo10.cloud.internal/api/v2/aws/ec2",
+					},
+					&CustomService{
+						Service:               "s3",
+						URL:                   "https://demo10.cloud.internal:1060",
+						TLSInsecureSkipVerify: true,
 					},
 				},
 			},
@@ -251,4 +268,31 @@ func TestFilterMerge(t *testing.T) {
 		t.Errorf("  Got:      %#v", filters)
 		t.Errorf("  Expected: %#v", expect)
 	}
+}
+
+func TestGetCustomRegion(t *testing.T) {
+	config, err := Load("test-fixtures/example.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	demo10 := config.CustomEndpoints.GetRegion("demo10")
+	if demo10 == nil {
+		t.Fatal("Expected to find a set of custom endpoints for region10")
+	}
+	euWest1 := config.CustomEndpoints.GetRegion("eu-west-1")
+	if euWest1 != nil {
+		t.Fatal("Expected to euWest1 without a set of custom endpoints")
+	}
+
+	t.Run("TestGetService", func(t *testing.T) {
+		ec2Service := demo10.Services.GetService("ec2")
+		if ec2Service == nil {
+			t.Fatal("Expected to find a custom ec2 service for region10")
+		}
+		rdsService := demo10.Services.GetService("rds")
+		if rdsService != nil {
+			t.Fatal("Expected to not find a custom rds service for region10")
+		}
+
+	})
 }

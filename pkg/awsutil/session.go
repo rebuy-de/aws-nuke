@@ -1,9 +1,12 @@
 package awsutil
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net"
 	"strings"
+
+	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -11,11 +14,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/rebuy-de/aws-nuke/pkg/config"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	GlobalRegionID  = "global"
+	GlobalRegionID = "global"
+)
+
+var (
+	// DefaultRegionID The default region. Can be customized for non AWS implementations
 	DefaultRegionID = endpoints.UsEast1RegionID
 )
 
@@ -26,7 +34,8 @@ type Credentials struct {
 	SecretAccessKey string
 	SessionToken    string
 
-	session *session.Session
+	CustomEndpoints config.CustomEndpoints
+	session         *session.Session
 }
 
 func (c *Credentials) HasProfile() bool {
@@ -70,11 +79,9 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 		case c.HasKeys():
 			opts = session.Options{
 				Config: aws.Config{
-					Credentials: credentials.NewStaticCredentials(
-						strings.TrimSpace(c.AccessKeyID),
-						strings.TrimSpace(c.SecretAccessKey),
-						strings.TrimSpace(c.SessionToken),
-					)}}
+					Credentials: c.awsNewStaticCredentials(),
+				},
+			}
 		}
 
 		opts.Config.Region = aws.String(region)
@@ -91,8 +98,19 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 	return c.session, nil
 }
 
-func (c *Credentials) NewSession(region string) (*session.Session, error) {
-	log.Debugf("creating new session in %s", region)
+func (c *Credentials) awsNewStaticCredentials() *credentials.Credentials {
+	if !c.HasKeys() {
+		return credentials.NewEnvCredentials()
+	}
+	return credentials.NewStaticCredentials(
+		strings.TrimSpace(c.AccessKeyID),
+		strings.TrimSpace(c.SecretAccessKey),
+		strings.TrimSpace(c.SessionToken),
+	)
+}
+
+func (c *Credentials) NewSession(region, serviceType string) (*session.Session, error) {
+	log.Debugf("creating new session in %s for %s", region, serviceType)
 
 	global := false
 
@@ -101,14 +119,45 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 		global = true
 	}
 
-	root, err := c.rootSession()
-	if err != nil {
-		return nil, err
+	var sess *session.Session
+	isCustom := false
+	if customRegion := c.CustomEndpoints.GetRegion(region); customRegion != nil {
+		customService := customRegion.Services.GetService(serviceType)
+		if customService == nil {
+			return nil, ErrSkipRequest(fmt.Sprintf(
+				".service '%s' is not available in region '%s'",
+				serviceType, region))
+		}
+		conf := &aws.Config{
+			Region:      &region,
+			Endpoint:    &customService.URL,
+			Credentials: c.awsNewStaticCredentials(),
+		}
+		if customService.TLSInsecureSkipVerify {
+			conf.HTTPClient = &http.Client{Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			}}
+		}
+		// ll := aws.LogDebugWithEventStreamBody
+		// conf.LogLevel = &ll
+		var err error
+		sess, err = session.NewSession(conf)
+		if err != nil {
+			return nil, err
+		}
+		isCustom = true
 	}
 
-	sess := root.Copy(&aws.Config{
-		Region: &region,
-	})
+	if sess == nil {
+		root, err := c.rootSession()
+		if err != nil {
+			return nil, err
+		}
+
+		sess = root.Copy(&aws.Config{
+			Region: &region,
+		})
+	}
 
 	sess.Handlers.Send.PushFront(func(r *request.Request) {
 		log.Debugf("sending AWS request:\n%s", DumpRequest(r.HTTPRequest))
@@ -118,9 +167,10 @@ func (c *Credentials) NewSession(region string) (*session.Session, error) {
 		log.Debugf("received AWS response:\n%s", DumpResponse(r.HTTPResponse))
 	})
 
-	sess.Handlers.Validate.PushFront(skipMissingServiceInRegionHandler)
-	sess.Handlers.Validate.PushFront(skipGlobalHandler(global))
-
+	if !isCustom {
+		sess.Handlers.Validate.PushFront(skipMissingServiceInRegionHandler)
+		sess.Handlers.Validate.PushFront(skipGlobalHandler(global))
+	}
 	return sess, nil
 }
 

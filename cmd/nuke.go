@@ -154,15 +154,7 @@ func (n *Nuke) Scan() error {
 	queue := make(Queue, 0)
 
 	for _, regionName := range n.Config.Regions {
-		sess, err := n.Account.NewSession(regionName)
-		if err != nil {
-			return err
-		}
-
-		region := Region{
-			Name:    regionName,
-			Session: sess,
-		}
+		region := NewRegion(regionName, n.Account.ResourceTypeToServiceType, n.Account.NewSession)
 
 		items := Scan(region, resourceTypes)
 		for item := range items {

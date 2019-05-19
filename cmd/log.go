@@ -24,7 +24,6 @@ var (
 	ColorResourceProperties = *color.New(color.Italic)
 )
 
-
 // Format the resource properties in sorted order ready for printing.
 // This ensures that multiple runs of aws-nuke produce stable output so
 // that they can be compared with each other.
