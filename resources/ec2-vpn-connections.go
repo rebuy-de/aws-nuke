@@ -5,12 +5,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2VPNConnection struct {
 	svc   *ec2.EC2
-	id    string
-	state string
+	conn  *ec2.VpnConnection
 }
 
 func init() {
@@ -30,8 +30,7 @@ func ListEC2VPNConnections(sess *session.Session) ([]Resource, error) {
 	for _, out := range resp.VpnConnections {
 		resources = append(resources, &EC2VPNConnection{
 			svc:   svc,
-			id:    *out.VpnConnectionId,
-			state: *out.State,
+			conn:  out,
 		})
 	}
 
@@ -39,7 +38,7 @@ func ListEC2VPNConnections(sess *session.Session) ([]Resource, error) {
 }
 
 func (v *EC2VPNConnection) Filter() error {
-	if v.state == "deleted" {
+	if *v.conn.State == "deleted" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
@@ -47,7 +46,7 @@ func (v *EC2VPNConnection) Filter() error {
 
 func (v *EC2VPNConnection) Remove() error {
 	params := &ec2.DeleteVpnConnectionInput{
-		VpnConnectionId: &v.id,
+		VpnConnectionId: v.conn.VpnConnectionId,
 	}
 
 	_, err := v.svc.DeleteVpnConnection(params)
@@ -58,6 +57,14 @@ func (v *EC2VPNConnection) Remove() error {
 	return nil
 }
 
+func (v *EC2VPNConnection) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range v.conn.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
+}
+
 func (v *EC2VPNConnection) String() string {
-	return v.id
+	return *v.conn.VpnConnectionId
 }
