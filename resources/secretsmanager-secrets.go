@@ -49,8 +49,8 @@ func ListSecretsManagerSecrets(sess *session.Session) ([]Resource, error) {
 func (f *SecretsManagerSecret) Remove() error {
 
 	_, err := f.svc.DeleteSecret(&secretsmanager.DeleteSecretInput{
-		SecretId:             f.ARN,
-		RecoveryWindowInDays: aws.Int64(7),
+		SecretId:                   f.ARN,
+		ForceDeleteWithoutRecovery: aws.Bool(true),
 	})
 
 	return err
