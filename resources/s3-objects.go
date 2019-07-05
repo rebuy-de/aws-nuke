@@ -2,7 +2,7 @@ package resources
 
 import (
 	"fmt"
-
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -14,6 +14,7 @@ type S3Object struct {
 	key       string
 	versionID *string
 	latest    bool
+	tags      []*s3.Tag
 }
 
 func init() {
@@ -45,6 +46,11 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 				if out.Key == nil {
 					continue
 				}
+				tags, err := retrieveObjectTags(svc, name, *out.Key, *out.VersionId)
+
+				if err != nil {
+					continue
+				}
 
 				resources = append(resources, &S3Object{
 					svc:       svc,
@@ -52,6 +58,7 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 					key:       *out.Key,
 					versionID: out.VersionId,
 					latest:    UnPtrBool(out.IsLatest, false),
+					tags:      tags,
 				})
 			}
 
@@ -97,12 +104,33 @@ func (e *S3Object) Remove() error {
 	return nil
 }
 
+func retrieveObjectTags(svc *s3.S3, bucketName string, keyName string, versionId string) ([]*s3.Tag, error) {
+	input := &s3.GetObjectTaggingInput{
+		Bucket:    aws.String(bucketName),
+		Key:       aws.String(keyName),
+		VersionId: aws.String(versionId),
+	}
+
+	result, err := svc.GetObjectTagging(input)
+	if err != nil {
+		return make([]*s3.Tag, 0), err
+	}
+
+	return result.TagSet, nil
+}
+
 func (e *S3Object) Properties() types.Properties {
-	return types.NewProperties().
-		Set("Bucket", e.bucket).
-		Set("Key", e.key).
-		Set("VersionID", e.versionID).
-		Set("IsLatest", e.latest)
+	properties := types.NewProperties()
+	properties.Set("Bucket", e.bucket)
+	properties.Set("Key", e.key)
+	properties.Set("VersionID", e.versionID)
+	properties.Set("IsLatest", e.latest)
+
+	for _, tag := range e.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (e *S3Object) String() string {
