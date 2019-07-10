@@ -33,7 +33,9 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, name := range buckets {
-		tags, err := retrieveBucketTags(svc, name)
+		result, err := svc.GetBucketTagging(&s3.GetBucketTaggingInput{
+			Bucket: aws.String(name),
+		})
 
 		if err != nil {
 			continue
@@ -42,7 +44,7 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 		resources = append(resources, &S3Bucket{
 			svc:  svc,
 			name: name,
-			tags: tags,
+			tags: result.TagSet,
 		})
 	}
 
@@ -123,19 +125,6 @@ func (e *S3Bucket) RemoveAllObjects() error {
 
 	iterator := s3manager.NewDeleteListIterator(e.svc, params)
 	return s3manager.NewBatchDeleteWithClient(e.svc).Delete(aws.BackgroundContext(), iterator)
-}
-
-func retrieveBucketTags(svc *s3.S3, bucketName string) ([]*s3.Tag, error) {
-	input := &s3.GetBucketTaggingInput{
-		Bucket: aws.String(bucketName),
-	}
-
-	result, err := svc.GetBucketTagging(input)
-	if err != nil {
-		return make([]*s3.Tag, 0), err
-	}
-
-	return result.TagSet, nil
 }
 
 func (e *S3Bucket) Properties() types.Properties {
