@@ -4,12 +4,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type RDSDBCluster struct {
 	svc                *rds.RDS
 	id                 string
 	deletionProtection bool
+	tags               []*rds.Tag
 }
 
 func init() {
@@ -27,10 +29,19 @@ func ListRDSClusters(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBClusters {
+		tags, err := svc.ListTagsForResource(&rds.ListTagsForResourceInput{
+                        ResourceName: instance.DBClusterArn,
+                })
+
+                if err != nil {
+                        continue
+                }
+
 		resources = append(resources, &RDSDBCluster{
 			svc:                svc,
 			id:                 *instance.DBClusterIdentifier,
 			deletionProtection: *instance.DeletionProtection,
+			tags:               tags.TagList,
 		})
 	}
 
@@ -64,4 +75,16 @@ func (i *RDSDBCluster) Remove() error {
 
 func (i *RDSDBCluster) String() string {
 	return i.id
+}
+
+func (i *RDSDBCluster) Properties() types.Properties {
+        properties := types.NewProperties()
+        properties.Set("Identifier", i.id)
+	properties.Set("Deletion Protection", i.deletionProtection)
+
+        for _, tag := range i.tags {
+                properties.SetTag(tag.Key, tag.Value)
+        }
+
+        return properties
 }

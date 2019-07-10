@@ -29,7 +29,9 @@ func ListRDSInstances(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBInstances {
-		tags, err := retrieveRDSInstanceTags(svc, *instance.DBInstanceArn)
+		tags, err := svc.ListTagsForResource(&rds.ListTagsForResourceInput{
+			ResourceName: instance.DBInstanceArn,
+		})
 
 		if err != nil {
 			continue
@@ -39,7 +41,7 @@ func ListRDSInstances(sess *session.Session) ([]Resource, error) {
 			svc:                svc,
 			id:                 *instance.DBInstanceIdentifier,
 			deletionProtection: *instance.DeletionProtection,
-			tags:		    tags,
+			tags:		    tags.TagList,
 		})
 	}
 
@@ -71,22 +73,10 @@ func (i *RDSInstance) Remove() error {
 	return nil
 }
 
-func retrieveRDSInstanceTags(svc *rds.RDS, instanceArn string) ([]*rds.Tag, error) {
-	input := &rds.ListTagsForResourceInput{
-		ResourceName: aws.String(instanceArn),
-	}
-
-	result, err := svc.ListTagsForResource(input)
-	if err != nil {
-		return make([]*rds.Tag, 0), err
-	}
-
-	return result.TagList, nil
-}
-
 func (i *RDSInstance) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("id", i.id)
+	properties.Set("Identifier", i.id)
+	properties.Set("Deletion Protection", i.deletionProtection)
 
 	for _, tag := range i.tags {
 		properties.SetTag(tag.Key, tag.Value)
