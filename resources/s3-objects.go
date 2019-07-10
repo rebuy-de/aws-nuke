@@ -2,7 +2,6 @@ package resources
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -36,6 +35,13 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 			Bucket: &name,
 		}
 
+		bucketTags, err := svc.GetBucketTagging(&s3.GetBucketTaggingInput{
+                        Bucket: &name,
+                })
+                if err != nil {
+                        continue
+                }
+
 		for {
 			resp, err := svc.ListObjectVersions(params)
 			if err != nil {
@@ -46,11 +52,6 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 				if out.Key == nil {
 					continue
 				}
-				tags, err := retrieveObjectTags(svc, name, *out.Key, *out.VersionId)
-
-				if err != nil {
-					continue
-				}
 
 				resources = append(resources, &S3Object{
 					svc:       svc,
@@ -58,7 +59,7 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 					key:       *out.Key,
 					versionID: out.VersionId,
 					latest:    UnPtrBool(out.IsLatest, false),
-					tags:      tags,
+					tags:      bucketTags.TagSet,
 				})
 			}
 
@@ -104,21 +105,6 @@ func (e *S3Object) Remove() error {
 	return nil
 }
 
-func retrieveObjectTags(svc *s3.S3, bucketName string, keyName string, versionId string) ([]*s3.Tag, error) {
-	input := &s3.GetObjectTaggingInput{
-		Bucket:    aws.String(bucketName),
-		Key:       aws.String(keyName),
-		VersionId: aws.String(versionId),
-	}
-
-	result, err := svc.GetObjectTagging(input)
-	if err != nil {
-		return make([]*s3.Tag, 0), err
-	}
-
-	return result.TagSet, nil
-}
-
 func (e *S3Object) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Bucket", e.bucket)
@@ -127,7 +113,7 @@ func (e *S3Object) Properties() types.Properties {
 	properties.Set("IsLatest", e.latest)
 
 	for _, tag := range e.tags {
-		properties.SetTag(tag.Key, tag.Value)
+		properties.SetTagWithPrefix("bucket",tag.Key, tag.Value)
 	}
 
 	return properties
