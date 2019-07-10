@@ -13,7 +13,6 @@ type S3Object struct {
 	key       string
 	versionID *string
 	latest    bool
-	tags      []*s3.Tag
 }
 
 func init() {
@@ -35,13 +34,6 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 			Bucket: &name,
 		}
 
-		bucketTags, err := svc.GetBucketTagging(&s3.GetBucketTaggingInput{
-                        Bucket: &name,
-                })
-                if err != nil {
-                        continue
-                }
-
 		for {
 			resp, err := svc.ListObjectVersions(params)
 			if err != nil {
@@ -59,7 +51,6 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 					key:       *out.Key,
 					versionID: out.VersionId,
 					latest:    UnPtrBool(out.IsLatest, false),
-					tags:      bucketTags.TagSet,
 				})
 			}
 
@@ -106,17 +97,11 @@ func (e *S3Object) Remove() error {
 }
 
 func (e *S3Object) Properties() types.Properties {
-	properties := types.NewProperties()
-	properties.Set("Bucket", e.bucket)
-	properties.Set("Key", e.key)
-	properties.Set("VersionID", e.versionID)
-	properties.Set("IsLatest", e.latest)
-
-	for _, tag := range e.tags {
-		properties.SetTagWithPrefix("bucket",tag.Key, tag.Value)
-	}
-
-	return properties
+	return types.NewProperties().
+		Set("Bucket", e.bucket).
+		Set("Key", e.key).
+		Set("VersionID", e.versionID).
+		Set("IsLatest", e.latest)
 }
 
 func (e *S3Object) String() string {
