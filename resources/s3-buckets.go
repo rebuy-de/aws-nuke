@@ -33,7 +33,7 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, name := range buckets {
-		result, err := svc.GetBucketTagging(&s3.GetBucketTaggingInput{
+		tags, err := svc.GetBucketTagging(&s3.GetBucketTaggingInput{
 			Bucket: aws.String(name),
 		})
 
@@ -44,7 +44,7 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 		resources = append(resources, &S3Bucket{
 			svc:  svc,
 			name: name,
-			tags: result.TagSet,
+			tags: tags.TagSet,
 		})
 	}
 
