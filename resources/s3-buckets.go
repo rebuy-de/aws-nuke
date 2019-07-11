@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func init() {
@@ -19,6 +20,7 @@ func init() {
 type S3Bucket struct {
 	svc  *s3.S3
 	name string
+	tags []*s3.Tag
 }
 
 func ListS3Buckets(s *session.Session) ([]Resource, error) {
@@ -31,9 +33,18 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, name := range buckets {
+		tags, err := svc.GetBucketTagging(&s3.GetBucketTaggingInput{
+			Bucket: aws.String(name),
+		})
+
+		if err != nil {
+			continue
+		}
+
 		resources = append(resources, &S3Bucket{
 			svc:  svc,
 			name: name,
+			tags: tags.TagSet,
 		})
 	}
 
@@ -114,6 +125,17 @@ func (e *S3Bucket) RemoveAllObjects() error {
 
 	iterator := s3manager.NewDeleteListIterator(e.svc, params)
 	return s3manager.NewBatchDeleteWithClient(e.svc).Delete(aws.BackgroundContext(), iterator)
+}
+
+func (e *S3Bucket) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", e.name)
+
+	for _, tag := range e.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (e *S3Bucket) String() string {
