@@ -43,6 +43,7 @@ func (e *EC2Volume) Remove() error {
 
 func (e *EC2Volume) Properties() types.Properties {
 	properties := types.NewProperties()
+	properties.Set("State", e.volume.State)
 	for _, tagValue := range e.volume.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
