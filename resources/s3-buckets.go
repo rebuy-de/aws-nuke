@@ -40,12 +40,15 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 
 		if err != nil {
 			if aerr, ok := err.(awserr.Error); ok {
-				if "NoSuchTagSet" != aerr.Code() {
-					continue
+				if aerr.Code() == "NoSuchTagSet" {
+					resources = append(resources, &S3Bucket{
+						svc: svc,
+						name: name,
+						tags: make([]*s3.Tag, 0),
+					})
 				}
-			} else {
-				continue
 			}
+			continue
 		}
 
 		resources = append(resources, &S3Bucket{
