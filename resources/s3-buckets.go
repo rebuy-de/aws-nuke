@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -38,6 +39,15 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 		})
 
 		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				if aerr.Code() == "NoSuchTagSet" {
+					resources = append(resources, &S3Bucket{
+						svc: svc,
+						name: name,
+						tags: make([]*s3.Tag, 0),
+					})
+				}
+			}
 			continue
 		}
 
