@@ -67,6 +67,7 @@ At first you need to create a config file for *aws-nuke*. This is a minimal one:
 ```yaml
 regions:
 - eu-west-1
+- global
 
 account-blacklist:
 - "999999999999" # production
