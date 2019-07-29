@@ -7,9 +7,8 @@ import (
 )
 
 type IoTCertificate struct {
-	svc    *iot.IoT
-	ID     *string
-	status *string
+	svc *iot.IoT
+	ID  *string
 }
 
 func init() {
@@ -29,9 +28,8 @@ func ListIoTCertificates(sess *session.Session) ([]Resource, error) {
 
 	for _, certificate := range output.Certificates {
 		resources = append(resources, &IoTCertificate{
-			svc:    svc,
-			ID:     certificate.CertificateId,
-			status: certificate.Status,
+			svc: svc,
+			ID:  certificate.CertificateId,
 		})
 	}
 
