@@ -17,7 +17,7 @@ func init() {
 	register("IoTThing", ListIoTThings)
 }
 
-func listIotThingPrincipals(f *IoTThing) (*IoTThing, error) {
+func listIoTThingPrincipals(f *IoTThing) (*IoTThing, error) {
 	params := &iot.ListThingPrincipalsInput{
 		ThingName: f.name,
 	}
@@ -46,7 +46,7 @@ func ListIoTThings(sess *session.Session) ([]Resource, error) {
 
 		// gather dependent principals
 		for _, thing := range output.Things {
-			t, err := listIotThingPrincipals(&IoTThing{
+			t, err := listIoTThingPrincipals(&IoTThing{
 				svc:     svc,
 				name:    thing.ThingName,
 				version: thing.Version,
