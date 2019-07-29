@@ -7,13 +7,28 @@ import (
 )
 
 type IoTThing struct {
-	svc     *iot.IoT
-	name    *string
-	version *int64
+	svc        *iot.IoT
+	name       *string
+	version    *int64
+	principals []*string
 }
 
 func init() {
 	register("IoTThing", ListIoTThings)
+}
+
+func listIotThingPrincipals(f *IoTThing) (*IoTThing, error) {
+	params := &iot.ListThingPrincipalsInput{
+		ThingName: f.name,
+	}
+
+	output, err := f.svc.ListThingPrincipals(params)
+	if err != nil {
+		return nil, err
+	}
+
+	f.principals = output.Principals
+	return f, nil
 }
 
 func ListIoTThings(sess *session.Session) ([]Resource, error) {
@@ -29,12 +44,18 @@ func ListIoTThings(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
+		// gather dependent principals
 		for _, thing := range output.Things {
-			resources = append(resources, &IoTThing{
+			t, err := listIotThingPrincipals(&IoTThing{
 				svc:     svc,
 				name:    thing.ThingName,
 				version: thing.Version,
 			})
+			if err != nil {
+				return nil, err
+			}
+
+			resources = append(resources, t)
 		}
 		if output.NextToken == nil {
 			break
@@ -47,6 +68,13 @@ func ListIoTThings(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *IoTThing) Remove() error {
+	// detach attached principals first
+	for _, principal := range f.principals {
+		f.svc.DetachThingPrincipal(&iot.DetachThingPrincipalInput{
+			Principal: principal,
+			ThingName: f.name,
+		})
+	}
 
 	_, err := f.svc.DeleteThing(&iot.DeleteThingInput{
 		ThingName:       f.name,
