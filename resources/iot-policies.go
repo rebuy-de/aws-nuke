@@ -7,16 +7,17 @@ import (
 )
 
 type IoTPolicy struct {
-	svc     *iot.IoT
-	name    *string
-	targets []*string
+	svc                *iot.IoT
+	name               *string
+	targets            []*string
+	deprecatedVersions []*string
 }
 
 func init() {
 	register("IoTPolicy", ListIoTPolicies)
 }
 
-func listIotPolicyTargets(f *IoTPolicy) (*IoTPolicy, error) {
+func listIoTPolicyTargets(f *IoTPolicy) (*IoTPolicy, error) {
 	targets := []*string{}
 
 	params := &iot.ListTargetsForPolicyInput{
@@ -44,6 +45,29 @@ func listIotPolicyTargets(f *IoTPolicy) (*IoTPolicy, error) {
 	return f, nil
 }
 
+func listIoTPolicyDeprecatedVersions(f *IoTPolicy) (*IoTPolicy, error) {
+	deprecatedVersions := []*string{}
+
+	params := &iot.ListPolicyVersionsInput{
+		PolicyName: f.name,
+	}
+
+	output, err := f.svc.ListPolicyVersions(params)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, policyVersion := range output.PolicyVersions {
+		if *policyVersion.IsDefaultVersion != true {
+			deprecatedVersions = append(deprecatedVersions, policyVersion.VersionId)
+		}
+	}
+
+	f.deprecatedVersions = deprecatedVersions
+
+	return f, nil
+}
+
 func ListIoTPolicies(sess *session.Session) ([]Resource, error) {
 	svc := iot.New(sess)
 	resources := []Resource{}
@@ -58,10 +82,17 @@ func ListIoTPolicies(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, policy := range output.Policies {
-			p, err := listIotPolicyTargets(&IoTPolicy{
+			p := &IoTPolicy{
 				svc:  svc,
 				name: policy.PolicyName,
-			})
+			}
+
+			p, err = listIoTPolicyTargets(p)
+			if err != nil {
+				return nil, err
+			}
+
+			p, err = listIoTPolicyDeprecatedVersions(p)
 			if err != nil {
 				return nil, err
 			}
@@ -84,6 +115,14 @@ func (f *IoTPolicy) Remove() error {
 		f.svc.DetachPolicy(&iot.DetachPolicyInput{
 			PolicyName: f.name,
 			Target:     target,
+		})
+	}
+
+	// delete deprecated versions
+	for _, version := range f.deprecatedVersions {
+		f.svc.DeletePolicyVersion(&iot.DeletePolicyVersionInput{
+			PolicyName:      f.name,
+			PolicyVersionId: version,
 		})
 	}
 
