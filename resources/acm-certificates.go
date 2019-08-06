@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/acm"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ACMCertificate struct {
-	svc            *acm.ACM
-	certificateARN *string
+	svc               *acm.ACM
+	certificateARN    *string
+	certificateDetail *acm.CertificateDetail
 }
 
 func init() {
@@ -30,9 +32,18 @@ func ListACMCertificates(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, certificate := range resp.CertificateSummaryList {
+			// Unfortunately the ACM API doesn't provide the certificate details when listing, so we
+			// have to describe each certificate separately.
+			certificateDescribe, err := svc.DescribeCertificate(&acm.DescribeCertificateInput{
+				CertificateArn: certificate.CertificateArn,
+			})
+			if err != nil {
+				return nil, err
+			}
 			resources = append(resources, &ACMCertificate{
-				svc:            svc,
-				certificateARN: certificate.CertificateArn,
+				svc:               svc,
+				certificateARN:    certificate.CertificateArn,
+				certificateDetail: certificateDescribe.Certificate,
 			})
 		}
 
@@ -53,6 +64,12 @@ func (f *ACMCertificate) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ACMCertificate) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("DomainName", f.certificateDetail.DomainName)
+	return properties
 }
 
 func (f *ACMCertificate) String() string {
