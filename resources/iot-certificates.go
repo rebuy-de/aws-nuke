@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iot"
 )
@@ -37,7 +38,15 @@ func ListIoTCertificates(sess *session.Session) ([]Resource, error) {
 
 func (f *IoTCertificate) Remove() error {
 
-	_, err := f.svc.DeleteCertificate(&iot.DeleteCertificateInput{
+	_, err := f.svc.UpdateCertificate(&iot.UpdateCertificateInput{
+		CertificateId: f.ID,
+		NewStatus:     aws.String("INACTIVE"),
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = f.svc.DeleteCertificate(&iot.DeleteCertificateInput{
 		CertificateId: f.ID,
 	})
 
