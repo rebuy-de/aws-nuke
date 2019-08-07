@@ -461,22 +461,28 @@ directory or `make install` go install *aws-nuke* into `$GOPATH/bin`. With
 
 ### Docker
 
-To use the provided Docker implementation, first you need to make sure you've 
-created the config file and that it exists in the `config` directory.
-Make sure you are in the project's root directory, then you need to build 
-the image and run the container:
+You can run *aws-nuke* with Docker by using a command like this:
 
 ```bash
-$ docker build . -t rebuy-de/aws_nuke
-
-$ docker run -a stdin -a stdout -ti rebuy-de/aws_nuke -c config/nuke-config.yml --profile aws-nuke-example
+$ docker run \
+    --rm -it \
+    -v /full-path/to/nuke-config.yml:/home/aws-nuke/config.yml \
+    -v /home/user/.aws:/home/aws-nuke/.aws \
+    quay.io/rebuy/aws-nuke:v2.11.0 \
+    --profile default \
+    --config /home/aws-nuke/config.yml
 ```
 
-The -a flag tells docker run to bind to the container's STDIN, STDOUT or STDERR. 
-This makes it possible to manipulate the output and input as needed. 
+To make it work, you need to adjust the paths for the AWS config and the
+*aws-nuke* config.
 
-The -t flag allocates a pseudo-TTY and the -i flag keeps STDIN open even 
-if not attached.
+Also you need to specify the correct AWS profile. Instead of mounting the AWS
+directory, you can use the `--access-key-id` and `--secret-access-key` flags.
+
+Make sure you use the latest version in the image tag. Alternatiely you can use
+`master` for the latest development version, but be aware that this is more
+likely to break at any time.
+
 
 ## Contact Channels
 
