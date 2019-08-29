@@ -3,7 +3,7 @@ module github.com/rebuy-de/aws-nuke
 go 1.12
 
 require (
-	github.com/aws/aws-sdk-go v1.17.8
+	github.com/aws/aws-sdk-go v1.23.11
 	github.com/fatih/color v1.7.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.0.0-20170210172801-5411d3eea597 // indirect
