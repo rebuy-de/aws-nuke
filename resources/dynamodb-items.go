@@ -6,13 +6,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
 type DynamoDBTableItem struct {
-	svc   *dynamodb.DynamoDB
-	id    map[string]*dynamodb.AttributeValue
-	table *DynamoDBTable
+	svc      *dynamodb.DynamoDB
+	id       map[string]*dynamodb.AttributeValue
+	table    *DynamoDBTable
+	keyName  string
+	keyValue string
 }
 
 func init() {
@@ -45,20 +48,13 @@ func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
 			return nil, descErr
 		}
 
-		var params *dynamodb.ScanInput
-
-		key := *descResp.Table.KeySchema[0].AttributeName
-		// Don't use ProjectionExpression in case it is a reserved keyword,
-		// because it creates errors otherwise.
-		if strings.ToLower(key) == "hash" || strings.ToLower(key) == "path" {
-			params = &dynamodb.ScanInput{
-				TableName: &dynamoTable.id,
-			}
-		} else {
-			params = &dynamodb.ScanInput{
-				TableName:            &dynamoTable.id,
-				ProjectionExpression: aws.String(key),
-			}
+		keyName := descResp.Table.KeySchema[0].AttributeName
+		params := &dynamodb.ScanInput{
+			TableName:            &dynamoTable.id,
+			ProjectionExpression: aws.String("#key"),
+			ExpressionAttributeNames: map[string]*string{
+				"#key": keyName,
+			},
 		}
 
 		scanResp, scanErr := svc.Scan(params)
@@ -67,10 +63,19 @@ func ListDynamoDBItems(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, itemMap := range scanResp.Items {
+			var keyValue string
+
+			for _, value := range itemMap {
+				value := strings.TrimSpace(value.String())
+				keyValue = string([]rune(value)[8:(len([]rune(value)) - 3)])
+			}
+
 			resources = append(resources, &DynamoDBTableItem{
-				svc:   svc,
-				id:    itemMap,
-				table: dynamoTable,
+				svc:      svc,
+				id:       itemMap,
+				table:    dynamoTable,
+				keyName:  aws.StringValue(keyName),
+				keyValue: keyValue,
 			})
 		}
 	}
@@ -92,14 +97,14 @@ func (i *DynamoDBTableItem) Remove() error {
 	return nil
 }
 
+func (i *DynamoDBTableItem) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Table", i.table)
+	properties.Set("KeyName", i.keyName)
+	properties.Set("KeyValue", i.keyValue)
+	return properties
+}
+
 func (i *DynamoDBTableItem) String() string {
-	table := i.table.String()
-	var keyField string
-
-	for _, value := range i.id {
-		value := strings.TrimSpace(value.String())
-		keyField = string([]rune(value)[8:(len([]rune(value)) - 3)])
-	}
-
-	return table + " -> " + keyField
+	return i.table.String() + " -> " + i.keyValue
 }
