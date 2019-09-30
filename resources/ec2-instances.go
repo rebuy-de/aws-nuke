@@ -19,20 +19,29 @@ func init() {
 
 func ListEC2Instances(sess *session.Session) ([]Resource, error) {
 	svc := ec2.New(sess)
-
 	params := &ec2.DescribeInstancesInput{}
-	resp, err := svc.DescribeInstances(params)
-	if err != nil {
-		return nil, err
-	}
-
 	resources := make([]Resource, 0)
-	for _, reservation := range resp.Reservations {
-		for _, instance := range reservation.Instances {
-			resources = append(resources, &EC2Instance{
-				svc:      svc,
-				instance: instance,
-			})
+	for {
+		resp, err := svc.DescribeInstances(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, reservation := range resp.Reservations {
+			for _, instance := range reservation.Instances {
+				resources = append(resources, &EC2Instance{
+					svc:      svc,
+					instance: instance,
+				})
+			}
+		}
+
+		if resp.NextToken == nil {
+			break
+		}
+
+		params = &ec2.DescribeInstancesInput{
+			NextToken: resp.NextToken,
 		}
 	}
 
