@@ -3,6 +3,8 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -53,9 +55,37 @@ func (i *EC2Instance) Remove() error {
 
 	_, err := i.svc.TerminateInstances(params)
 	if err != nil {
+		awsErr, ok := err.(awserr.Error)
+		if ok && awsErr.Code() == "OperationNotPermitted" &&
+
+			awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be terminated. "+
+				"Modify its 'disableApiTermination' instance attribute and try again." {
+			err = i.DisableProtection()
+			if err != nil {
+				return err
+			}
+			_, err := i.svc.TerminateInstances(params)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
 		return err
 	}
+	return nil
+}
 
+func (i *EC2Instance) DisableProtection() error {
+	params := &ec2.ModifyInstanceAttributeInput{
+		InstanceId: i.instance.InstanceId,
+		DisableApiTermination: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(false),
+		},
+	}
+	_, err := i.svc.ModifyInstanceAttribute(params)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
