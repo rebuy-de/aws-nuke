@@ -41,15 +41,19 @@ vet: vendor
 lint:
 	$(foreach pkg,$(GOPKGS),golint $(pkg);)
 
+generate_mocks:
+	rm mocks -rvf
+	mockgen -source $(shell go list -m -f "{{.Dir}}" "github.com/aws/aws-sdk-go")/service/cloudformation/cloudformationiface/interface.go -destination mocks/mock_cloudformationiface/mock.go 
+
 test_packages: vendor
 	go test $(GOPKGS)
 
 test_format:
 	gofmt -s -l $(GOFILES)
 
-test: test_format vet lint test_packages
+test: test_format generate_mocks vet lint test_packages
 
-cov:
+cov: generate_mocks
 	gocov test -v $(GOPKGS) \
 		| gocov-html > coverage.html
 
@@ -76,4 +80,5 @@ install: vendor test
 		$(BUILD_FLAGS);)
 
 clean:
-	rm dist/*
+	rm dist/ -rv
+	rm mocks/ -rv
