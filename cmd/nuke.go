@@ -166,6 +166,11 @@ func (n *Nuke) Scan() error {
 
 		items := Scan(region, resourceTypes)
 		for item := range items {
+			ffGetter, ok := item.Resource.(resources.FeatureFlagGetter)
+			if ok {
+				ffGetter.FeatureFlags(n.Config.FeatureFlags)
+			}
+
 			queue = append(queue, item)
 			err := n.Filter(item)
 			if err != nil {
