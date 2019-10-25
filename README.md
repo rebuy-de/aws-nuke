@@ -269,6 +269,21 @@ If an exclude is used, then all its resource types will not be deleted.
 aws-nuke resource-types
 ```
 
+
+### Feature Flags
+
+There are some features, which are quite opinionated. To make those work for
+everyone, *aws-nuke* has flags to manually enable those features. These can be
+configured on the root-level of the config, like this:
+
+```yaml
+---
+feature-flags:
+  disable-deletion-protection:
+    RDSInstance: true
+```
+
+
 ### Filtering Resources
 
 It is possible to filter this is important for not deleting the current user
