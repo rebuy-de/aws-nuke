@@ -28,6 +28,13 @@ type Nuke struct {
 	Accounts         map[string]Account           `yaml:"accounts"`
 	ResourceTypes    ResourceTypes                `yaml:"resource-types"`
 	Presets          map[string]PresetDefinitions `yaml:"presets"`
+	FeatureFlags     FeatureFlags                 `yaml:"feature-flags"`
+}
+
+type FeatureFlags struct {
+	DisableDeletionProtection struct {
+		RDSInstance bool `yaml:"RDSInstance"`
+	} `yaml:"disable-deletion-protection"`
 }
 
 type PresetDefinitions struct {

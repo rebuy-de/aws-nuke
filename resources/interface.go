@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
@@ -28,6 +29,11 @@ type LegacyStringer interface {
 type ResourcePropertyGetter interface {
 	Resource
 	Properties() types.Properties
+}
+
+type FeatureFlagGetter interface {
+	Resource
+	FeatureFlags(config.FeatureFlags)
 }
 
 var resourceListers = make(ResourceListers)

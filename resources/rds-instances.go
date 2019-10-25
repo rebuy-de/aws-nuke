@@ -4,14 +4,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
+	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type RDSInstance struct {
-	svc                *rds.RDS
-	id                 string
-	deletionProtection bool
-	tags		   []*rds.Tag
+	svc      *rds.RDS
+	instance *rds.DBInstance
+	tags     []*rds.Tag
+
+	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -38,20 +40,23 @@ func ListRDSInstances(sess *session.Session) ([]Resource, error) {
 		}
 
 		resources = append(resources, &RDSInstance{
-			svc:                svc,
-			id:                 *instance.DBInstanceIdentifier,
-			deletionProtection: *instance.DeletionProtection,
-			tags:		    tags.TagList,
+			svc:      svc,
+			instance: instance,
+			tags:     tags.TagList,
 		})
 	}
 
 	return resources, nil
 }
 
+func (i *RDSInstance) FeatureFlags(ff config.FeatureFlags) {
+	i.featureFlags = ff
+}
+
 func (i *RDSInstance) Remove() error {
-	if (i.deletionProtection) {
+	if aws.BoolValue(i.instance.DeletionProtection) && i.featureFlags.DisableDeletionProtection.RDSInstance {
 		modifyParams := &rds.ModifyDBInstanceInput{
-			DBInstanceIdentifier: &i.id,
+			DBInstanceIdentifier: i.instance.DBInstanceIdentifier,
 			DeletionProtection:   aws.Bool(false),
 		}
 		_, err := i.svc.ModifyDBInstance(modifyParams)
@@ -61,7 +66,7 @@ func (i *RDSInstance) Remove() error {
 	}
 
 	params := &rds.DeleteDBInstanceInput{
-		DBInstanceIdentifier: &i.id,
+		DBInstanceIdentifier: i.instance.DBInstanceIdentifier,
 		SkipFinalSnapshot:    aws.Bool(true),
 	}
 
@@ -75,8 +80,14 @@ func (i *RDSInstance) Remove() error {
 
 func (i *RDSInstance) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("Identifier", i.id)
-	properties.Set("Deletion Protection", i.deletionProtection)
+	properties.Set("Identifier", i.instance.DBInstanceIdentifier)
+	properties.Set("DeletionProtection", i.instance.DeletionProtection)
+	properties.Set("AvailabilityZone", i.instance.AvailabilityZone)
+	properties.Set("InstanceClass", i.instance.DBInstanceClass)
+	properties.Set("Engine", i.instance.Engine)
+	properties.Set("EngineVersion", i.instance.EngineVersion)
+	properties.Set("MultiAZ", i.instance.MultiAZ)
+	properties.Set("PubliclyAccessible", i.instance.PubliclyAccessible)
 
 	for _, tag := range i.tags {
 		properties.SetTag(tag.Key, tag.Value)
@@ -86,5 +97,5 @@ func (i *RDSInstance) Properties() types.Properties {
 }
 
 func (i *RDSInstance) String() string {
-	return i.id
+	return aws.StringValue(i.instance.DBInstanceIdentifier)
 }
