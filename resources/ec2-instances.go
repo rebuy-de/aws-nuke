@@ -3,14 +3,19 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2Instance struct {
 	svc      *ec2.EC2
 	instance *ec2.Instance
+
+	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -48,6 +53,10 @@ func ListEC2Instances(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func (i *EC2Instance) FeatureFlags(ff config.FeatureFlags) {
+	i.featureFlags = ff
+}
+
 func (i *EC2Instance) Filter() error {
 	if *i.instance.State.Name == "terminated" {
 		return fmt.Errorf("already terminated")
@@ -62,9 +71,38 @@ func (i *EC2Instance) Remove() error {
 
 	_, err := i.svc.TerminateInstances(params)
 	if err != nil {
+		if i.featureFlags.DisableDeletionProtection.EC2Instance {
+			awsErr, ok := err.(awserr.Error)
+			if ok && awsErr.Code() == "OperationNotPermitted" &&
+				awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be terminated. "+
+					"Modify its 'disableApiTermination' instance attribute and try again." {
+				err = i.DisableProtection()
+				if err != nil {
+					return err
+				}
+				_, err := i.svc.TerminateInstances(params)
+				if err != nil {
+					return err
+				}
+				return nil
+			}
+		}
 		return err
 	}
+	return nil
+}
 
+func (i *EC2Instance) DisableProtection() error {
+	params := &ec2.ModifyInstanceAttributeInput{
+		InstanceId: i.instance.InstanceId,
+		DisableApiTermination: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(false),
+		},
+	}
+	_, err := i.svc.ModifyInstanceAttribute(params)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
