@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lightsail"
 )
@@ -44,11 +45,10 @@ func ListLightsailInstances(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *LightsailInstance) Remove() error {
-
 	_, err := f.svc.DeleteInstance(&lightsail.DeleteInstanceInput{
-		InstanceName: f.instanceName,
+		InstanceName:      f.instanceName,
+		ForceDeleteAddOns: aws.Bool(true),
 	})
-
 	return err
 }
 
