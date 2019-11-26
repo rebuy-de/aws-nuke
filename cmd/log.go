@@ -40,7 +40,7 @@ func Sorted(m map[string]string) string {
 	return fmt.Sprintf("[%s]", strings.Join(sorted, ", "))
 }
 
-func Log(region Region, resourceType string, r resources.Resource, c color.Color, msg string) {
+func Log(region *Region, resourceType string, r resources.Resource, c color.Color, msg string) {
 	ColorRegion.Printf("%s", region.Name)
 	fmt.Printf(" - ")
 	ColorResourceType.Print(resourceType)
