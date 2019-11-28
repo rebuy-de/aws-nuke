@@ -53,7 +53,7 @@ func TestLoadExampleConfig(t *testing.T) {
 
 	expect := Nuke{
 		AccountBlacklist: []string{"1234567890"},
-		Regions:          []string{"eu-west-1", "demo10"},
+		Regions:          []string{"eu-west-1", "stratoscale"},
 		Accounts: map[string]Account{
 			"555133742": Account{
 				Presets: []string{"terraform"},
@@ -89,16 +89,16 @@ func TestLoadExampleConfig(t *testing.T) {
 		},
 		CustomEndpoints: []*CustomRegion{
 			&CustomRegion{
-				Region:                "demo10",
+				Region:                "stratoscale",
 				TLSInsecureSkipVerify: true,
 				Services: CustomServices{
 					&CustomService{
 						Service: "ec2",
-						URL:     "https://demo10.cloud.internal/api/v2/aws/ec2",
+						URL:     "https://stratoscale.cloud.internal/api/v2/aws/ec2",
 					},
 					&CustomService{
 						Service:               "s3",
-						URL:                   "https://demo10.cloud.internal:1060",
+						URL:                   "https://stratoscale.cloud.internal:1060",
 						TLSInsecureSkipVerify: true,
 					},
 				},
@@ -275,8 +275,8 @@ func TestGetCustomRegion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	demo10 := config.CustomEndpoints.GetRegion("demo10")
-	if demo10 == nil {
+	stratoscale := config.CustomEndpoints.GetRegion("stratoscale")
+	if stratoscale == nil {
 		t.Fatal("Expected to find a set of custom endpoints for region10")
 	}
 	euWest1 := config.CustomEndpoints.GetRegion("eu-west-1")
@@ -285,11 +285,11 @@ func TestGetCustomRegion(t *testing.T) {
 	}
 
 	t.Run("TestGetService", func(t *testing.T) {
-		ec2Service := demo10.Services.GetService("ec2")
+		ec2Service := stratoscale.Services.GetService("ec2")
 		if ec2Service == nil {
 			t.Fatal("Expected to find a custom ec2 service for region10")
 		}
-		rdsService := demo10.Services.GetService("rds")
+		rdsService := stratoscale.Services.GetService("rds")
 		if rdsService != nil {
 			t.Fatal("Expected to not find a custom rds service for region10")
 		}
