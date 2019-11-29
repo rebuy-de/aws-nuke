@@ -29,6 +29,7 @@ type Nuke struct {
 	ResourceTypes    ResourceTypes                `yaml:"resource-types"`
 	Presets          map[string]PresetDefinitions `yaml:"presets"`
 	FeatureFlags     FeatureFlags                 `yaml:"feature-flags"`
+	CustomEndpoints  CustomEndpoints              `yaml:"endpoints"`
 }
 
 type FeatureFlags struct {
@@ -41,6 +42,22 @@ type FeatureFlags struct {
 type PresetDefinitions struct {
 	Filters Filters `yaml:"filters"`
 }
+
+type CustomService struct {
+	Service               string `yaml:"service"`
+	URL                   string `yaml:"url"`
+	TLSInsecureSkipVerify bool   `yaml:"tls_insecure_skip_verify"`
+}
+
+type CustomServices []*CustomService
+
+type CustomRegion struct {
+	Region                string         `yaml:"region"`
+	Services              CustomServices `yaml:"services"`
+	TLSInsecureSkipVerify bool           `yaml:"tls_insecure_skip_verify"`
+}
+
+type CustomEndpoints []*CustomRegion
 
 func Load(path string) (*Nuke, error) {
 	var err error
@@ -182,4 +199,41 @@ func (c *Nuke) resolveDeprecations() error {
 		}
 	}
 	return nil
+}
+
+// GetRegion returns the custom region or nil when no such custom endpoints are defined for this region
+func (endpoints CustomEndpoints) GetRegion(region string) *CustomRegion {
+	for _, r := range endpoints {
+		if r.Region == region {
+			if r.TLSInsecureSkipVerify {
+				for _, s := range r.Services {
+					s.TLSInsecureSkipVerify = r.TLSInsecureSkipVerify
+				}
+			}
+			return r
+		}
+	}
+	return nil
+}
+
+// GetService returns the custom region or nil when no such custom endpoints are defined for this region
+func (services CustomServices) GetService(serviceType string) *CustomService {
+	for _, s := range services {
+		if serviceType == s.Service {
+			return s
+		}
+	}
+	return nil
+}
+
+func (endpoints CustomEndpoints) GetURL(region, serviceType string) string {
+	r := endpoints.GetRegion(region)
+	if r == nil {
+		return ""
+	}
+	s := r.Services.GetService(serviceType)
+	if s == nil {
+		return ""
+	}
+	return s.URL
 }
