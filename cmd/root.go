@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"sort"
-
 	"os"
 
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"

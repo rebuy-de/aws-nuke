@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"strings"
-
 	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"

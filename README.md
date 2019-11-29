@@ -209,11 +209,11 @@ assuming role.
 
 ### Using custom AWS endpoint
 
-It is possible to configure aws-nuke to against non default AWS endpoints.
+It is possible to configure aws-nuke to run against non-default AWS endpoints.
 It could be used for integration testing pointing to a local endpoint such as an
 S3 appliance or a Stratoscale cluster for example.
 
-To configure aws-nuke to use custom endpoint, add the configuration directives as shown in the following example:
+To configure aws-nuke to use custom endpoints, add the configuration directives as shown in the following example:
 
 ```yaml
 regions:
