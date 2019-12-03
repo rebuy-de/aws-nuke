@@ -1,0 +1,62 @@
+regions:
+- demo10
+
+# inspired by https://www.terraform.io/docs/providers/aws/guides/custom-service-endpoints.html
+endpoints:
+- region: demo10
+  tls_insecure_skip_verify: true
+  services:
+  - service: ec2
+    url: https://demo10.cloud.internal/api/v2/aws/ec2
+  - service: s3
+    url: https://demo10.cloud.internal:1060
+  - service: rds
+    url: https://demo10.cloud.internal/api/v2/aws/rds
+  - service: elbv2
+    url: https://demo10.cloud.internal/api/v2/aws/elbv2
+  - service: efs
+    url: https://demo10.cloud.internal/api/v2/aws/efs
+  - service: emr
+    url: https://demo10.cloud.internal/api/v2/aws/emr
+  - service: autoscaling
+    url: https://demo10.cloud.internal/api/v2/aws/autoscaling
+  - service: cloudwatch
+    url: https://demo10.cloud.internal/api/v2/aws/cloudwatch
+  - service: sns
+    url: https://demo10.cloud.internal/api/v2/aws/sns
+  - service: iam
+    url: https://demo10.cloud.internal/api/v2/aws/iam
+  - service: acm
+    url: https://demo10.cloud.internal/api/v2/aws/acm
+
+account-blacklist:
+- "account-id-of-custom-region-prod" # production
+
+accounts:
+  "account-id-of-custom-region-demo10":
+    presets:
+    - stratoscale
+
+presets:
+  stratoscale:
+    filters:
+      EC2VPC:
+      - property: tag:Name
+        type: contains
+        value: "Default VPC"
+      EC2Instance:
+      - property: tag:Name
+        type: contains
+        value: "DNS VM for vpc"
+      EC2Volume:
+      - property: tag:Name
+        type: contains
+        value: "DNS VM for vpc"
+      RDSDBParameterGroup:
+      - type: regex
+        value: "^default-"
+      EC2DHCPOption:
+      - property: tag:Name
+        type: regex
+        value: "^.+$"
+        invert: true
