@@ -47,19 +47,32 @@ func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string) ([]Resourc
 	params := &route53.ListResourceRecordSetsInput{
 		HostedZoneId: zoneId,
 	}
-	resp, err := svc.ListResourceRecordSets(params)
-	if err != nil {
-		return nil, err
-	}
 
 	resources := make([]Resource, 0)
-	for _, rrs := range resp.ResourceRecordSets {
-		resources = append(resources, &Route53ResourceRecordSet{
-			svc:          svc,
-			hostedZoneId: zoneId,
-			data:         rrs,
-		})
+
+	for {
+		resp, err := svc.ListResourceRecordSets(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, rrs := range resp.ResourceRecordSets {
+			resources = append(resources, &Route53ResourceRecordSet{
+				svc:          svc,
+				hostedZoneId: zoneId,
+				data:         rrs,
+			})
+		}
+
+		// make sure to list all with more than 100 records
+		if *resp.IsTruncated {
+			params.StartRecordName = resp.NextRecordName
+			continue
+		}
+
+		break
 	}
+
 	return resources, nil
 }
 
