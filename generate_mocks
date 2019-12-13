@@ -1,0 +1,3 @@
+#!/bin/sh
+
+go run github.com/golang/mock/mockgen -source $(go list -m -f "{{.Dir}}" "github.com/aws/aws-sdk-go")/service/cloudformation/cloudformationiface/interface.go -destination mocks/mock_cloudformationiface/mock.go

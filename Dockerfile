@@ -11,7 +11,6 @@ RUN mkdir -p ${GOPATH}/src ${GOPATH}/bin
 ENV GO111MODULE on
 # Install Go Tools
 RUN go get -u golang.org/x/lint/golint
-RUN go get -u github.com/golang/mock/mockgen
 
 
 WORKDIR /src
