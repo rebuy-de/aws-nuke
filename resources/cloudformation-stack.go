@@ -2,11 +2,16 @@ package resources
 
 import (
 	"errors"
-
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/sirupsen/logrus"
+	"strings"
 )
+
+const CLOUDFORMATION_MAX_DELETE_ATTEMPT = 3
 
 func init() {
 	register("CloudFormationStack", ListCloudFormationStacks)
@@ -25,8 +30,9 @@ func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 		}
 		for _, stack := range resp.Stacks {
 			resources = append(resources, &CloudFormationStack{
-				svc:   svc,
-				stack: stack,
+				svc:               svc,
+				stack:             stack,
+				maxDeleteAttempts: CLOUDFORMATION_MAX_DELETE_ATTEMPT,
 			})
 		}
 
@@ -41,29 +47,57 @@ func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 }
 
 type CloudFormationStack struct {
-	svc   *cloudformation.CloudFormation
-	stack *cloudformation.Stack
+	svc               cloudformationiface.CloudFormationAPI
+	stack             *cloudformation.Stack
+	maxDeleteAttempts int
 }
 
 func (cfs *CloudFormationStack) Remove() error {
+	return cfs.removeWithAttempts(0)
+}
+
+func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
+	if err := cfs.doRemove(); err != nil {
+		logrus.Errorf("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d delete failed: %s", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts, err.Error())
+		if attempt >= cfs.maxDeleteAttempts {
+			return errors.New("CFS might not be deleted after this run.")
+		} else {
+			return cfs.removeWithAttempts(attempt + 1)
+		}
+	} else {
+		return nil
+	}
+}
+
+func (cfs *CloudFormationStack) doRemove() error {
 	o, err := cfs.svc.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: cfs.stack.StackName,
 	})
 	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok {
+			if awsErr.Code() == "ValidationFailed" && strings.HasSuffix(awsErr.Message(), " does not exist") {
+				logrus.Infof("CloudFormationStack stackName=%s no longer exists", *cfs.stack.StackName)
+				return nil
+			}
+		}
 		return err
 	}
 	stack := o.Stacks[0]
 
-	if *stack.StackStatus != cloudformation.StackStatusDeleteFailed {
-		cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
-			StackName: stack.StackName,
+	if *stack.StackStatus == cloudformation.StackStatusDeleteComplete {
+		//stack already deleted, no need to re-delete
+		return nil
+	} else if *stack.StackStatus == cloudformation.StackStatusDeleteInProgress {
+		logrus.Infof("CloudFormationStack stackName=%s delete in progress. Waiting", *cfs.stack.StackName)
+		return cfs.svc.WaitUntilStackDeleteComplete(&cloudformation.DescribeStacksInput{
+			StackName: cfs.stack.StackName,
 		})
-		return errors.New("CFS might not be deleted after this run.")
-	} else {
+	} else if *stack.StackStatus == cloudformation.StackStatusDeleteFailed {
+		logrus.Infof("CloudFormationStack stackName=%s delete failed. Attempting to retain and delete stack", *cfs.stack.StackName)
 		// This means the CFS has undeleteable resources.
 		// In order to move on with nuking, we retain them in the deletion.
 		retainableResources, err := cfs.svc.ListStackResources(&cloudformation.ListStackResourcesInput{
-			StackName: stack.StackName,
+			StackName: cfs.stack.StackName,
 		})
 		if err != nil {
 			return err
@@ -72,18 +106,56 @@ func (cfs *CloudFormationStack) Remove() error {
 		retain := make([]*string, 0)
 
 		for _, r := range retainableResources.StackResourceSummaries {
-			if *r.ResourceStatus != "DELETE_COMPLETE" {
+			if *r.ResourceStatus != cloudformation.ResourceStatusDeleteComplete {
 				retain = append(retain, r.LogicalResourceId)
 			}
 		}
 
 		_, err = cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
-			StackName:       stack.StackName,
+			StackName:       cfs.stack.StackName,
 			RetainResources: retain,
 		})
 		if err != nil {
 			return err
 		}
+		return cfs.svc.WaitUntilStackDeleteComplete(&cloudformation.DescribeStacksInput{
+			StackName: cfs.stack.StackName,
+		})
+	} else {
+		if err := cfs.waitForStackToStabalize(*stack.StackStatus); err != nil {
+			return err
+		} else if _, err := cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
+			StackName: cfs.stack.StackName,
+		}); err != nil {
+			return err
+		} else if err := cfs.svc.WaitUntilStackDeleteComplete(&cloudformation.DescribeStacksInput{
+			StackName: cfs.stack.StackName,
+		}); err != nil {
+			return err
+		} else {
+			return nil
+		}
+	}
+}
+func (cfs *CloudFormationStack) waitForStackToStabalize(currentStatus string) error {
+	switch currentStatus {
+	case cloudformation.StackStatusUpdateInProgress:
+		fallthrough
+	case cloudformation.StackStatusUpdateRollbackCompleteCleanupInProgress:
+		fallthrough
+	case cloudformation.StackStatusUpdateRollbackInProgress:
+		logrus.Infof("CloudFormationStack stackName=%s update in progress. Waiting to stabalize", *cfs.stack.StackName)
+		return cfs.svc.WaitUntilStackUpdateComplete(&cloudformation.DescribeStacksInput{
+			StackName: cfs.stack.StackName,
+		})
+	case cloudformation.StackStatusCreateInProgress:
+		fallthrough
+	case cloudformation.StackStatusRollbackInProgress:
+		logrus.Infof("CloudFormationStack stackName=%s create in progress. Waiting to stabalize", *cfs.stack.StackName)
+		return cfs.svc.WaitUntilStackCreateComplete(&cloudformation.DescribeStacksInput{
+			StackName: cfs.stack.StackName,
+		})
+	default:
 		return nil
 	}
 }

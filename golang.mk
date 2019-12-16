@@ -41,15 +41,19 @@ vet: vendor
 lint:
 	$(foreach pkg,$(GOPKGS),golint $(pkg);)
 
+go_generate:
+	rm mocks -rvf
+	go generate ./...
+
 test_packages: vendor
 	go test $(GOPKGS)
 
 test_format:
 	gofmt -s -l $(GOFILES)
 
-test: test_format vet lint test_packages
+test: test_format go_generate vet lint test_packages
 
-cov:
+cov: go_generate
 	gocov test -v $(GOPKGS) \
 		| gocov-html > coverage.html
 
@@ -76,4 +80,5 @@ install: vendor test
 		$(BUILD_FLAGS);)
 
 clean:
-	rm dist/*
+	rm dist/ -rvf
+	rm mocks/ -rvf

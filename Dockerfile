@@ -8,11 +8,19 @@ RUN apk add --no-cache git make curl openssl
 ENV GOPATH=/go PATH=/go/bin:$PATH CGO_ENABLED=0 GO111MODULE=on
 RUN mkdir -p ${GOPATH}/src ${GOPATH}/bin
 
+ENV GO111MODULE on
 # Install Go Tools
-RUN GO111MODULE= go get -u golang.org/x/lint/golint
+RUN go get -u golang.org/x/lint/golint
 
-COPY . /src
+
 WORKDIR /src
+
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+COPY . .
+
 RUN set -x \
  && make test \
  && make build \

@@ -580,6 +580,19 @@ Make sure you use the latest version in the image tag. Alternatiely you can use
 likely to break at any time.
 
 
+## Testing
+
+### Unit Tests
+
+To unit test *aws-nuke*, some tests require [gomock](https://github.com/golang/mock) to run.
+This will run via `go generate ./...`, but is automatically run via `make test`.
+To run the unit tests:
+
+```bash
+make test
+```
+
+
 ## Contact Channels
 
 Feel free to create a GitHub Issue for any questions, bug reports or feature
