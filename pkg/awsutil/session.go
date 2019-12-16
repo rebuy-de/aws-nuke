@@ -4,8 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	"strings"
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -48,8 +48,8 @@ func (c *Credentials) HasKeys() bool {
 }
 
 func (c *Credentials) Validate() error {
-	if c.HasProfile() == c.HasKeys() {
-		return fmt.Errorf("You have to specify the --profile flag OR " +
+	if c.HasProfile() && c.HasKeys() {
+		return fmt.Errorf("You have to specify either the --profile flag or " +
 			"--access-key-id with --secret-access-key and optionally " +
 			"--session-token.\n")
 	}
@@ -65,15 +65,8 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 		log.Debugf("creating new root session in %s", region)
 
 		switch {
-		case c.HasProfile() == c.HasKeys():
+		case c.HasProfile() && c.HasKeys():
 			return nil, fmt.Errorf("You have to specify a profile or credentials for at least one region.")
-
-		case c.HasProfile():
-			opts = session.Options{
-				SharedConfigState:       session.SharedConfigEnable,
-				Profile:                 c.Profile,
-				AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
-			}
 
 		case c.HasKeys():
 			opts = session.Options{
@@ -81,6 +74,17 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 					Credentials: c.awsNewStaticCredentials(),
 				},
 			}
+
+		case c.HasProfile():
+			fallthrough
+
+		default:
+			opts = session.Options{
+				SharedConfigState:       session.SharedConfigEnable,
+				Profile:                 c.Profile,
+				AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
+			}
+
 		}
 
 		opts.Config.Region = aws.String(region)
