@@ -169,7 +169,9 @@ func (n *Nuke) Scan() error {
 				return err
 			}
 
-			item.Print()
+			if item.State != ItemStateFiltered || !n.Parameters.Quiet {
+				item.Print()
+			}
 		}
 	}
 
