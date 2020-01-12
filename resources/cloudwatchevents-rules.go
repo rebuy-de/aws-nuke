@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 )
@@ -37,6 +38,7 @@ type CloudWatchEventsRule struct {
 func (rule *CloudWatchEventsRule) Remove() error {
 	_, err := rule.svc.DeleteRule(&cloudwatchevents.DeleteRuleInput{
 		Name: rule.name,
+		Force: aws.Bool(true),
 	})
 	return err
 }
