@@ -16,6 +16,7 @@ type NukeParameters struct {
 	NoDryRun   bool
 	Force      bool
 	ForceSleep int
+	Quiet      bool
 
 	MaxWaitRetries int
 }

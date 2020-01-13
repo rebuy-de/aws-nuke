@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"sort"
 	"os"
+	"sort"
 
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/pkg/config"
@@ -134,6 +134,9 @@ func NewRootCommand() *cobra.Command {
 		&params.MaxWaitRetries, "max-wait-retries", 0,
 		"If specified, the program will exit if resources are stuck in waiting for this many iterations. "+
 			"0 (default) disables early exit.")
+	command.PersistentFlags().BoolVarP(
+		&params.Quiet, "quiet", "q", false,
+		"Don't show filtered resources.")
 
 	command.AddCommand(NewVersionCommand())
 	command.AddCommand(NewResourceTypesCommand())
