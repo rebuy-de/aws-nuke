@@ -595,8 +595,10 @@ make test
 
 ## Contact Channels
 
-Feel free to create a GitHub Issue for any questions, bug reports or feature
-requests.
+Feel free to create a GitHub Issue for any bug reports or feature requests.
+Please use our mailing list for questions: aws-nuke@googlegroups.com. You can
+also search in the mailing list archive, whether someone already had the same
+problem: https://groups.google.com/d/forum/aws-nuke
 
 ## Contribute
 
