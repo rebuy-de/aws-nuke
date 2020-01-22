@@ -232,7 +232,7 @@ func (n *Nuke) Filter(item *Item) error {
 }
 
 func (n *Nuke) HandleQueue() {
-	listCache := make(map[string][]resources.Resource)
+	listCache := make(map[string]map[string][]resources.Resource)
 
 	for _, item := range n.items {
 		switch item.State {
@@ -272,10 +272,14 @@ func (n *Nuke) HandleRemove(item *Item) {
 	item.Reason = ""
 }
 
-func (n *Nuke) HandleWait(item *Item, cache map[string][]resources.Resource) {
+func (n *Nuke) HandleWait(item *Item, cache map[string]map[string][]resources.Resource) {
 	var err error
-
-	left, ok := cache[item.Type]
+	region := item.Region.Name
+	_, ok := cache[region]
+	if !ok {
+		cache[region] = map[string][]resources.Resource{}
+	}
+	left, ok := cache[region][item.Type]
 	if !ok {
 		left, err = item.List()
 		if err != nil {
@@ -283,7 +287,7 @@ func (n *Nuke) HandleWait(item *Item, cache map[string][]resources.Resource) {
 			item.Reason = err.Error()
 			return
 		}
-		cache[item.Type] = left
+		cache[region][item.Type] = left
 	}
 
 	for _, r := range left {
