@@ -49,11 +49,16 @@ func (e *EC2NetworkInterface) Remove() error {
 }
 
 func (r *EC2NetworkInterface) Properties() types.Properties {
-	return types.NewProperties().
+	properties := types.NewProperties()
+	for _, tag := range r.eni.TagSet {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+	properties.
 		Set("ID", r.eni.NetworkInterfaceId).
 		Set("VPC", r.eni.VpcId).
 		Set("AvailabilityZone", r.eni.AvailabilityZone).
 		Set("PrivateIPAddress", r.eni.PrivateIpAddress).
 		Set("SubnetID", r.eni.SubnetId).
 		Set("Status", r.eni.Status)
+	return properties
 }
