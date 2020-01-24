@@ -26,22 +26,31 @@ func ListBackupSelections(sess *session.Session) ([]Resource, error) {
 		IncludeDeleted: &false_value,
 		MaxResults:     &max_backups_len, // aws default limit on number of backup plans per account
 	}
-	resp, err := svc.ListBackupPlans(params)
-	if err != nil {
-		return nil, err
-	}
-
 	resources := make([]Resource, 0)
-	for _, out := range resp.BackupPlansList {
-		selectionsOutput, _ := svc.ListBackupSelections(&backup.ListBackupSelectionsInput{BackupPlanId: out.BackupPlanId})
-		for _, selection := range selectionsOutput.BackupSelectionsList {
-			resources = append(resources, &BackupSelection{
-				svc:           svc,
-				planId:        *selection.BackupPlanId,
-				selectionId:   *selection.SelectionId,
-				selectionName: *selection.SelectionName,
-			})
+
+	for {
+		output, err := svc.ListBackupPlans(params)
+		if err != nil {
+			return nil, err
 		}
+
+		for _, plan := range output.BackupPlansList {
+			selectionsOutput, _ := svc.ListBackupSelections(&backup.ListBackupSelectionsInput{BackupPlanId: plan.BackupPlanId})
+			for _, selection := range selectionsOutput.BackupSelectionsList {
+				resources = append(resources, &BackupSelection{
+					svc:           svc,
+					planId:        *selection.BackupPlanId,
+					selectionId:   *selection.SelectionId,
+					selectionName: *selection.SelectionName,
+				})
+			}
+		}
+
+		if output.NextToken == nil {
+			break
+		}
+
+		params.NextToken = output.NextToken
 	}
 
 	return resources, nil
