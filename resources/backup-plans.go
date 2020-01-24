@@ -21,27 +21,36 @@ func init() {
 
 func ListBackupPlans(sess *session.Session) ([]Resource, error) {
 	svc := backup.New(sess)
-	false_value := false
-	max_backups_len := int64(100)
+	falseValue := false
+	maxBackupsLen := int64(100)
 	params := &backup.ListBackupPlansInput{
-		IncludeDeleted: &false_value,
-		MaxResults:     &max_backups_len, // aws default limit on number of backup plans per account
+		IncludeDeleted: &falseValue,
+		MaxResults:     &maxBackupsLen, // aws default limit on number of backup plans per account
 	}
-	resp, err := svc.ListBackupPlans(params)
-	if err != nil {
-		return nil, err
-	}
-
 	resources := make([]Resource, 0)
-	for _, out := range resp.BackupPlansList {
-		tagsOutput, _ := svc.ListTags(&backup.ListTagsInput{ResourceArn: out.BackupPlanArn})
-		resources = append(resources, &BackupPlan{
-			svc:  svc,
-			id:   *out.BackupPlanId,
-			name: *out.BackupPlanName,
-			arn:  *out.BackupPlanArn,
-			tags: tagsOutput.Tags,
-		})
+
+	for {
+		output, err := svc.ListBackupPlans(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, plan := range output.BackupPlansList {
+			tagsOutput, _ := svc.ListTags(&backup.ListTagsInput{ResourceArn: plan.BackupPlanArn})
+			resources = append(resources, &BackupPlan{
+				svc:  svc,
+				id:   *plan.BackupPlanId,
+				name: *plan.BackupPlanName,
+				arn:  *plan.BackupPlanArn,
+				tags: tagsOutput.Tags,
+			})
+		}
+
+		if output.NextToken == nil {
+			break
+		}
+
+		params.NextToken = output.NextToken
 	}
 
 	return resources, nil
