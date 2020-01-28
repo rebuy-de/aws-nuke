@@ -15,7 +15,7 @@ a Pull Request or to create an [Issue](https://github.com/rebuy-de/aws-nuke/issu
 Be aware that *aws-nuke* is a very destructive tool, hence you have to be very
 careful while using it. Otherwise you might delete production data.
 
-**We strongly advice you to not run this application on any AWS account, where
+**We strongly advise you to not run this application on any AWS account, where
 you cannot afford to lose all resources.**
 
 To reduce the blast radius of accidents, there are some safety precautions:
