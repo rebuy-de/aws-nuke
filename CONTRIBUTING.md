@@ -114,108 +114,6 @@ change.
 
 ### Git
 
-#### Squash
-
-We want to keep the git history of *aws-nuke* clean. Generally, it is fine to
-have one commit per resource, putting them into a single commit is also
-fine. But having a lot of meaningless "fixup" and "change" commits would
-clutter up the history. Therefore those commits should be squashed into a single
-commit.
-
-To squash all commits in your branch, execute:
-
-```
-git rebase --fork-point -i master
-```
-
-This opens an editor, where you should replace `pick` with `squash` on every
-but the first commit. Then *git* opens another editor, where you have to update
-the commit message. This message should be updated properly.
-
-Afterwards you have to force push your changes.
-
-> **Note:** It is generally not advised to do a history rewrite, but we
-> consider that a branch and PR is owned by the author, until it gets merged.
-> Therefore the author can always rewrite its own branch. An important
-> implication is, that you should never add a commit to a branch of another
-> author, without communicating this beforehand.
-
-
-#### Rebase
-
-We want to keep the git history of *aws-nuke* clean. Using a merge from the
-master branch to update a feature branch would add unnecessary commits to the
-history. Therefore, please use rebase, rather than merge to update your branch.
-
-> **Note:** We cannot use the GitHub Squash Merge, since it would alter the
-> commit author. We do not want this, because it would not properly acknowledge
-> the contributions of the community.
-
-It is recommended to [squash](#squash) your branch before doing a rebase, so you avoid
-unnecessary conflicts.
-
-To rebase your branch, simply update your master branch and run this command:
-
-```
-git rebase master
-```
-
-Afterwards you have to force push your changes.
-
-
-#### Repair a Broken Branch
-
-Sometimes, wrong *git* commands break a branch in a way that makes it hard to
-properly clean it up. To fix this, we can create a new branch and put all
-changes of the broken branch there.
-
-As a first step you have to commit all changes of your broken branch. The
-commit message does not matter.
-
-Afterwards you need to create a new branch, based on `master`:
-
-```
-git checkout master
-git checkout -b repair-branch
-```
-
-Then you need to merge the changes of the broken branch into the new one,
-without taking over the commits itself:
-
-```
-git merge --squash broken-branch
-```
-
-Since this actually does not create a commit, you have to commit the changes
-manually and write a proper commit message:
-
-```
-git commit
-```
-
-To verify that there are no unwanted changes you can do a diff to the broken
-branch. This should not print any changes.
-
-```
-git diff broken-branch
-```
-
-Additionally you should test that your branch is working as expected.
-
-If you are sure, that you new branch is working and contains all changes you
-did, you can rewrite the broken branch. This avoids having to create a new Pull
-Request. Be aware, that this will overwrite the broken branch.
-
-```
-# git checkout -B broken-branch
-```
-
-Afterwards you have to force push your changes.
-
-> **Note:** If you accidentally overwrote your branch, you might be able to
-> recover them with `git reflog`.
-
-
 #### Setup Email
 
 We prefer having the commit linked to the GitHub account, that is creating the
@@ -243,5 +141,4 @@ git commit --amend --author="Author Name <email@address.com>"
 ```
 
 This changes the email of the lastest commit. If you have multiple commits in
-your branch, please follow the [Squash guidelines](#squash) and change the
-author afterwards.
+your branch, please squash them and change the author afterwards.
