@@ -42,7 +42,7 @@ lint:
 	$(foreach pkg,$(GOPKGS),golint $(pkg);)
 
 go_generate:
-	rm mocks -rvf
+	rm -rvf mocks
 	go generate ./...
 
 test_packages: vendor
