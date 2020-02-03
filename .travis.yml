@@ -25,5 +25,5 @@ deploy:
   file: releases/*
   skip_cleanup: true
   on:
-    repo: rebuy-de/aws-nuke
+    repo: Optum/aws-nuke
     tags: true
