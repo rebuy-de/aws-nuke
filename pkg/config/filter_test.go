@@ -3,7 +3,7 @@ package config_test
 import (
 	"testing"
 
-	"github.com/rebuy-de/aws-nuke/pkg/config"
+	"github.com/Optum/aws-nuke/pkg/config"
 	yaml "gopkg.in/yaml.v2"
 )
 

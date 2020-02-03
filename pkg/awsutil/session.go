@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
+	"github.com/Optum/aws-nuke/pkg/config"
 	log "github.com/sirupsen/logrus"
 )
 

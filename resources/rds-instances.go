@@ -4,8 +4,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/Optum/aws-nuke/pkg/config"
+	"github.com/Optum/aws-nuke/pkg/types"
 )
 
 type RDSInstance struct {

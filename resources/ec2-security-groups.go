@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/Optum/aws-nuke/pkg/types"
 )
 
 type EC2SecurityGroup struct {
