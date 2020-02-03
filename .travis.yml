@@ -6,6 +6,7 @@ services:
   - docker
 
 script:
+- echo "Here we go!"
 - docker build --target=builder -t aws-nuke --no-cache .
 - >
   docker run
