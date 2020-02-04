@@ -1,3 +1,3 @@
-PACKAGE=github.com/Optum/aws-nuke
+PACKAGE=github.com/rebuy-de/aws-nuke
 
 include golang.mk
