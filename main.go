@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/Optum/aws-nuke/cmd"
+	"github.com/rebuy-de/aws-nuke/cmd"
 )
 
 type NukeParameters struct {

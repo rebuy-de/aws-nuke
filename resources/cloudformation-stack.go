@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
-	"github.com/Optum/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/sirupsen/logrus"
 	"strings"
 )

@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Optum/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func Prompt(expect string) error {

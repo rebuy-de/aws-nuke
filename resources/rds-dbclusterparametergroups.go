@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
-	"github.com/Optum/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type RDSDBClusterParameterGroup struct {

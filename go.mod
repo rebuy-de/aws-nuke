@@ -1,4 +1,4 @@
-module github.com/Optum/aws-nuke
+module github.com/rebuy-de/aws-nuke
 
 go 1.13
 

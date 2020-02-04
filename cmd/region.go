@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/Optum/aws-nuke/pkg/awsutil"
+	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
 )
 
 // SessionFactory support for custom endpoints
