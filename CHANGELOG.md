@@ -1,3 +1,7 @@
+## vNext
+
+- Add support for Athena WorkGroups and NamedQueries
+
 ## v1.0.2
 
 Rename go module back to github.com/rebuy-de/aws-nuke, in order to facilitate merges back to the rebuy-de org.
