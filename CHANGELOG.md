@@ -1,5 +1,7 @@
 ## vNext
 
+## v1.1.0
+
 - Add support for Athena WorkGroups and NamedQueries
 
 ## v1.0.2
