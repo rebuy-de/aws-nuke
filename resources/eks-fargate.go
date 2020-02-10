@@ -2,9 +2,11 @@ package resources
 
 import (
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EKSFargateProfile struct {
@@ -85,6 +87,12 @@ func (fp *EKSFargateProfile) Remove() error {
 		FargateProfileName: fp.name,
 	})
 	return err
+}
+
+func (fp *EKSFargateProfile) Properties() types.Properties {
+	return types.NewProperties().
+		Set("Cluster", *fp.cluster).
+		Set("Profile", *fp.name)
 }
 
 func (fp *EKSFargateProfile) String() string {
