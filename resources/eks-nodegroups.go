@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EKSNodegroup struct {
@@ -85,6 +86,12 @@ func (ng *EKSNodegroup) Remove() error {
 		NodegroupName: ng.name,
 	})
 	return err
+}
+
+func (ng *EKSNodegroup) Properties() types.Properties {
+	return types.NewProperties().
+		Set("Cluster", *ng.cluster).
+		Set("Profile", *ng.name)
 }
 
 func (ng *EKSNodegroup) String() string {
