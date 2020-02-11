@@ -79,7 +79,7 @@ func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string, zoneName *
 }
 
 func (r *Route53ResourceRecordSet) Filter() error {
-	if *r.data.Type == "NS" && *r.hostedZoneName != *r.data.Name {
+	if *r.data.Type == "NS" && *r.hostedZoneName == *r.data.Name {
 		return fmt.Errorf("cannot delete NS record")
 	}
 
