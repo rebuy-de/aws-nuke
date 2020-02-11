@@ -16,16 +16,27 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 	params := &route53.ListHealthChecksInput{}
 	resources := make([]Resource, 0)
 
-	resp, err := svc.ListHealthChecks(params)
-	if err != nil {
-		return nil, err
-	}
+	var marker *string
+	getHealthChecks := func() *bool {
+		b := true
+		return &b
+	}()
 
-	for _, check := range resp.HealthChecks {
-		resources = append(resources, &Route53HealthCheck{
-			svc:  svc,
-			id:   check.Id,
-		})
+	for *getHealthChecks == true {
+		params.Marker = marker
+		resp, err := svc.ListHealthChecks(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, check := range resp.HealthChecks {
+			resources = append(resources, &Route53HealthCheck{
+				svc:  svc,
+				id:   check.Id,
+			})
+		}
+		getHealthChecks = resp.IsTruncated
+		marker = resp.NextMarker
 	}
 
 	return resources, nil
