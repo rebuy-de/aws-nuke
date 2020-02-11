@@ -31,8 +31,8 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 
 		for _, check := range resp.HealthChecks {
 			resources = append(resources, &Route53HealthCheck{
-				svc:  svc,
-				id:   check.Id,
+				svc: svc,
+				id:  check.Id,
 			})
 		}
 		getHealthChecks = resp.IsTruncated
@@ -43,8 +43,8 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 }
 
 type Route53HealthCheck struct {
-	svc  *route53.Route53
-	id   *string
+	svc *route53.Route53
+	id  *string
 }
 
 func (hz *Route53HealthCheck) Remove() error {
