@@ -16,14 +16,12 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 	params := &route53.ListHealthChecksInput{}
 	resources := make([]Resource, 0)
 
-	var marker *string
 	getHealthChecks := func() *bool {
 		b := true
 		return &b
 	}()
 
 	for *getHealthChecks == true {
-		params.Marker = marker
 		resp, err := svc.ListHealthChecks(params)
 		if err != nil {
 			return nil, err
@@ -36,7 +34,7 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 			})
 		}
 		getHealthChecks = resp.IsTruncated
-		marker = resp.NextMarker
+		params.Marker = resp.NextMarker
 	}
 
 	return resources, nil
