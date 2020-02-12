@@ -30,7 +30,7 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 				id:  check.Id,
 			})
 		}
-		if aws.BoolValue(resp.IsTruncated) == false {
+		if aws.BoolValue(resp.IsTruncated) != false {
 			break
 		}
 		params.Marker = resp.NextMarker
