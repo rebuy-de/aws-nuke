@@ -17,9 +17,8 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 	params := &route53.ListHealthChecksInput{}
 	resources := make([]Resource, 0)
 
-	getHealthChecks := aws.Bool(true)
 
-	for aws.BoolValue(getHealthChecks) == true {
+	for {
 		resp, err := svc.ListHealthChecks(params)
 		if err != nil {
 			return nil, err
@@ -31,7 +30,9 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 				id:  check.Id,
 			})
 		}
-		getHealthChecks = resp.IsTruncated
+		if aws.BoolValue(resp.IsTruncated) == false {
+			break
+		}
 		params.Marker = resp.NextMarker
 	}
 
