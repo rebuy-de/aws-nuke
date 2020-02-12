@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func init() {
@@ -16,12 +17,9 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 	params := &route53.ListHealthChecksInput{}
 	resources := make([]Resource, 0)
 
-	getHealthChecks := func() *bool {
-		b := true
-		return &b
-	}()
+	getHealthChecks := aws.Bool(true)
 
-	for *getHealthChecks == true {
+	for aws.BoolValue(getHealthChecks) == true {
 		resp, err := svc.ListHealthChecks(params)
 		if err != nil {
 			return nil, err
