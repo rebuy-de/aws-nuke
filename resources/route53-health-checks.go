@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func init() {
@@ -16,24 +17,31 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 	params := &route53.ListHealthChecksInput{}
 	resources := make([]Resource, 0)
 
-	resp, err := svc.ListHealthChecks(params)
-	if err != nil {
-		return nil, err
-	}
 
-	for _, check := range resp.HealthChecks {
-		resources = append(resources, &Route53HealthCheck{
-			svc:  svc,
-			id:   check.Id,
-		})
+	for {
+		resp, err := svc.ListHealthChecks(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, check := range resp.HealthChecks {
+			resources = append(resources, &Route53HealthCheck{
+				svc: svc,
+				id:  check.Id,
+			})
+		}
+		if aws.BoolValue(resp.IsTruncated) != false {
+			break
+		}
+		params.Marker = resp.NextMarker
 	}
 
 	return resources, nil
 }
 
 type Route53HealthCheck struct {
-	svc  *route53.Route53
-	id   *string
+	svc *route53.Route53
+	id  *string
 }
 
 func (hz *Route53HealthCheck) Remove() error {
