@@ -70,7 +70,6 @@ func (f Filter) Match(o string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		fmt.Printf("offsetTime: %s\nfieldTime: %s\nisBefore? %v\n", offsetTime, fieldTime, offsetTime.Before(fieldTime))
 		return offsetTime.Before(fieldTime), nil
 
 	default:
