@@ -444,6 +444,9 @@ There are also additional comparision types than an exact match:
 * `regex` – The identifier must match against the given regular expression.
   Details about the syntax can be found in the [library
   documentation](https://golang.org/pkg/regexp/syntax/).
+* `date` - The identifier is parsed as a timestamp and must be AFTER the current
+  time plus the given offset. Details on offset syntax can be found in 
+  the [library documentation](https://golang.org/pkg/time/#ParseDuration).
 
 To use a non-default comparision type, it is required to specify a object with
 `type` and `value` instead of the plain string.
