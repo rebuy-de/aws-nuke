@@ -91,7 +91,6 @@ func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
 }
 
 func (cfs *CloudFormationStack) doRemove() error {
-
 	o, err := cfs.svc.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: cfs.stack.StackName,
 	})
