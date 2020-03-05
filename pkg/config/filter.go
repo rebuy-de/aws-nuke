@@ -84,6 +84,7 @@ func parseDate(input string) (time.Time, error) {
 	}
 
 	formats := []string{"2006-01-02",
+		"2006/01/02",
 		"2006-01-02T15:04:05Z",
 		time.RFC3339Nano, // Format of t.MarshalText() and t.MarshalJSON()
 		time.RFC3339,
