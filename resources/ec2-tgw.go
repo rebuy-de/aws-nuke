@@ -72,7 +72,10 @@ func (e *EC2TGW) Properties() types.Properties {
 	for _, tagValue := range e.tgw.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
-	properties.Set("ID", e.tgw.TransitGatewayId)
+	properties.
+		Set("ID", e.tgw.TransitGatewayId).
+		Set("OwnerId", e.tgw.OwnerId)
+
 	return properties
 }
 
