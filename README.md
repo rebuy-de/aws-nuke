@@ -446,7 +446,9 @@ There are also additional comparision types than an exact match:
   documentation](https://golang.org/pkg/regexp/syntax/).
 * `date` - The identifier is parsed as a timestamp and must be AFTER the current
   time plus the given offset. Details on offset syntax can be found in 
-  the [library documentation](https://golang.org/pkg/time/#ParseDuration).
+  the [library documentation](https://golang.org/pkg/time/#ParseDuration). Supported
+  date formats are epoch time, `2006-01-02`, `2006/01/02`, `2006-01-02T15:04:05Z`, 
+  `2006-01-02T15:04:05.999999999Z07:00`, and `2006-01-02T15:04:05Z07:00`.
 
 To use a non-default comparision type, it is required to specify a object with
 `type` and `value` instead of the plain string.
