@@ -34,7 +34,7 @@ accounts:
       - "s3://my-bucket"
       S3Object:
       - type: "glob"
-        value: "s3://my-bucket/*"
+        value: "s3://my-bucket/**"
       Route53HostedZone:
       - property: Name
         type: "glob"
