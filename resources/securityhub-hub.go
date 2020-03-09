@@ -39,7 +39,7 @@ type Hub struct {
 
 func (hub *Hub) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("HubArn", hub.id)
+	properties.Set("Arn", hub.id)
 	return properties
 }
 
