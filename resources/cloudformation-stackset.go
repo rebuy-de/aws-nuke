@@ -19,7 +19,9 @@ func init() {
 func ListCloudFormationStackSets(sess *session.Session) ([]Resource, error) {
 	svc := cloudformation.New(sess)
 
-	params := &cloudformation.ListStackSetsInput{}
+	params := &cloudformation.ListStackSetsInput{
+		Status: aws.String(cloudformation.StackSetStatusActive),
+	}
 	resources := make([]Resource, 0)
 
 	for {
