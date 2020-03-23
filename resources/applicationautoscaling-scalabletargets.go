@@ -14,16 +14,16 @@ func ListApplicationAutoScalingScalableTargets(s *session.Session) ([]Resource, 
 
 	// https://docs.aws.amazon.com/autoscaling/application/APIReference/API_RegisterScalableTarget.html#autoscaling-RegisterScalableTarget-request-ServiceNamespace
 	namespaces := []string{
+		"appstream",
+		"comprehend",
+		"custom-resource",
+		"dynamodb",
+		"ec2",
 		"ecs",
 		"elasticmapreduce",
-		"ec2",
-		"appstream",
-		"dynamodb",
+		"lambda",
 		"rds",
 		"sagemaker",
-		"custom-resource",
-		"comprehend",
-		"lambda",
 	}
 
 	resources := make([]Resource, 0)
