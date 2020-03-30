@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/fms"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type FMSNotificationChannel struct {
@@ -44,4 +45,10 @@ func (f *FMSNotificationChannel) Remove() error {
 
 func (f *FMSNotificationChannel) String() string {
 	return "fms-notification-channel"
+}
+
+func (f *FMSNotificationChannel) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("NotificationChannelEnabled", "true")
+	return properties
 }

@@ -4,11 +4,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/fms"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type FMSPolicy struct {
-	svc      *fms.FMS
-	policyId *string
+	svc    *fms.FMS
+	policy *fms.PolicySummary
 }
 
 func init() {
@@ -31,8 +32,8 @@ func ListFMSPolicies(sess *session.Session) ([]Resource, error) {
 
 		for _, policy := range resp.PolicyList {
 			resources = append(resources, &FMSPolicy{
-				svc:      svc,
-				policyId: policy.PolicyId,
+				svc:    svc,
+				policy: policy,
 			})
 		}
 
@@ -49,7 +50,7 @@ func ListFMSPolicies(sess *session.Session) ([]Resource, error) {
 func (f *FMSPolicy) Remove() error {
 
 	_, err := f.svc.DeletePolicy(&fms.DeletePolicyInput{
-		PolicyId:                 f.policyId,
+		PolicyId:                 f.policy.PolicyId,
 		DeleteAllPolicyResources: aws.Bool(false),
 	})
 
@@ -57,5 +58,12 @@ func (f *FMSPolicy) Remove() error {
 }
 
 func (f *FMSPolicy) String() string {
-	return *f.policyId
+	return *f.policy.PolicyId
+}
+
+func (f *FMSPolicy) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("PolicyId", f.policy.PolicyId)
+	properties.Set("PolicyName", f.policy.PolicyName)
+	return properties
 }
