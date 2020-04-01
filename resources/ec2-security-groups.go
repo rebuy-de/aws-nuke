@@ -10,6 +10,7 @@ import (
 
 type EC2SecurityGroup struct {
 	svc     *ec2.EC2
+	group   *ec2.SecurityGroup
 	id      *string
 	name    *string
 	ingress []*ec2.IpPermission
@@ -33,6 +34,7 @@ func ListEC2SecurityGroups(sess *session.Session) ([]Resource, error) {
 	for _, group := range resp.SecurityGroups {
 		resources = append(resources, &EC2SecurityGroup{
 			svc:     svc,
+			group:   group,
 			id:      group.GroupId,
 			name:    group.GroupName,
 			ingress: group.IpPermissions,
@@ -55,7 +57,7 @@ func (sg *EC2SecurityGroup) Remove() error {
 	if len(sg.egress) > 0 {
 		egressParams := &ec2.RevokeSecurityGroupEgressInput{
 			GroupId:       sg.id,
-			IpPermissions: sg.egress,
+			IpPermissions:  sg.egress,
 		}
 
 		_, _ = sg.svc.RevokeSecurityGroupEgress(egressParams)
@@ -83,8 +85,12 @@ func (sg *EC2SecurityGroup) Remove() error {
 }
 
 func (sg *EC2SecurityGroup) Properties() types.Properties {
-	return types.NewProperties().
-		Set("Name", sg.name)
+	properties := types.NewProperties()
+    for _, tagValue := range sg.group.Tags {
+        properties.SetTag(tagValue.Key, tagValue.Value)
+    }
+    properties.Set("Name", sg.name)
+    return properties
 }
 
 func (sg *EC2SecurityGroup) String() string {
