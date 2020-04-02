@@ -57,7 +57,7 @@ func (sg *EC2SecurityGroup) Remove() error {
 	if len(sg.egress) > 0 {
 		egressParams := &ec2.RevokeSecurityGroupEgressInput{
 			GroupId:       sg.id,
-			IpPermissions:  sg.egress,
+			IpPermissions: sg.egress,
 		}
 
 		_, _ = sg.svc.RevokeSecurityGroupEgress(egressParams)
