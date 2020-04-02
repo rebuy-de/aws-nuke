@@ -55,7 +55,7 @@ func (e *EC2Address) Properties() types.Properties {
     for _, tagValue := range e.eip.Tags {
         properties.SetTag(tagValue.Key, tagValue.Value)
     }
-    properties.Set("AllocationId", e.id)
+    properties.Set("AllocationID", e.id)
     return properties
 }
 
