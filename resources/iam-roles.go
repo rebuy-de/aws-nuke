@@ -32,13 +32,13 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.Roles {
-		    getroleParams := &iam.GetRoleInput{
-                RoleName: out.RoleName,
-            }
-		    getroleOutput, err := svc.GetRole(getroleParams)
-            if err != nil {
-                return nil, err
-            }
+			getroleParams := &iam.GetRoleInput{
+				RoleName: out.RoleName,
+			}
+			getroleOutput, err := svc.GetRole(getroleParams)
+			if err != nil {
+				return nil, err
+			}
 			resources = append(resources, &IAMRole{
 				svc:  svc,
 				role: getroleOutput.Role,
@@ -77,11 +77,11 @@ func (e *IAMRole) Remove() error {
 
 func (role *IAMRole) Properties() types.Properties {
 	properties := types.NewProperties()
-    for _, tagValue := range role.role.Tags {
-        properties.SetTag(tagValue.Key, tagValue.Value)
-    }
-    properties.Set("Name", role.name)
-    return properties
+	for _, tagValue := range role.role.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("Name", role.name)
+	return properties
 }
 
 func (e *IAMRole) String() string {

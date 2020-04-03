@@ -52,11 +52,11 @@ func (e *EC2Address) Remove() error {
 
 func (e *EC2Address) Properties() types.Properties {
 	properties := types.NewProperties()
-    for _, tagValue := range e.eip.Tags {
-        properties.SetTag(tagValue.Key, tagValue.Value)
-    }
-    properties.Set("AllocationID", e.id)
-    return properties
+	for _, tagValue := range e.eip.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("AllocationID", e.id)
+	return properties
 }
 
 func (e *EC2Address) String() string {
