@@ -3,10 +3,12 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2Address struct {
 	svc *ec2.EC2
+	eip *ec2.Address
 	id  string
 	ip  string
 }
@@ -28,6 +30,7 @@ func ListEC2Addresses(sess *session.Session) ([]Resource, error) {
 	for _, out := range resp.Addresses {
 		resources = append(resources, &EC2Address{
 			svc: svc,
+			eip: out,
 			id:  *out.AllocationId,
 			ip:  *out.PublicIp,
 		})
@@ -45,6 +48,15 @@ func (e *EC2Address) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *EC2Address) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.eip.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("AllocationID", e.id)
+	return properties
 }
 
 func (e *EC2Address) String() string {
