@@ -2,13 +2,16 @@ package resources
 
 import (
 	"errors"
+	"strings"
+
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
+	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/sirupsen/logrus"
-	"strings"
 )
 
 const CLOUDFORMATION_MAX_DELETE_ATTEMPT = 3
@@ -50,6 +53,11 @@ type CloudFormationStack struct {
 	svc               cloudformationiface.CloudFormationAPI
 	stack             *cloudformation.Stack
 	maxDeleteAttempts int
+	featureFlags      config.FeatureFlags
+}
+
+func (cfs *CloudFormationStack) FeatureFlags(ff config.FeatureFlags) {
+	cfs.featureFlags = ff
 }
 
 func (cfs *CloudFormationStack) Remove() error {
@@ -59,6 +67,19 @@ func (cfs *CloudFormationStack) Remove() error {
 func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
 	if err := cfs.doRemove(); err != nil {
 		logrus.Errorf("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d delete failed: %s", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts, err.Error())
+		if cfs.featureFlags.DisableDeletionProtection.CloudformationStack {
+			awsErr, ok := err.(awserr.Error)
+			if ok && awsErr.Code() == "ValidationError" &&
+				awsErr.Message() == "Stack ["+*cfs.stack.StackName+"] cannot be deleted while TerminationProtection is enabled" {
+				_, err = cfs.svc.UpdateTerminationProtection(&cloudformation.UpdateTerminationProtectionInput{
+					EnableTerminationProtection: aws.Bool(false),
+					StackName:                   cfs.stack.StackName,
+				})
+				if err != nil {
+					return err
+				}
+			}
+		}
 		if attempt >= cfs.maxDeleteAttempts {
 			return errors.New("CFS might not be deleted after this run.")
 		} else {

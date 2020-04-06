@@ -10,10 +10,11 @@ import (
 )
 
 type Route53ResourceRecordSet struct {
-	svc          *route53.Route53
-	hostedZoneId *string
-	data         *route53.ResourceRecordSet
-	changeId     *string
+	svc            *route53.Route53
+	hostedZoneId   *string
+	hostedZoneName *string
+	data           *route53.ResourceRecordSet
+	changeId       *string
 }
 
 func init() {
@@ -32,7 +33,7 @@ func ListRoute53ResourceRecordSets(sess *session.Session) ([]Resource, error) {
 
 	for _, resource := range sub {
 		zone := resource.(*Route53HostedZone)
-		rrs, err := ListResourceRecordsForZone(svc, zone.id)
+		rrs, err := ListResourceRecordsForZone(svc, zone.id, zone.name)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +44,7 @@ func ListRoute53ResourceRecordSets(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string) ([]Resource, error) {
+func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string, zoneName *string) ([]Resource, error) {
 	params := &route53.ListResourceRecordSetsInput{
 		HostedZoneId: zoneId,
 	}
@@ -58,9 +59,10 @@ func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string) ([]Resourc
 
 		for _, rrs := range resp.ResourceRecordSets {
 			resources = append(resources, &Route53ResourceRecordSet{
-				svc:          svc,
-				hostedZoneId: zoneId,
-				data:         rrs,
+				svc:            svc,
+				hostedZoneId:   zoneId,
+				hostedZoneName: zoneName,
+				data:           rrs,
 			})
 		}
 
@@ -77,7 +79,7 @@ func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string) ([]Resourc
 }
 
 func (r *Route53ResourceRecordSet) Filter() error {
-	if *r.data.Type == "NS" {
+	if *r.data.Type == "NS" && *r.hostedZoneName == *r.data.Name {
 		return fmt.Errorf("cannot delete NS record")
 	}
 
