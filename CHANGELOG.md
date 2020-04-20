@@ -1,5 +1,12 @@
 ## vNext
 
+## v1.2.0
+
+- Merge in latest version of rebuy-de/aws-nuke from master:
+  * Add support for Athena WorkGroups and NamedQueries (#464)
+  * Upgrade to aws sdk version 1.28.12 (#466)
+  * Upgrade to aws sdk version 1.28.12
+
 ## v1.1.0
 
 - Add support for Athena WorkGroups and NamedQueries
