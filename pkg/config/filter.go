@@ -13,12 +13,12 @@ import (
 type FilterType string
 
 const (
-	FilterTypeEmpty    FilterType = ""
-	FilterTypeExact               = "exact"
-	FilterTypeGlob                = "glob"
-	FilterTypeRegex               = "regex"
-	FilterTypeContains            = "contains"
-	FilterTypeDate                = "date"
+	FilterTypeEmpty         FilterType = ""
+	FilterTypeExact                    = "exact"
+	FilterTypeGlob                     = "glob"
+	FilterTypeRegex                    = "regex"
+	FilterTypeContains                 = "contains"
+	FilterTypeDateOlderThan            = "dateOlderThan"
 )
 
 type Filters map[string][]Filter
@@ -57,7 +57,7 @@ func (f Filter) Match(o string) (bool, error) {
 		}
 		return re.MatchString(o), nil
 
-	case FilterTypeDate:
+	case FilterTypeDateOlderThan:
 		if o == "" {
 			return false, nil
 		}
@@ -65,12 +65,13 @@ func (f Filter) Match(o string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		offsetTime := time.Now().Add(duration)
 		fieldTime, err := parseDate(o)
 		if err != nil {
 			return false, err
 		}
-		return offsetTime.Before(fieldTime), nil
+		fieldTimeWithOffset := fieldTime.Add(duration)
+
+		return fieldTimeWithOffset.After(time.Now()), nil
 
 	default:
 		return false, fmt.Errorf("unknown type %s", f.Type)

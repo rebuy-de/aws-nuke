@@ -10,8 +10,8 @@ import (
 )
 
 func TestUnmarshalFilter(t *testing.T) {
-	past := time.Now().Add(-24 * time.Hour)
-	future := time.Now().Add(24 * time.Hour)
+	past := time.Now().UTC().Add(-24 * time.Hour)
+	future := time.Now().UTC().Add(24 * time.Hour)
 	cases := []struct {
 		yaml            string
 		match, mismatch []string
@@ -47,7 +47,7 @@ func TestUnmarshalFilter(t *testing.T) {
 			mismatch: []string{"bim-baz"},
 		},
 		{
-			yaml: `{"type":"date","value":"0"}`,
+			yaml: `{"type":"dateOlderThan","value":"0"}`,
 			match: []string{strconv.Itoa(int(future.Unix())),
 				future.Format("2006-01-02"),
 				future.Format("2006/01/02"),
