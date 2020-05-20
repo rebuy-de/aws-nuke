@@ -444,8 +444,13 @@ There are also additional comparision types than an exact match:
 * `regex` – The identifier must match against the given regular expression.
   Details about the syntax can be found in the [library
   documentation](https://golang.org/pkg/regexp/syntax/).
+* `dateOlderThan` - The identifier is parsed as a timestamp. After the offset is added to it (specified in the `value` field), the resulting timestamp must be AFTER the current
+  time. Details on offset syntax can be found in 
+  the [library documentation](https://golang.org/pkg/time/#ParseDuration). Supported
+  date formats are epoch time, `2006-01-02`, `2006/01/02`, `2006-01-02T15:04:05Z`, 
+  `2006-01-02T15:04:05.999999999Z07:00`, and `2006-01-02T15:04:05Z07:00`.
 
-To use a non-default comparision type, it is required to specify a object with
+To use a non-default comparision type, it is required to specify an object with
 `type` and `value` instead of the plain string.
 
 These types can be used to simplify the configuration. For example, it is

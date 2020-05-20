@@ -34,8 +34,9 @@ type Nuke struct {
 
 type FeatureFlags struct {
 	DisableDeletionProtection struct {
-		RDSInstance bool `yaml:"RDSInstance"`
-		EC2Instance bool `yaml:"EC2Instance"`
+		RDSInstance         bool `yaml:"RDSInstance"`
+		EC2Instance         bool `yaml:"EC2Instance"`
+		CloudformationStack bool `yaml:"CloudformationStack"`
 	} `yaml:"disable-deletion-protection"`
 }
 

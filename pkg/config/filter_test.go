@@ -1,14 +1,17 @@
 package config_test
 
 import (
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/rebuy-de/aws-nuke/pkg/config"
 	yaml "gopkg.in/yaml.v2"
 )
 
 func TestUnmarshalFilter(t *testing.T) {
-
+	past := time.Now().UTC().Add(-24 * time.Hour)
+	future := time.Now().UTC().Add(24 * time.Hour)
 	cases := []struct {
 		yaml            string
 		match, mismatch []string
@@ -42,6 +45,24 @@ func TestUnmarshalFilter(t *testing.T) {
 			yaml:     `{"type":"contains","value":"mba"}`,
 			match:    []string{"bimbaz", "mba", "bi mba z"},
 			mismatch: []string{"bim-baz"},
+		},
+		{
+			yaml: `{"type":"dateOlderThan","value":"0"}`,
+			match: []string{strconv.Itoa(int(future.Unix())),
+				future.Format("2006-01-02"),
+				future.Format("2006/01/02"),
+				future.Format("2006-01-02T15:04:05Z"),
+				future.Format(time.RFC3339Nano),
+				future.Format(time.RFC3339),
+			},
+			mismatch: []string{"",
+				strconv.Itoa(int(past.Unix())),
+				past.Format("2006-01-02"),
+				past.Format("2006/01/02"),
+				past.Format("2006-01-02T15:04:05Z"),
+				past.Format(time.RFC3339Nano),
+				past.Format(time.RFC3339),
+			},
 		},
 	}
 
