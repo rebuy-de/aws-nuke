@@ -30,10 +30,6 @@ type Item struct {
 	Type   string
 }
 
-func (i *Item) PrintAsFilter() {
-	LogFilter(i.Region, i.Type, i.Resource, i)
-}
-
 func (i *Item) Print() {
 	switch i.State {
 	case ItemStateNew:
