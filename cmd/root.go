@@ -41,42 +41,14 @@ func NewRootCommand() *cobra.Command {
 			return err
 		}
 
-		if !creds.HasKeys() && !creds.HasProfile() && defaultRegion != "" {
-			creds.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
-			creds.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
-		}
-		err = creds.Validate()
-		if err != nil {
-			return err
-		}
-
 		command.SilenceUsage = true
 
-		config, err := config.Load(params.ConfigPath)
-		if err != nil {
-			log.Errorf("Failed to parse config file %s", params.ConfigPath)
-			return err
-		}
-
-		if defaultRegion != "" {
-			awsutil.DefaultRegionID = defaultRegion
-			if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
-				err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)
-				log.Error(err.Error())
-				return err
-			}
-		}
-
-		account, err := awsutil.NewAccount(creds, config.CustomEndpoints)
+		nuke, err := buildNuke(&params, &creds, defaultRegion)
 		if err != nil {
 			return err
 		}
 
-		n := NewNuke(params, *account)
-
-		n.Config = config
-
-		return n.Run()
+		return nuke.Run()
 	}
 
 	command.PersistentFlags().BoolVarP(
@@ -140,6 +112,7 @@ func NewRootCommand() *cobra.Command {
 
 	command.AddCommand(NewVersionCommand())
 	command.AddCommand(NewResourceTypesCommand())
+	command.AddCommand(NewAccountBlueprintCommand(&params, &creds, defaultRegion))
 
 	return command
 }
@@ -159,4 +132,76 @@ func NewResourceTypesCommand() *cobra.Command {
 	}
 
 	return cmd
+}
+
+func NewAccountBlueprintCommand(params *NukeParameters, creds *awsutil.Credentials, defaultRegion string) *cobra.Command {
+	var (
+		includeFiltered bool
+		includeName     bool
+	)
+
+	cmd := &cobra.Command{
+		Use:   "baseline",
+		Short: "scan account and print resources in filter format",
+	}
+
+	cmd.PreRun = func(cmd *cobra.Command, args []string) {
+		log.SetLevel(log.InfoLevel)
+	}
+
+	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		nuke, err := buildNuke(params, creds, defaultRegion)
+		if err != nil {
+			return err
+		}
+
+		return nuke.BuildBlueprint(includeFiltered, includeName)
+	}
+
+	cmd.PersistentFlags().BoolVarP(
+		&includeFiltered, "include-filtered", "f", false,
+		"Show filtered resources. Off by default.")
+
+	cmd.PersistentFlags().BoolVarP(
+		&includeName, "include-name", "n", false,
+		"Show name/description filter even if the resource has properties to filter on. Off by default.")
+
+	return cmd
+}
+
+func buildNuke(params *NukeParameters, creds *awsutil.Credentials, defaultRegion string) (*Nuke, error) {
+	if !creds.HasKeys() && !creds.HasProfile() && defaultRegion != "" {
+		creds.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
+		creds.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	}
+	err := creds.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := config.Load(params.ConfigPath)
+	if err != nil {
+		log.Errorf("Failed to parse config file %s", params.ConfigPath)
+		return nil, err
+	}
+
+	if defaultRegion != "" {
+		awsutil.DefaultRegionID = defaultRegion
+		if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
+			err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)
+			log.Error(err.Error())
+			return nil, err
+		}
+	}
+
+	account, err := awsutil.NewAccount(*creds, config.CustomEndpoints)
+	if err != nil {
+		return nil, err
+	}
+
+	n := NewNuke(*params, *account)
+
+	n.Config = config
+
+	return n, nil
 }
