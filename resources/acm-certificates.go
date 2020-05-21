@@ -11,6 +11,7 @@ type ACMCertificate struct {
 	svc               *acm.ACM
 	certificateARN    *string
 	certificateDetail *acm.CertificateDetail
+	tags              []*acm.Tag
 }
 
 func init() {
@@ -40,10 +41,21 @@ func ListACMCertificates(sess *session.Session) ([]Resource, error) {
 			if err != nil {
 				return nil, err
 			}
+
+			tagParams := &acm.ListTagsForCertificateInput{
+				CertificateArn: certificate.CertificateArn,
+			}
+
+			tagResp, tagErr := svc.ListTagsForCertificate(tagParams)
+			if tagErr != nil {
+				return nil, tagErr
+			}
+
 			resources = append(resources, &ACMCertificate{
 				svc:               svc,
 				certificateARN:    certificate.CertificateArn,
 				certificateDetail: certificateDescribe.Certificate,
+				tags:              tagResp.Tags,
 			})
 		}
 
@@ -68,6 +80,9 @@ func (f *ACMCertificate) Remove() error {
 
 func (f *ACMCertificate) Properties() types.Properties {
 	properties := types.NewProperties()
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
 	properties.Set("DomainName", f.certificateDetail.DomainName)
 	return properties
 }

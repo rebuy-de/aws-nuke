@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type SSMParameter struct {
 	svc  *ssm.SSM
 	name *string
+	tags []*ssm.Tag
 }
 
 func init() {
@@ -30,9 +32,20 @@ func ListSSMParameters(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, parameter := range output.Parameters {
+			tagParams := &ssm.ListTagsForResourceInput{
+				ResourceId:   parameter.Name,
+				ResourceType: aws.String(ssm.ResourceTypeForTaggingParameter),
+			}
+
+			tagResp, tagErr := svc.ListTagsForResource(tagParams)
+			if tagErr != nil {
+				return nil, tagErr
+			}
+
 			resources = append(resources, &SSMParameter{
 				svc:  svc,
 				name: parameter.Name,
+				tags: tagResp.TagList,
 			})
 		}
 
@@ -57,4 +70,14 @@ func (f *SSMParameter) Remove() error {
 
 func (f *SSMParameter) String() string {
 	return *f.name
+}
+
+func (f *SSMParameter) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+	properties.
+		Set("Name", f.name)
+	return properties
 }
