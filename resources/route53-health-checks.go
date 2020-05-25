@@ -2,10 +2,11 @@ package resources
 
 import (
 	"fmt"
+
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 func init() {
@@ -16,7 +17,6 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 	svc := route53.New(sess)
 	params := &route53.ListHealthChecksInput{}
 	resources := make([]Resource, 0)
-
 
 	for {
 		resp, err := svc.ListHealthChecks(params)
@@ -30,7 +30,7 @@ func ListRoute53HealthChecks(sess *session.Session) ([]Resource, error) {
 				id:  check.Id,
 			})
 		}
-		if aws.BoolValue(resp.IsTruncated) != false {
+		if aws.BoolValue(resp.IsTruncated) == false {
 			break
 		}
 		params.Marker = resp.NextMarker
