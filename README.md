@@ -538,6 +538,26 @@ presets:
       - "OrganizationAccountAccessRole"
 ```
 
+#### Generating the account's baseline filters
+You can speed up the process of filter generation using the `baseline` command.
+
+```
+$ aws-nuke baseline --help
+scan account and print resources in filter format
+
+Usage:
+  aws-nuke baseline [flags]
+
+Flags:
+  -h, --help               help for baseline
+  -f, --include-filtered   Show filtered resources. Off by default.
+  -n, --include-name       Show name/description filter even if the resource has properties to filter on. Off by default.
+  
+```
+The command will scan the account and will print resources with corresponding simple filter in yaml form you can use as a starting point.
+By default the currently filtered resources are not printed (--include-filtered).
+In addition properties are preferred over name, but you can print also name filters alongside with property ones (--include-filtered).
+
 
 ## Install
 
