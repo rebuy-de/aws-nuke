@@ -533,7 +533,7 @@ presets:
       DynamoDBTable:
       - "terraform-lock"
   common:
-    filter:
+    filters:
       IAMRole:
       - "OrganizationAccountAccessRole"
 ```
