@@ -63,7 +63,7 @@ func (f *FMSPolicy) String() string {
 
 func (f *FMSPolicy) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("PolicyId", f.policy.PolicyId)
+	properties.Set("PolicyID", f.policy.PolicyId)
 	properties.Set("PolicyName", f.policy.PolicyName)
 	return properties
 }
