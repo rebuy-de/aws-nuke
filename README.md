@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/rebuy-de/aws-nuke.svg?branch=master)](https://travis-ci.org/rebuy-de/aws-nuke)
 [![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/releases)
+[![Docker Repository on Quay](https://quay.io/repository/rebuy/aws-nuke/status "Docker Repository on Quay")](https://quay.io/repository/rebuy/aws-nuke)
 
 Remove all resources from an AWS account.
 
@@ -58,6 +59,16 @@ procedures.
   their own Kubernetes clusters for testing purposes. With *aws-nuke* it is
   very easy to clean up these account at the end of the day and keep the costs
   low.
+
+## Releases
+
+We usually release a new version once enough changes came together and have
+been tested for a while.
+
+You can find Linux and macOS binaries on the
+[releases page](https://github.com/rebuy-de/aws-nuke/releases), but we also
+provide containerized versions on [quay.io/rebuy/aws-nuke](quay.io/rebuy/aws-nuke)
+and [docker.io/rebuy/aws-nuke](https://hub.docker.com/r/rebuy/aws-nuke) (mirror).
 
 
 ## Usage
