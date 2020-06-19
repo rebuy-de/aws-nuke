@@ -67,7 +67,7 @@ been tested for a while.
 
 You can find Linux and macOS binaries on the
 [releases page](https://github.com/rebuy-de/aws-nuke/releases), but we also
-provide containerized versions on [quay.io/rebuy/aws-nuke](quay.io/rebuy/aws-nuke)
+provide containerized versions on [quay.io/rebuy/aws-nuke](https://quay.io/rebuy/aws-nuke)
 and [docker.io/rebuy/aws-nuke](https://hub.docker.com/r/rebuy/aws-nuke) (mirror).
 
 
