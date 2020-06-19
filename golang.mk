@@ -35,7 +35,7 @@ vendor: go.mod go.sum
 format:
 	gofmt -s -w $(GOFILES)
 
-vet: vendor
+vet: go_generate vendor
 	go vet $(GOPKGS)
 
 lint:
@@ -45,13 +45,13 @@ go_generate:
 	rm -rvf mocks
 	go generate ./...
 
-test_packages: vendor
+test_packages: go_generate vendor
 	go test $(GOPKGS)
 
 test_format:
 	gofmt -s -l $(GOFILES)
 
-test: test_format go_generate vet lint test_packages
+test: test_format vet lint test_packages
 
 cov: go_generate
 	gocov test -v $(GOPKGS) \
@@ -65,17 +65,17 @@ _build: vendor
 		$(TARGET);\
 	)
 
-build: _build
+build: go_generate _build
 	$(foreach TARGET,$(TARGETS),ln -sf $(OUTPUT_FILE) dist/$(OUTPUT_LINK);)
 
 compress: _build
 	tar czf dist/$(OUTPUT_FILE).tar.gz dist/$(OUTPUT_FILE)
 
-xc:
+xc: go_generate
 	GOOS=linux GOARCH=amd64 make compress
 	GOOS=darwin GOARCH=amd64 make compress
 
-install: vendor test
+install: test
 	$(foreach TARGET,$(TARGETS),go install \
 		$(BUILD_FLAGS);)
 
