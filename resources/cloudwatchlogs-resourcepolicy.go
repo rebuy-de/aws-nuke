@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type CloudWatchLogsResourcePolicy struct {
@@ -46,15 +47,22 @@ func ListCloudWatchLogsResourcePolicies(sess *session.Session) ([]Resource, erro
 	return resources, nil
 }
 
-func (f *CloudWatchLogsResourcePolicy) Remove() error {
+func (p *CloudWatchLogsResourcePolicy) Remove() error {
 
-	_, err := f.svc.DeleteResourcePolicy(&cloudwatchlogs.DeleteResourcePolicyInput{
-		PolicyName: f.policyName,
+	_, err := p.svc.DeleteResourcePolicy(&cloudwatchlogs.DeleteResourcePolicyInput{
+		PolicyName: p.policyName,
 	})
 
 	return err
 }
 
-func (f *CloudWatchLogsResourcePolicy) String() string {
-	return *f.policyName
+func (p *CloudWatchLogsResourcePolicy) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", p.policyName)
+
+	return properties
+}
+
+func (p *CloudWatchLogsResourcePolicy) String() string {
+	return *p.policyName
 }
