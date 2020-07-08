@@ -61,7 +61,7 @@ func (gaa *GAAccelerator) Remove() error {
 // Properties definition
 func (gaa *GAAccelerator) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("Arn", gaa.ARN)
+	properties.Set("ARN", gaa.ARN)
 	return properties
 }
 
