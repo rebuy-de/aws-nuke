@@ -114,7 +114,7 @@ func (gaeg *GAEndpointGroup) Remove() error {
 // Properties definition
 func (gaeg *GAEndpointGroup) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("Arn", gaeg.ARN)
+	properties.Set("ARN", gaeg.ARN)
 	return properties
 }
 
