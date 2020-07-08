@@ -88,7 +88,7 @@ func (gal *GAListener) Remove() error {
 // Properties definition
 func (gal *GAListener) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("Arn", gal.ARN)
+	properties.Set("ARN", gal.ARN)
 	return properties
 }
 
