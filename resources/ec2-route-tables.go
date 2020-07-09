@@ -1,13 +1,15 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EC2RouteTable struct {
-	svc        *ec2.EC2
+	svc        ec2iface.EC2API
 	routeTable *ec2.RouteTable
 }
 
@@ -41,6 +43,11 @@ func (e *EC2RouteTable) Remove() error {
 
 	_, err := e.svc.DeleteRouteTable(params)
 	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok {
+			if awsErr.Code() == "InvalidRouteTableID.NotFound" { //the route table was deleted elsewhere
+				return nil
+			}
+		}
 		return err
 	}
 
