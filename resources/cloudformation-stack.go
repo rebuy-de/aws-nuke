@@ -67,10 +67,11 @@ func (cfs *CloudFormationStack) Remove() error {
 func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
 	if err := cfs.doRemove(); err != nil {
 		logrus.Errorf("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d delete failed: %s", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts, err.Error())
-		if cfs.featureFlags.DisableDeletionProtection.CloudformationStack {
-			awsErr, ok := err.(awserr.Error)
-			if ok && awsErr.Code() == "ValidationError" &&
-				awsErr.Message() == "Stack ["+*cfs.stack.StackName+"] cannot be deleted while TerminationProtection is enabled" {
+		awsErr, ok := err.(awserr.Error)
+		if ok && awsErr.Code() == "ValidationError" &&
+			awsErr.Message() == "Stack ["+*cfs.stack.StackName+"] cannot be deleted while TerminationProtection is enabled" {
+			if cfs.featureFlags.DisableDeletionProtection.CloudformationStack {
+				logrus.Infof("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d updating termination protection", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts)
 				_, err = cfs.svc.UpdateTerminationProtection(&cloudformation.UpdateTerminationProtectionInput{
 					EnableTerminationProtection: aws.Bool(false),
 					StackName:                   cfs.stack.StackName,
@@ -78,6 +79,9 @@ func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
 				if err != nil {
 					return err
 				}
+			} else {
+				logrus.Warnf("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d set feature flag to disable deletion protection", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts)
+				return err
 			}
 		}
 		if attempt >= cfs.maxDeleteAttempts {
