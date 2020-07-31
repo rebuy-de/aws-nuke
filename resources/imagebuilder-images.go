@@ -27,10 +27,10 @@ func ListImageBuilderImages(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.ImageVersionList {
-			resources = append(resources, &ImageBuilderImage{
-				svc: svc,
-				arn: *out.Arn,
-			})
+			resources, err = ImageBuildVersions(svc, out.Arn, resources)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if resp.NextToken == nil {
@@ -42,6 +42,36 @@ func ListImageBuilderImages(sess *session.Session) ([]Resource, error) {
 		}
 	}
 
+	return resources, nil
+}
+
+func ImageBuildVersions(svc *imagebuilder.Imagebuilder, imageVersionArn *string, resources []Resource) ([]Resource, error) {
+	params := &imagebuilder.ListImageBuildVersionsInput{
+		ImageVersionArn: imageVersionArn,
+	}
+
+	for {
+		resp, err := svc.ListImageBuildVersions(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, out := range resp.ImageSummaryList {
+			resources = append(resources, &ImageBuilderImage{
+				svc: svc,
+				arn: *out.Arn,
+			})
+		}
+
+		if resp.NextToken == nil {
+			break
+		}
+
+		params = &imagebuilder.ListImageBuildVersionsInput{
+			ImageVersionArn: imageVersionArn,
+			NextToken:       resp.NextToken,
+		}
+	}
 	return resources, nil
 }
 

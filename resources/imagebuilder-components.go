@@ -27,10 +27,10 @@ func ListImageBuilderComponents(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.ComponentVersionList {
-			resources = append(resources, &ImageBuilderComponent{
-				svc: svc,
-				arn: *out.Arn,
-			})
+			resources, err = ListImageBuilderComponentVersions(svc, out.Arn, resources)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if resp.NextToken == nil {
@@ -42,6 +42,36 @@ func ListImageBuilderComponents(sess *session.Session) ([]Resource, error) {
 		}
 	}
 
+	return resources, nil
+}
+
+func ListImageBuilderComponentVersions(svc *imagebuilder.Imagebuilder, componentVersionArn *string, resources []Resource) ([]Resource, error) {
+	params := &imagebuilder.ListComponentBuildVersionsInput{
+		ComponentVersionArn: componentVersionArn,
+	}
+
+	for {
+		resp, err := svc.ListComponentBuildVersions(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, out := range resp.ComponentSummaryList {
+			resources = append(resources, &ImageBuilderComponent{
+				svc: svc,
+				arn: *out.Arn,
+			})
+		}
+
+		if resp.NextToken == nil {
+			break
+		}
+
+		params = &imagebuilder.ListComponentBuildVersionsInput{
+			ComponentVersionArn: componentVersionArn,
+			NextToken:           resp.NextToken,
+		}
+	}
 	return resources, nil
 }
 
