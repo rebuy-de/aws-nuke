@@ -7,18 +7,18 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
-// GAEndpointGroup model
-type GAEndpointGroup struct {
+// GlobalAcceleratorEndpointGroup model
+type GlobalAcceleratorEndpointGroup struct {
 	svc *globalaccelerator.GlobalAccelerator
 	ARN *string
 }
 
 func init() {
-	register("GAEndpointGroup", ListGAEndpointGroups)
+	register("GlobalAcceleratorEndpointGroup", ListGlobalAcceleratorEndpointGroups)
 }
 
-// ListGAEndpointGroups enumerates all available accelerators
-func ListGAEndpointGroups(sess *session.Session) ([]Resource, error) {
+// ListGlobalAcceleratorEndpointGroups enumerates all available accelerators
+func ListGlobalAcceleratorEndpointGroups(sess *session.Session) ([]Resource, error) {
 	svc := globalaccelerator.New(sess)
 	acceleratorARNs := []*string{}
 	listenerARNs := []*string{}
@@ -85,7 +85,7 @@ func ListGAEndpointGroups(sess *session.Session) ([]Resource, error) {
 			}
 
 			for _, endpointGroup := range output.EndpointGroups {
-				resources = append(resources, &GAEndpointGroup{
+				resources = append(resources, &GlobalAcceleratorEndpointGroup{
 					svc: svc,
 					ARN: endpointGroup.EndpointGroupArn,
 				})
@@ -103,7 +103,7 @@ func ListGAEndpointGroups(sess *session.Session) ([]Resource, error) {
 }
 
 // Remove resource
-func (gaeg *GAEndpointGroup) Remove() error {
+func (gaeg *GlobalAcceleratorEndpointGroup) Remove() error {
 	_, err := gaeg.svc.DeleteEndpointGroup(&globalaccelerator.DeleteEndpointGroupInput{
 		EndpointGroupArn: gaeg.ARN,
 	})
@@ -112,13 +112,13 @@ func (gaeg *GAEndpointGroup) Remove() error {
 }
 
 // Properties definition
-func (gaeg *GAEndpointGroup) Properties() types.Properties {
+func (gaeg *GlobalAcceleratorEndpointGroup) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("ARN", gaeg.ARN)
 	return properties
 }
 
 // String representation
-func (gaeg *GAEndpointGroup) String() string {
+func (gaeg *GlobalAcceleratorEndpointGroup) String() string {
 	return *gaeg.ARN
 }

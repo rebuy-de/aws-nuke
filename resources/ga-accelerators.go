@@ -7,18 +7,18 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
-// GAAccelerator model
-type GAAccelerator struct {
+// GlobalAccelerator model
+type GlobalAccelerator struct {
 	svc *globalaccelerator.GlobalAccelerator
 	ARN *string
 }
 
 func init() {
-	register("GAAccelerator", ListGAAccelerators)
+	register("GlobalAccelerator", ListGlobalAccelerators)
 }
 
-// ListGAAccelerators enumerates all available accelerators
-func ListGAAccelerators(sess *session.Session) ([]Resource, error) {
+// ListGlobalAccelerators enumerates all available accelerators
+func ListGlobalAccelerators(sess *session.Session) ([]Resource, error) {
 	svc := globalaccelerator.New(sess)
 	resources := []Resource{}
 
@@ -33,7 +33,7 @@ func ListGAAccelerators(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, accelerator := range output.Accelerators {
-			resources = append(resources, &GAAccelerator{
+			resources = append(resources, &GlobalAccelerator{
 				svc: svc,
 				ARN: accelerator.AcceleratorArn,
 			})
@@ -50,22 +50,22 @@ func ListGAAccelerators(sess *session.Session) ([]Resource, error) {
 }
 
 // Remove resource
-func (gaa *GAAccelerator) Remove() error {
-	_, err := gaa.svc.DeleteAccelerator(&globalaccelerator.DeleteAcceleratorInput{
-		AcceleratorArn: gaa.ARN,
+func (ga *GlobalAccelerator) Remove() error {
+	_, err := ga.svc.DeleteAccelerator(&globalaccelerator.DeleteAcceleratorInput{
+		AcceleratorArn: ga.ARN,
 	})
 
 	return err
 }
 
 // Properties definition
-func (gaa *GAAccelerator) Properties() types.Properties {
+func (ga *GlobalAccelerator) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("ARN", gaa.ARN)
+	properties.Set("ARN", ga.ARN)
 	return properties
 }
 
 // String representation
-func (gaa *GAAccelerator) String() string {
-	return *gaa.ARN
+func (ga *GlobalAccelerator) String() string {
+	return *ga.ARN
 }

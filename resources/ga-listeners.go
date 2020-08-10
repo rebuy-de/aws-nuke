@@ -7,18 +7,18 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
-// GAListener model
-type GAListener struct {
+// GlobalAcceleratorListener model
+type GlobalAcceleratorListener struct {
 	svc *globalaccelerator.GlobalAccelerator
 	ARN *string
 }
 
 func init() {
-	register("GAListener", ListGAListeners)
+	register("GlobalAcceleratorListener", ListGlobalAcceleratorListeners)
 }
 
-// ListGAListeners enumerates all available listeners of all available accelerators
-func ListGAListeners(sess *session.Session) ([]Resource, error) {
+// ListGlobalAcceleratorListeners enumerates all available listeners of all available accelerators
+func ListGlobalAcceleratorListeners(sess *session.Session) ([]Resource, error) {
 	svc := globalaccelerator.New(sess)
 	acceleratorARNs := []*string{}
 	resources := []Resource{}
@@ -59,7 +59,7 @@ func ListGAListeners(sess *session.Session) ([]Resource, error) {
 			}
 
 			for _, listener := range output.Listeners {
-				resources = append(resources, &GAListener{
+				resources = append(resources, &GlobalAcceleratorListener{
 					svc: svc,
 					ARN: listener.ListenerArn,
 				})
@@ -77,7 +77,7 @@ func ListGAListeners(sess *session.Session) ([]Resource, error) {
 }
 
 // Remove resource
-func (gal *GAListener) Remove() error {
+func (gal *GlobalAcceleratorListener) Remove() error {
 	_, err := gal.svc.DeleteListener(&globalaccelerator.DeleteListenerInput{
 		ListenerArn: gal.ARN,
 	})
@@ -86,13 +86,13 @@ func (gal *GAListener) Remove() error {
 }
 
 // Properties definition
-func (gal *GAListener) Properties() types.Properties {
+func (gal *GlobalAcceleratorListener) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("ARN", gal.ARN)
 	return properties
 }
 
 // String representation
-func (gal *GAListener) String() string {
+func (gal *GlobalAcceleratorListener) String() string {
 	return *gal.ARN
 }
