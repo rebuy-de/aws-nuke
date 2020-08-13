@@ -30,6 +30,68 @@ func NewNuke(params NukeParameters, account awsutil.Account) *Nuke {
 	return &n
 }
 
+func (n *Nuke) BuildBlueprint(includeFiltered bool, includeName bool) error {
+	n.Parameters.Quiet = true
+
+	err := n.Scan()
+	if err != nil {
+		return err
+	}
+
+	if n.items.Count(ItemStateNew) == 0 {
+		fmt.Println("All resources filtered out.")
+		return nil
+	}
+
+	resourceMap := make(map[string][]*Item)
+	for _, item := range n.items {
+		n.Filter(item)
+
+		if item.State != ItemStateFiltered || includeFiltered {
+			resourceMap[item.Type] = append(resourceMap[item.Type], item)
+		}
+	}
+
+	for k, v := range resourceMap {
+		fmt.Printf("%s:\n", k)
+		for _, item := range v {
+			rProp, propok := item.Resource.(resources.ResourcePropertyGetter)
+
+			rString, stringOk := item.Resource.(resources.LegacyStringer)
+			var hasProps bool = false
+			var props types.Properties
+
+			var filteredStatus string
+			if item.State == ItemStateFiltered {
+				filteredStatus = fmt.Sprintf("# filtered (%s)", item.Reason)
+			}
+
+			if propok {
+				props = rProp.Properties()
+				hasProps = len(props) > 0
+			}
+
+			if stringOk && (!hasProps || includeName) {
+				fmt.Printf("- \"%s\" %s\n", rString.String(), filteredStatus)
+			}
+
+			if hasProps {
+				for p := range props {
+					fmt.Printf("- property: \"%s\" %s\n", p, filteredStatus)
+					fmt.Printf("  value: \"%s\"\n", props[p])
+				}
+			}
+
+			if !stringOk && !hasProps {
+				fmt.Printf("  # WARN: Cannot find properties or string definition of %v, string: (%v), props: (%v)\n", item, stringOk, propok)
+			}
+
+		}
+	}
+
+	return nil
+}
+
 func (n *Nuke) Run() error {
 	var err error
 
