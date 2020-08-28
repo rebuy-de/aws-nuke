@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type KMSAlias struct {
@@ -52,4 +53,12 @@ func (e *KMSAlias) Remove() error {
 
 func (e *KMSAlias) String() string {
 	return e.name
+}
+
+func (e *KMSAlias) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.
+		Set("Name", e.name)
+
+	return properties
 }
