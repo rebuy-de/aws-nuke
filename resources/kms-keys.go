@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type KMSKey struct {
@@ -13,6 +14,7 @@ type KMSKey struct {
 	id      string
 	state   string
 	manager *string
+	tags    []*kms.Tag
 }
 
 func init() {
@@ -29,6 +31,10 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, key := range resp.Keys {
+		tags, err := svc.ListResourceTags(&kms.ListResourceTagsInput{
+			KeyId: key.KeyId,
+		})
+
 		resp, err := svc.DescribeKey(&kms.DescribeKeyInput{
 			KeyId: key.KeyId,
 		})
@@ -41,6 +47,7 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 			id:      *resp.KeyMetadata.KeyId,
 			state:   *resp.KeyMetadata.KeyState,
 			manager: resp.KeyMetadata.KeyManager,
+			tags:    tags.Tags,
 		})
 	}
 
@@ -69,4 +76,16 @@ func (e *KMSKey) Remove() error {
 
 func (e *KMSKey) String() string {
 	return e.id
+}
+
+func (i *KMSKey) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.
+		Set("ID", i.id)
+
+	for _, tag := range i.tags {
+		properties.SetTag(tag.TagKey, tag.TagValue)
+	}
+
+	return properties
 }
