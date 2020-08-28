@@ -3,27 +3,27 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/apigateway"
+	"github.com/aws/aws-sdk-go/service/apigatewayv2"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
-type APIGatewayVpcLink struct {
-	svc       *apigateway.APIGateway
+type APIGatewayV2VpcLink struct {
+	svc       *apigatewayv2.ApiGatewayV2
 	vpcLinkID *string
 	name      *string
 	tags      map[string]*string
 }
 
 func init() {
-	register("APIGatewayVpcLink", ListAPIGatewayVpcLinks)
+	register("APIGatewayV2VpcLink", ListAPIGatewayV2VpcLinks)
 }
 
-func ListAPIGatewayVpcLinks(sess *session.Session) ([]Resource, error) {
-	svc := apigateway.New(sess)
+func ListAPIGatewayV2VpcLinks(sess *session.Session) ([]Resource, error) {
+	svc := apigatewayv2.New(sess)
 	resources := []Resource{}
 
-	params := &apigateway.GetVpcLinksInput{
-		Limit: aws.Int64(100),
+	params := &apigatewayv2.GetVpcLinksInput{
+		MaxResults: aws.String("100"),
 	}
 
 	for {
@@ -33,38 +33,38 @@ func ListAPIGatewayVpcLinks(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, item := range output.Items {
-			resources = append(resources, &APIGatewayVpcLink{
+			resources = append(resources, &APIGatewayV2VpcLink{
 				svc:       svc,
-				vpcLinkID: item.Id,
+				vpcLinkID: item.VpcLinkId,
 				name:      item.Name,
 				tags:      item.Tags,
 			})
 		}
 
-		if output.Position == nil {
+		if output.NextToken == nil {
 			break
 		}
 
-		params.Position = output.Position
+		params.NextToken = output.NextToken
 	}
 
 	return resources, nil
 }
 
-func (f *APIGatewayVpcLink) Remove() error {
+func (f *APIGatewayV2VpcLink) Remove() error {
 
-	_, err := f.svc.DeleteVpcLink(&apigateway.DeleteVpcLinkInput{
+	_, err := f.svc.DeleteVpcLink(&apigatewayv2.DeleteVpcLinkInput{
 		VpcLinkId: f.vpcLinkID,
 	})
 
 	return err
 }
 
-func (f *APIGatewayVpcLink) String() string {
+func (f *APIGatewayV2VpcLink) String() string {
 	return *f.vpcLinkID
 }
 
-func (f *APIGatewayVpcLink) Properties() types.Properties {
+func (f *APIGatewayV2VpcLink) Properties() types.Properties {
 	properties := types.NewProperties()
 	for key, tag := range f.tags {
 		properties.SetTag(&key, tag)
