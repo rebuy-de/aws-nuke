@@ -80,7 +80,9 @@ func (role *IAMRole) Properties() types.Properties {
 	for _, tagValue := range role.role.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
-	properties.Set("Name", role.name)
+	properties.
+		Set("Name", role.name).
+		Set("Path", role.path)
 	return properties
 }
 
