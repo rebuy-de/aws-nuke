@@ -8,35 +8,35 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
-type WAFRegionalWebACL struct {
+type WAFRegionalRuleGroup struct {
 	svc  *wafregional.WAFRegional
 	ID   *string
 	name *string
 }
 
 func init() {
-	register("WAFRegionalWebACL", ListWAFRegionalWebACLs)
+	register("WAFRegionalRuleGroup", ListWAFRegionalRuleGroups)
 }
 
-func ListWAFRegionalWebACLs(sess *session.Session) ([]Resource, error) {
+func ListWAFRegionalRuleGroups(sess *session.Session) ([]Resource, error) {
 	svc := wafregional.New(sess)
 	resources := []Resource{}
 
-	params := &waf.ListWebACLsInput{
+	params := &waf.ListRuleGroupsInput{
 		Limit: aws.Int64(50),
 	}
 
 	for {
-		resp, err := svc.ListWebACLs(params)
+		resp, err := svc.ListRuleGroups(params)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, webACL := range resp.WebACLs {
-			resources = append(resources, &WAFRegionalWebACL{
+		for _, rule := range resp.RuleGroups {
+			resources = append(resources, &WAFRegionalRuleGroup{
 				svc:  svc,
-				ID:   webACL.WebACLId,
-				name: webACL.Name,
+				ID:   rule.RuleGroupId,
+				name: rule.Name,
 			})
 		}
 
@@ -50,26 +50,26 @@ func ListWAFRegionalWebACLs(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (f *WAFRegionalWebACL) Remove() error {
+func (f *WAFRegionalRuleGroup) Remove() error {
 
 	tokenOutput, err := f.svc.GetChangeToken(&waf.GetChangeTokenInput{})
 	if err != nil {
 		return err
 	}
 
-	_, err = f.svc.DeleteWebACL(&waf.DeleteWebACLInput{
-		WebACLId:    f.ID,
+	_, err = f.svc.DeleteRuleGroup(&waf.DeleteRuleGroupInput{
+		RuleGroupId: f.ID,
 		ChangeToken: tokenOutput.ChangeToken,
 	})
 
 	return err
 }
 
-func (f *WAFRegionalWebACL) String() string {
+func (f *WAFRegionalRuleGroup) String() string {
 	return *f.ID
 }
 
-func (f *WAFRegionalWebACL) Properties() types.Properties {
+func (f *WAFRegionalRuleGroup) Properties() types.Properties {
 	properties := types.NewProperties()
 
 	properties.
