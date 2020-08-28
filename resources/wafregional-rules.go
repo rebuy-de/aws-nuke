@@ -5,11 +5,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/aws/aws-sdk-go/service/wafregional"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type WAFRegionalRule struct {
-	svc *wafregional.WAFRegional
-	ID  *string
+	svc  *wafregional.WAFRegional
+	ID   *string
+	name *string
 }
 
 func init() {
@@ -32,8 +34,9 @@ func ListWAFRegionalRules(sess *session.Session) ([]Resource, error) {
 
 		for _, rule := range resp.Rules {
 			resources = append(resources, &WAFRegionalRule{
-				svc: svc,
-				ID:  rule.RuleId,
+				svc:  svc,
+				ID:   rule.RuleId,
+				name: rule.Name,
 			})
 		}
 
@@ -64,4 +67,13 @@ func (f *WAFRegionalRule) Remove() error {
 
 func (f *WAFRegionalRule) String() string {
 	return *f.ID
+}
+
+func (f *WAFRegionalRule) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.
+		Set("ID", f.ID).
+		Set("Name", f.name)
+	return properties
 }
