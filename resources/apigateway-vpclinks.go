@@ -4,11 +4,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/apigateway"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type APIGatewayVpcLink struct {
 	svc       *apigateway.APIGateway
 	vpcLinkID *string
+	name      *string
+	tags      map[string]*string
 }
 
 func init() {
@@ -33,6 +36,8 @@ func ListAPIGatewayVpcLinks(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &APIGatewayVpcLink{
 				svc:       svc,
 				vpcLinkID: item.Id,
+				name:      item.Name,
+				tags:      item.Tags,
 			})
 		}
 
@@ -57,4 +62,15 @@ func (f *APIGatewayVpcLink) Remove() error {
 
 func (f *APIGatewayVpcLink) String() string {
 	return *f.vpcLinkID
+}
+
+func (f *APIGatewayVpcLink) Properties() types.Properties {
+	properties := types.NewProperties()
+	for key, tag := range f.tags {
+		properties.SetTag(&key, tag)
+	}
+	properties.
+		Set("VPCLinkID", f.vpcLinkID).
+		Set("Name", f.name)
+	return properties
 }
