@@ -70,10 +70,13 @@ build: go_generate _build
 
 compress: _build
 	tar czf dist/$(OUTPUT_FILE).tar.gz dist/$(OUTPUT_FILE)
+	rm -f dist/$(OUTPUT_FILE)
 
 xc: go_generate
 	GOOS=linux GOARCH=amd64 make compress
+	GOOS=linux GOARCH=arm64 make compress
 	GOOS=darwin GOARCH=amd64 make compress
+	GOOS=windows GOARCH=amd64 make compress
 
 install: test
 	$(foreach TARGET,$(TARGETS),go install \
