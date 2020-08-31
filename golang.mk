@@ -23,7 +23,7 @@ BUILD_FLAGS=-ldflags "\
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GOPKGS=$(shell go list ./...)
 
-OUTPUT_FILE=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOEXE)
+OUTPUT_FILE=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOARM)$(shell go env GOEXE)
 OUTPUT_LINK=$(NAME)$(shell go env GOEXE)
 
 default: build
@@ -75,6 +75,7 @@ compress: _build
 xc: go_generate
 	GOOS=linux GOARCH=amd64 make compress
 	GOOS=linux GOARCH=arm64 make compress
+	GOOS=linux GOARCH=arm GOARM=7 make compress
 	GOOS=darwin GOARCH=amd64 make compress
 	GOOS=windows GOARCH=amd64 make compress
 
