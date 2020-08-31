@@ -69,7 +69,7 @@ build: go_generate _build
 	$(foreach TARGET,$(TARGETS),ln -sf $(OUTPUT_FILE) dist/$(OUTPUT_LINK);)
 
 compress: _build
-	tar czf dist/$(OUTPUT_FILE).tar.gz dist/$(OUTPUT_FILE)
+	tar czf dist/$(OUTPUT_FILE).tar.gz -C dist $(OUTPUT_FILE)
 	rm -f dist/$(OUTPUT_FILE)
 
 xc: go_generate
