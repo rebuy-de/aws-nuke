@@ -1,0 +1,15 @@
+name: Remove docker package
+
+on:
+  schedule:
+  - cron: "*/10 * * * *"
+
+jobs:
+  stale:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/delete-package-versions@v1
+      with:
+        package-name: 'aws-nuke'
