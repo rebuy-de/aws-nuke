@@ -36,15 +36,19 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 				return false
 			}
 
+			if *resp.KeyMetadata.KeyManager == kms.KeyManagerTypeAws {
+				continue
+			}
+
+			if *resp.KeyMetadata.KeyState == kms.KeyStatePendingDeletion {
+				continue
+			}
+
 			kmsKey := &KMSKey{
 				svc:     svc,
 				id:      *resp.KeyMetadata.KeyId,
 				state:   *resp.KeyMetadata.KeyState,
 				manager: resp.KeyMetadata.KeyManager,
-			}
-
-			if *kmsKey.manager == kms.KeyManagerTypeAws {
-				continue
 			}
 
 			tags, err := svc.ListResourceTags(&kms.ListResourceTagsInput{
