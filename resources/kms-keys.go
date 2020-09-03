@@ -23,32 +23,49 @@ func init() {
 
 func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 	svc := kms.New(sess)
+	resources := make([]Resource, 0)
 
-	resp, err := svc.ListKeys(nil)
+	var innerErr error
+	err := svc.ListKeysPages(nil, func(resp *kms.ListKeysOutput, lastPage bool) bool {
+		for _, key := range resp.Keys {
+			tags, err := svc.ListResourceTags(&kms.ListResourceTagsInput{
+				KeyId: key.KeyId,
+			})
+			if err != nil {
+				innerErr = err
+				return false
+			}
+
+			resp, err := svc.DescribeKey(&kms.DescribeKeyInput{
+				KeyId: key.KeyId,
+			})
+			if err != nil {
+				innerErr = err
+				return false
+			}
+
+			resources = append(resources, &KMSKey{
+				svc:     svc,
+				id:      *resp.KeyMetadata.KeyId,
+				state:   *resp.KeyMetadata.KeyState,
+				manager: resp.KeyMetadata.KeyManager,
+				tags:    tags.Tags,
+			})
+		}
+
+		if lastPage {
+			return false
+		}
+
+		return true
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
-	resources := make([]Resource, 0)
-	for _, key := range resp.Keys {
-		tags, err := svc.ListResourceTags(&kms.ListResourceTagsInput{
-			KeyId: key.KeyId,
-		})
-
-		resp, err := svc.DescribeKey(&kms.DescribeKeyInput{
-			KeyId: key.KeyId,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		resources = append(resources, &KMSKey{
-			svc:     svc,
-			id:      *resp.KeyMetadata.KeyId,
-			state:   *resp.KeyMetadata.KeyState,
-			manager: resp.KeyMetadata.KeyManager,
-			tags:    tags.Tags,
-		})
+	if innerErr != nil {
+		return nil, err
 	}
 
 	return resources, nil
