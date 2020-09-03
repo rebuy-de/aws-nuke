@@ -28,14 +28,6 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 	var innerErr error
 	err := svc.ListKeysPages(nil, func(resp *kms.ListKeysOutput, lastPage bool) bool {
 		for _, key := range resp.Keys {
-			tags, err := svc.ListResourceTags(&kms.ListResourceTagsInput{
-				KeyId: key.KeyId,
-			})
-			if err != nil {
-				innerErr = err
-				return false
-			}
-
 			resp, err := svc.DescribeKey(&kms.DescribeKeyInput{
 				KeyId: key.KeyId,
 			})
@@ -44,13 +36,27 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 				return false
 			}
 
-			resources = append(resources, &KMSKey{
+			kmsKey := &KMSKey{
 				svc:     svc,
 				id:      *resp.KeyMetadata.KeyId,
 				state:   *resp.KeyMetadata.KeyState,
 				manager: resp.KeyMetadata.KeyManager,
-				tags:    tags.Tags,
+			}
+
+			if *kmsKey.manager == kms.KeyManagerTypeAws {
+				continue
+			}
+
+			tags, err := svc.ListResourceTags(&kms.ListResourceTagsInput{
+				KeyId: key.KeyId,
 			})
+			if err != nil {
+				innerErr = err
+				return false
+			}
+
+			kmsKey.tags = tags.Tags
+			resources = append(resources, kmsKey)
 		}
 
 		if lastPage {
