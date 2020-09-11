@@ -31,6 +31,9 @@ func NewRootCommand() *cobra.Command {
 		if verbose {
 			log.SetLevel(log.DebugLevel)
 		}
+		log.SetFormatter(&log.TextFormatter{
+			EnvironmentOverrideColors: true,
+		})
 	}
 
 	command.RunE = func(cmd *cobra.Command, args []string) error {
