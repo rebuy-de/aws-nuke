@@ -17,59 +17,85 @@ type (
 		domainName *string
 		vpcIds     []*string
 	}
-
-	association struct {
-		id    *string
-		vpcID *string
-	}
 )
 
 func init() {
-	register("Route53ResolverRules", ListRout53ResolverRules)
+	register("Route53ResolverRule", ListRout53ResolverRules)
 }
 
 // ListRout53ResolverRules produces the resources to be nuked.
 func ListRout53ResolverRules(sess *session.Session) ([]Resource, error) {
 	svc := route53resolver.New(sess)
 
+	vpcAssociations, err := resolverRulesToVpcIDs(svc)
+	if err != nil {
+		return nil, err
+	}
+
 	var resources []Resource
-	output, err := svc.ListResolverRules(&route53resolver.ListResolverRulesInput{})
 
-	if err != nil {
-		return resources, err
-	}
+	params := &route53resolver.ListResolverRulesInput{}
+	for {
+		resp, err := svc.ListResolverRules(params)
 
-	associationsOutput, err := svc.ListResolverRuleAssociations(&route53resolver.ListResolverRuleAssociationsInput{})
-
-	if err != nil {
-		return resources, err
-	}
-
-	vpcAssociations := map[string][]*string{}
-	for _, ruleAssociation := range associationsOutput.ResolverRuleAssociations {
-		vpcId := ruleAssociation.VPCId
-		if vpcId != nil {
-			resolverRuleID := *ruleAssociation.ResolverRuleId
-
-			if _, ok := vpcAssociations[resolverRuleID]; !ok {
-				vpcAssociations[resolverRuleID] = []*string{vpcId}
-			} else {
-				vpcAssociations[resolverRuleID] = append(vpcAssociations[resolverRuleID], vpcId)
-			}
+		if err != nil {
+			return nil, err
 		}
-	}
 
-	for _, rule := range output.ResolverRules {
-		resources = append(resources, &Route53ResolverRule{
-			svc:        svc,
-			id:         rule.Id,
-			name:       rule.Name,
-			domainName: rule.DomainName,
-			vpcIds:     vpcAssociations[*rule.Id],
-		})
+		for _, rule := range resp.ResolverRules {
+			resources = append(resources, &Route53ResolverRule{
+				svc:        svc,
+				id:         rule.Id,
+				name:       rule.Name,
+				domainName: rule.DomainName,
+				vpcIds:     vpcAssociations[*rule.Id],
+			})
+		}
+
+		if resp.NextToken == nil {
+			break
+		}
+
+		params.NextToken = resp.NextToken
 	}
 
 	return resources, nil
+}
+
+// Associate all the vpcIDs to their resolver rule ID to be disassociated before deleting the rule.
+func resolverRulesToVpcIDs(svc *route53resolver.Route53Resolver) (map[string][]*string, error) {
+	vpcAssociations := map[string][]*string{}
+
+	params := &route53resolver.ListResolverRuleAssociationsInput{}
+
+	for {
+		resp, err := svc.ListResolverRuleAssociations(params)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, ruleAssociation := range resp.ResolverRuleAssociations {
+			vpcID := ruleAssociation.VPCId
+			if vpcID != nil {
+				resolverRuleID := *ruleAssociation.ResolverRuleId
+
+				if _, ok := vpcAssociations[resolverRuleID]; !ok {
+					vpcAssociations[resolverRuleID] = []*string{vpcID}
+				} else {
+					vpcAssociations[resolverRuleID] = append(vpcAssociations[resolverRuleID], vpcID)
+				}
+			}
+		}
+
+		if resp.NextToken == nil {
+			break
+		}
+
+		params.NextToken = resp.NextToken
+	}
+
+	return vpcAssociations, nil
 }
 
 // Filter removes resources automatically from being nuked
@@ -104,7 +130,7 @@ func (r *Route53ResolverRule) Remove() error {
 // Properties provides debugging output
 func (r *Route53ResolverRule) Properties() types.Properties {
 	return types.NewProperties().
-		Set("Id", r.id).
+		Set("ID", r.id).
 		Set("Name", r.name)
 }
 

@@ -9,6 +9,14 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
+type Route53TrafficPolicy struct {
+	svc       *route53.Route53
+	id        *string
+	name      *string
+	version   *int64
+	instances []*route53.TrafficPolicyInstance
+}
+
 func init() {
 	register("Route53TrafficPolicy", ListRoute53TrafficPolicies)
 }
@@ -77,14 +85,6 @@ func instancesForPolicy(svc *route53.Route53, policyID *string, version *int64) 
 	return instances, nil
 }
 
-type Route53TrafficPolicy struct {
-	svc       *route53.Route53
-	id        *string
-	name      *string
-	version   *int64
-	instances []*route53.TrafficPolicyInstance
-}
-
 func (tp *Route53TrafficPolicy) Remove() error {
 	for _, instance := range tp.instances {
 		_, err := tp.svc.DeleteTrafficPolicyInstance(&route53.DeleteTrafficPolicyInstanceInput{
@@ -109,5 +109,5 @@ func (tp *Route53TrafficPolicy) Remove() error {
 func (tp *Route53TrafficPolicy) Properties() types.Properties {
 	return types.NewProperties().
 		Set("ID", *tp.id).
-		Set("NAME", *tp.name)
+		Set("Name", *tp.name)
 }

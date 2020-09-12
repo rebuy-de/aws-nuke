@@ -13,11 +13,10 @@ type Route53ResolverEndpoint struct {
 	svc  *route53resolver.Route53Resolver
 	id   *string
 	name *string
-	ips  []*route53resolver.IpAddressUpdate
 }
 
 func init() {
-	register("Route53ResolverEndpoints", ListRoute53ResolverEndpoints)
+	register("Route53ResolverEndpoint", ListRoute53ResolverEndpoints)
 }
 
 // ListRoute53ResolverEndpoints produces the resources to be nuked
@@ -26,41 +25,33 @@ func ListRoute53ResolverEndpoints(sess *session.Session) ([]Resource, error) {
 
 	params := &route53resolver.ListResolverEndpointsInput{}
 
-	resources := make([]Resource, 0)
-	output, err := svc.ListResolverEndpoints(params)
+	var resources []Resource
 
-	if err != nil {
-		return resources, err
-	}
-
-	for _, endpoint := range output.ResolverEndpoints {
-		resolverEndpoint := &Route53ResolverEndpoint{
-			svc:  svc,
-			id:   endpoint.Id,
-			name: endpoint.Name,
-		}
-
-		ipsOutput, err := svc.ListResolverEndpointIpAddresses(
-			&route53resolver.ListResolverEndpointIpAddressesInput{
-				ResolverEndpointId: endpoint.Id,
-			})
+	for {
+		resp, err := svc.ListResolverEndpoints(params)
 
 		if err != nil {
-			return resources, err
+			return nil, err
 		}
 
-		for _, ip := range ipsOutput.IpAddresses {
-			resolverEndpoint.ips = append(resolverEndpoint.ips, &route53resolver.IpAddressUpdate{
-				Ip:       ip.Ip,
-				IpId:     ip.IpId,
-				SubnetId: ip.SubnetId,
-			})
+		for _, endpoint := range resp.ResolverEndpoints {
+			resolverEndpoint := &Route53ResolverEndpoint{
+				svc:  svc,
+				id:   endpoint.Id,
+				name: endpoint.Name,
+			}
+
+			resources = append(resources, resolverEndpoint)
 		}
 
-		resources = append(resources, resolverEndpoint)
+		if resp.NextToken == nil {
+			break
+		}
+
+		params.NextToken = resp.NextToken
 	}
 
-	return resources, err
+	return resources, nil
 }
 
 // Remove implements Resource
