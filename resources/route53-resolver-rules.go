@@ -20,11 +20,11 @@ type (
 )
 
 func init() {
-	register("Route53ResolverRule", ListRout53ResolverRules)
+	register("Route53ResolverRule", ListRoute53ResolverRules)
 }
 
-// ListRout53ResolverRules produces the resources to be nuked.
-func ListRout53ResolverRules(sess *session.Session) ([]Resource, error) {
+// ListRoute53ResolverRules produces the resources to be nuked.
+func ListRoute53ResolverRules(sess *session.Session) ([]Resource, error) {
 	svc := route53resolver.New(sess)
 
 	vpcAssociations, err := resolverRulesToVpcIDs(svc)
