@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMRole struct {
@@ -37,8 +38,13 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 			}
 			getroleOutput, err := svc.GetRole(getroleParams)
 			if err != nil {
-				return nil, err
+				logrus.
+					WithError(err).
+					WithField("roleName", *out.RoleName).
+					Error("Failed to get listed role")
+				continue
 			}
+
 			resources = append(resources, &IAMRole{
 				svc:  svc,
 				role: getroleOutput.Role,

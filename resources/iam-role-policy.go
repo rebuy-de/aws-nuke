@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -39,7 +40,11 @@ func ListIAMRolePolicies(sess *session.Session) ([]Resource, error) {
 			for {
 				policies, err := svc.ListRolePolicies(polParams)
 				if err != nil {
-					return nil, err
+					logrus.
+						WithError(err).
+						WithField("roleName", *role.RoleName).
+						Error("Failed to list policies")
+					break
 				}
 
 				for _, policyName := range policies.PolicyNames {
