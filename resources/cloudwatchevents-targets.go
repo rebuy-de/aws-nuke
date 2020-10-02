@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 )
@@ -47,8 +48,9 @@ type CloudWatchEventsTarget struct {
 func (target *CloudWatchEventsTarget) Remove() error {
 	ids := []*string{target.targetId}
 	_, err := target.svc.RemoveTargets(&cloudwatchevents.RemoveTargetsInput{
-		Ids:  ids,
-		Rule: target.ruleName,
+		Ids:   ids,
+		Rule:  target.ruleName,
+		Force: aws.Bool(true),
 	})
 	return err
 }
