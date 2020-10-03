@@ -79,5 +79,5 @@ func (a *AppAutoScaling) Properties() types.Properties {
 }
 
 func (a *AppAutoScaling) String() string {
-  return a.id + ": " + a.dimension
+	return a.id + ": " + a.dimension
 }
