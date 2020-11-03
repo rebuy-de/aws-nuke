@@ -4,11 +4,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/apigateway"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type APIGatewayRestAPI struct {
 	svc       *apigateway.APIGateway
 	restAPIID *string
+	name      *string
+	version   *string
+	tags      map[string]*string
 }
 
 func init() {
@@ -33,6 +37,9 @@ func ListAPIGatewayRestApis(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &APIGatewayRestAPI{
 				svc:       svc,
 				restAPIID: item.Id,
+				name:      item.Name,
+				version:   item.Version,
+				tags:      item.Tags,
 			})
 		}
 
@@ -57,4 +64,16 @@ func (f *APIGatewayRestAPI) Remove() error {
 
 func (f *APIGatewayRestAPI) String() string {
 	return *f.restAPIID
+}
+
+func (f *APIGatewayRestAPI) Properties() types.Properties {
+	properties := types.NewProperties()
+	for key, tag := range f.tags {
+		properties.SetTag(&key, tag)
+	}
+	properties.
+		Set("APIID", f.restAPIID).
+		Set("Name", f.name).
+		Set("Version", f.version)
+	return properties
 }

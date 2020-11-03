@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type KMSKey struct {
@@ -13,6 +14,7 @@ type KMSKey struct {
 	id      string
 	state   string
 	manager *string
+	tags    []*kms.Tag
 }
 
 func init() {
@@ -21,27 +23,59 @@ func init() {
 
 func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 	svc := kms.New(sess)
+	resources := make([]Resource, 0)
 
-	resp, err := svc.ListKeys(nil)
+	var innerErr error
+	err := svc.ListKeysPages(nil, func(resp *kms.ListKeysOutput, lastPage bool) bool {
+		for _, key := range resp.Keys {
+			resp, err := svc.DescribeKey(&kms.DescribeKeyInput{
+				KeyId: key.KeyId,
+			})
+			if err != nil {
+				innerErr = err
+				return false
+			}
+
+			if *resp.KeyMetadata.KeyManager == kms.KeyManagerTypeAws {
+				continue
+			}
+
+			if *resp.KeyMetadata.KeyState == kms.KeyStatePendingDeletion {
+				continue
+			}
+
+			kmsKey := &KMSKey{
+				svc:     svc,
+				id:      *resp.KeyMetadata.KeyId,
+				state:   *resp.KeyMetadata.KeyState,
+				manager: resp.KeyMetadata.KeyManager,
+			}
+
+			tags, err := svc.ListResourceTags(&kms.ListResourceTagsInput{
+				KeyId: key.KeyId,
+			})
+			if err != nil {
+				innerErr = err
+				return false
+			}
+
+			kmsKey.tags = tags.Tags
+			resources = append(resources, kmsKey)
+		}
+
+		if lastPage {
+			return false
+		}
+
+		return true
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
-	resources := make([]Resource, 0)
-	for _, key := range resp.Keys {
-		resp, err := svc.DescribeKey(&kms.DescribeKeyInput{
-			KeyId: key.KeyId,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		resources = append(resources, &KMSKey{
-			svc:     svc,
-			id:      *resp.KeyMetadata.KeyId,
-			state:   *resp.KeyMetadata.KeyState,
-			manager: resp.KeyMetadata.KeyManager,
-		})
+	if innerErr != nil {
+		return nil, err
 	}
 
 	return resources, nil
@@ -69,4 +103,16 @@ func (e *KMSKey) Remove() error {
 
 func (e *KMSKey) String() string {
 	return e.id
+}
+
+func (i *KMSKey) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.
+		Set("ID", i.id)
+
+	for _, tag := range i.tags {
+		properties.SetTag(tag.TagKey, tag.TagValue)
+	}
+
+	return properties
 }

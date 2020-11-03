@@ -6,10 +6,13 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMRole struct {
 	svc  *iam.IAM
+	role *iam.Role
 	name string
 	path string
 }
@@ -30,10 +33,23 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.Roles {
+			getroleParams := &iam.GetRoleInput{
+				RoleName: out.RoleName,
+			}
+			getroleOutput, err := svc.GetRole(getroleParams)
+			if err != nil {
+				logrus.
+					WithError(err).
+					WithField("roleName", *out.RoleName).
+					Error("Failed to get listed role")
+				continue
+			}
+
 			resources = append(resources, &IAMRole{
 				svc:  svc,
-				name: *out.RoleName,
-				path: *out.Path,
+				role: getroleOutput.Role,
+				name: *getroleOutput.Role.RoleName,
+				path: *getroleOutput.Role.Path,
 			})
 		}
 
@@ -63,6 +79,17 @@ func (e *IAMRole) Remove() error {
 	}
 
 	return nil
+}
+
+func (role *IAMRole) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range role.role.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.
+		Set("Name", role.name).
+		Set("Path", role.path)
+	return properties
 }
 
 func (e *IAMRole) String() string {

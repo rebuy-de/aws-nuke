@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/rebuy-de/aws-nuke.svg?branch=master)](https://travis-ci.org/rebuy-de/aws-nuke)
 [![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/releases)
+[![Docker Repository on Quay](https://quay.io/repository/rebuy/aws-nuke/status "Docker Repository on Quay")](https://quay.io/repository/rebuy/aws-nuke)
 
 Remove all resources from an AWS account.
 
@@ -58,6 +59,16 @@ procedures.
   their own Kubernetes clusters for testing purposes. With *aws-nuke* it is
   very easy to clean up these account at the end of the day and keep the costs
   low.
+
+## Releases
+
+We usually release a new version once enough changes came together and have
+been tested for a while.
+
+You can find Linux and macOS binaries on the
+[releases page](https://github.com/rebuy-de/aws-nuke/releases), but we also
+provide containerized versions on [quay.io/rebuy/aws-nuke](https://quay.io/rebuy/aws-nuke)
+and [docker.io/rebuy/aws-nuke](https://hub.docker.com/r/rebuy/aws-nuke) (mirror).
 
 
 ## Usage
@@ -444,8 +455,13 @@ There are also additional comparision types than an exact match:
 * `regex` – The identifier must match against the given regular expression.
   Details about the syntax can be found in the [library
   documentation](https://golang.org/pkg/regexp/syntax/).
+* `dateOlderThan` - The identifier is parsed as a timestamp. After the offset is added to it (specified in the `value` field), the resulting timestamp must be AFTER the current
+  time. Details on offset syntax can be found in 
+  the [library documentation](https://golang.org/pkg/time/#ParseDuration). Supported
+  date formats are epoch time, `2006-01-02`, `2006/01/02`, `2006-01-02T15:04:05Z`, 
+  `2006-01-02T15:04:05.999999999Z07:00`, and `2006-01-02T15:04:05Z07:00`.
 
-To use a non-default comparision type, it is required to specify a object with
+To use a non-default comparision type, it is required to specify an object with
 `type` and `value` instead of the plain string.
 
 These types can be used to simplify the configuration. For example, it is
@@ -528,7 +544,7 @@ presets:
       DynamoDBTable:
       - "terraform-lock"
   common:
-    filter:
+    filters:
       IAMRole:
       - "OrganizationAccountAccessRole"
 ```

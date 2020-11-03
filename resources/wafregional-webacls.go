@@ -5,11 +5,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/waf"
 	"github.com/aws/aws-sdk-go/service/wafregional"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type WAFRegionalWebACL struct {
-	svc *wafregional.WAFRegional
-	ID  *string
+	svc  *wafregional.WAFRegional
+	ID   *string
+	name *string
 }
 
 func init() {
@@ -32,8 +34,9 @@ func ListWAFRegionalWebACLs(sess *session.Session) ([]Resource, error) {
 
 		for _, webACL := range resp.WebACLs {
 			resources = append(resources, &WAFRegionalWebACL{
-				svc: svc,
-				ID:  webACL.WebACLId,
+				svc:  svc,
+				ID:   webACL.WebACLId,
+				name: webACL.Name,
 			})
 		}
 
@@ -64,4 +67,13 @@ func (f *WAFRegionalWebACL) Remove() error {
 
 func (f *WAFRegionalWebACL) String() string {
 	return *f.ID
+}
+
+func (f *WAFRegionalWebACL) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.
+		Set("ID", f.ID).
+		Set("Name", f.name)
+	return properties
 }

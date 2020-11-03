@@ -33,12 +33,18 @@ type Credentials struct {
 	SecretAccessKey string
 	SessionToken    string
 
+	Credentials *credentials.Credentials
+
 	CustomEndpoints config.CustomEndpoints
 	session         *session.Session
 }
 
 func (c *Credentials) HasProfile() bool {
 	return strings.TrimSpace(c.Profile) != ""
+}
+
+func (c *Credentials) HasAwsCredentials() bool {
+	return c.Credentials != nil
 }
 
 func (c *Credentials) HasKeys() bool {
@@ -65,6 +71,12 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 		log.Debugf("creating new root session in %s", region)
 
 		switch {
+		case c.HasAwsCredentials():
+			opts = session.Options{
+				Config: aws.Config{
+					Credentials: c.Credentials,
+				},
+			}
 		case c.HasProfile() && c.HasKeys():
 			return nil, fmt.Errorf("You have to specify a profile or credentials for at least one region.")
 

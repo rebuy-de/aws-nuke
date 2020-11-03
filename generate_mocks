@@ -1,3 +1,7 @@
 #!/bin/sh
 
 go run github.com/golang/mock/mockgen -source $(go list -m -f "{{.Dir}}" "github.com/aws/aws-sdk-go")/service/cloudformation/cloudformationiface/interface.go -destination mocks/mock_cloudformationiface/mock.go
+go run github.com/golang/mock/mockgen -source $(go list -m -f "{{.Dir}}" "github.com/aws/aws-sdk-go")/service/ec2/ec2iface/interface.go -destination mocks/mock_ec2iface/mock.go
+go run github.com/golang/mock/mockgen -source $(go list -m -f "{{.Dir}}" "github.com/aws/aws-sdk-go")/service/emr/emriface/interface.go -destination mocks/mock_emriface/mock.go
+go run github.com/golang/mock/mockgen -source $(go list -m -f "{{.Dir}}" "github.com/aws/aws-sdk-go")/service/kinesisanalyticsv2/kinesisanalyticsv2iface/interface.go -destination mocks/mock_kinesisanalyticsv2iface/mock.go
+go run github.com/golang/mock/mockgen -source $(go list -m -f "{{.Dir}}" "github.com/aws/aws-sdk-go")/service/waf/wafiface/interface.go -destination mocks/mock_wafiface/mock.go
