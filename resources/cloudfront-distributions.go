@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudfront"
+	"github.com/sirupsen/logrus"
 )
 
 type CloudFrontDistribution struct {
@@ -49,9 +50,40 @@ func ListCloudFrontDistributions(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *CloudFrontDistribution) Remove() error {
+	logrus.Infof("Waiting on cloudfront id=%s", *f.ID)
+	err := f.svc.WaitUntilDistributionDeployed(&cloudfront.GetDistributionInput{
+		Id: f.ID,
+	})
+	if err != nil {
+		return err
+	}
 
 	// Get Existing eTag
 	resp, err := f.svc.GetDistributionConfig(&cloudfront.GetDistributionConfigInput{
+		Id: f.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	distributionConfig := resp.DistributionConfig
+
+	if (*distributionConfig.Enabled) {
+		distributionConfig.Enabled = new(bool)
+
+		// Cloudfront distribution must be disabled before deleting
+		_, err = f.svc.UpdateDistribution(&cloudfront.UpdateDistributionInput{
+			Id:                 f.ID,
+			IfMatch:            resp.ETag,
+			DistributionConfig: distributionConfig,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	logrus.Infof("Waiting on cloudfront id=%s", *f.ID)
+	err = f.svc.WaitUntilDistributionDeployed(&cloudfront.GetDistributionInput{
 		Id: f.ID,
 	})
 	if err != nil {
