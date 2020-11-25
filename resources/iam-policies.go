@@ -4,11 +4,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type IAMPolicy struct {
-	svc *iam.IAM
-	arn string
+	svc      *iam.IAM
+	name     string
+	policyId string
+	arn      string
+	path     string
 }
 
 func init() {
@@ -17,29 +21,35 @@ func init() {
 
 func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
+
 	params := &iam.ListPoliciesInput{
 		Scope: aws.String("Local"),
 	}
+
+	policies := make([]*iam.Policy, 0)
+
+	//resp, err := svc.ListPolicies(params)
+	err := svc.ListPoliciesPages(params,
+		func(page *iam.ListPoliciesOutput, lastPage bool) bool {
+			for _, policy := range page.Policies {
+				policies = append(policies, policy)
+			}
+			return true
+		})
+	if err != nil {
+		return nil, err
+	}
+
 	resources := make([]Resource, 0)
 
-	for {
-		resp, err := svc.ListPolicies(params)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, out := range resp.Policies {
-			resources = append(resources, &IAMPolicy{
-				svc: svc,
-				arn: *out.Arn,
-			})
-		}
-
-		if *resp.IsTruncated == false {
-			break
-		}
-
-		params.Marker = resp.Marker
+	for _, out := range policies {
+		resources = append(resources, &IAMPolicy{
+			svc:      svc,
+			name:     *out.PolicyName,
+			path:     *out.Path,
+			arn:      *out.Arn,
+			policyId: *out.PolicyId,
+		})
 	}
 
 	return resources, nil
@@ -74,6 +84,16 @@ func (e *IAMPolicy) Remove() error {
 	return nil
 }
 
+func (policy *IAMPolicy) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("Name", policy.name)
+	properties.Set("ARN", policy.arn)
+	properties.Set("Path", policy.path)
+	properties.Set("PolicyID", policy.policyId)
+	return properties
+}
+
 func (e *IAMPolicy) String() string {
-	return e.arn
+	return e.name
 }
