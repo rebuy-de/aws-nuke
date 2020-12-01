@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ElasticacheCacheParameterGroup struct {
-	svc       *elasticache.ElastiCache
-	groupName *string
+	svc         *elasticache.ElastiCache
+	groupName   *string
+	groupFamily *string
 }
 
 func init() {
@@ -29,8 +31,9 @@ func ListElasticacheCacheParameterGroups(sess *session.Session) ([]Resource, err
 
 		for _, cacheParameterGroup := range resp.CacheParameterGroups {
 			resources = append(resources, &ElasticacheCacheParameterGroup{
-				svc:       svc,
-				groupName: cacheParameterGroup.CacheParameterGroupName,
+				svc:         svc,
+				groupName:   cacheParameterGroup.CacheParameterGroupName,
+				groupFamily: cacheParameterGroup.CacheParameterGroupFamily,
 			})
 		}
 
@@ -59,4 +62,12 @@ func (i *ElasticacheCacheParameterGroup) Remove() error {
 
 func (i *ElasticacheCacheParameterGroup) String() string {
 	return *i.groupName
+}
+
+func (i *ElasticacheCacheParameterGroup) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.
+		Set("GroupName", i.groupName).
+		Set("GroupFamily", i.groupFamily)
+	return properties
 }
