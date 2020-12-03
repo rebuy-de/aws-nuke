@@ -28,7 +28,6 @@ func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 
 	policies := make([]*iam.Policy, 0)
 
-	//resp, err := svc.ListPolicies(params)
 	err := svc.ListPoliciesPages(params,
 		func(page *iam.ListPoliciesOutput, lastPage bool) bool {
 			for _, policy := range page.Policies {
@@ -95,5 +94,5 @@ func (policy *IAMPolicy) Properties() types.Properties {
 }
 
 func (e *IAMPolicy) String() string {
-	return e.name
+	return e.arn
 }
