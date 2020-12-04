@@ -19,7 +19,7 @@ func ListLightsailDomains(sess *session.Session) ([]Resource, error) {
 	svc := lightsail.New(sess)
 	resources := []Resource{}
 
-	if sess.Config.Region == nil || *sess.Config.Region != endpoints.UsEast1RegionID {
+	if sess.Config.Region == nil || *sess.Config.Region != endpoints.CnNorth1RegionID {
 		// LightsailDomain only supports us-east-1
 		return resources, nil
 	}

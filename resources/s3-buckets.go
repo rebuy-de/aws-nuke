@@ -42,7 +42,7 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 			if aerr, ok := err.(awserr.Error); ok {
 				if aerr.Code() == "NoSuchTagSet" {
 					resources = append(resources, &S3Bucket{
-						svc: svc,
+						svc:  svc,
 						name: name,
 						tags: make([]*s3.Tag, 0),
 					})
@@ -75,8 +75,8 @@ func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
 			continue
 		}
 
-		location := UnPtrString(bucketLocationResponse.LocationConstraint, endpoints.UsEast1RegionID)
-		region := UnPtrString(svc.Config.Region, endpoints.UsEast1RegionID)
+		location := UnPtrString(bucketLocationResponse.LocationConstraint, endpoints.CnNorth1RegionID)
+		region := UnPtrString(svc.Config.Region, endpoints.CnNorth1RegionID)
 		if location == region {
 			buckets = append(buckets, *out.Name)
 		}
