@@ -37,14 +37,22 @@ func ListLambdaLayers(sess *session.Session) ([]Resource, error) {
 
 	for _, layer := range layers {
 
-		var i int64 = int64(1) // is there a better way to do this
-		for i <= *layer.LatestMatchingVersion.Version {
-			resources = append(resources, &lambdaLayer{
-				svc:       svc,
-				layerName: layer.LayerName,
-				version:   i,
-			})
-			i++
+		versionsParams := &lambda.ListLayerVersionsInput{
+			LayerName: layer.LayerName,
+		}
+		err := svc.ListLayerVersionsPages(versionsParams, func(page *lambda.ListLayerVersionsOutput, lastPage bool) bool {
+			for _, out := range page.LayerVersions {
+				// versions = append(versions, out)
+				resources = append(resources, &lambdaLayer{
+					svc:       svc,
+					layerName: layer.LayerName,
+					version:   *out.Version,
+				})
+			}
+			return true
+		})
+		if err != nil {
+			return nil, err
 		}
 
 	}
