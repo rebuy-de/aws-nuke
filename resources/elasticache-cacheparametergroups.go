@@ -1,6 +1,9 @@
 package resources
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
@@ -45,6 +48,13 @@ func ListElasticacheCacheParameterGroups(sess *session.Session) ([]Resource, err
 	}
 
 	return resources, nil
+}
+
+func (i *ElasticacheCacheParameterGroup) Filter() error {
+	if strings.HasPrefix(*i.groupName, "default.") {
+		return fmt.Errorf("Cannot delete default cache parameter group")
+	}
+	return nil
 }
 
 func (i *ElasticacheCacheParameterGroup) Remove() error {
