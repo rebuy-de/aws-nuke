@@ -88,6 +88,7 @@ func (i *RDSInstance) Properties() types.Properties {
 	properties.Set("EngineVersion", i.instance.EngineVersion)
 	properties.Set("MultiAZ", i.instance.MultiAZ)
 	properties.Set("PubliclyAccessible", i.instance.PubliclyAccessible)
+	properties.Set("Tags", i.tags)
 
 	for _, tag := range i.tags {
 		properties.SetTag(tag.Key, tag.Value)
