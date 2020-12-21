@@ -8,8 +8,8 @@ import (
 )
 
 type SecretsManagerSecret struct {
-	svc *secretsmanager.SecretsManager
-	ARN *string
+	svc  *secretsmanager.SecretsManager
+	ARN  *string
 	tags []*secretsmanager.Tag
 }
 
@@ -33,9 +33,9 @@ func ListSecretsManagerSecrets(sess *session.Session) ([]Resource, error) {
 
 		for _, secrets := range output.SecretList {
 			resources = append(resources, &SecretsManagerSecret{
-				svc: svc,
-				ARN: secrets.ARN,
-			    tags: secrets.Tags,
+				svc:  svc,
+				ARN:  secrets.ARN,
+				tags: secrets.Tags,
 			})
 		}
 
