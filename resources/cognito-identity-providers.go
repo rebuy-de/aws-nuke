@@ -82,6 +82,8 @@ func (p *CognitoIdentityProvider) Remove() error {
 func (p *CognitoIdentityProvider) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Type", p.providerType)
+	properties.Set("UserPoolName", p.userPoolName)
+	properties.Set("Name", p.name)
 	return properties
 }
 
