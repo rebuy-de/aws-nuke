@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: CI Build
     runs-on: ubuntu-latest
     steps:
     - name: Setup Go
