@@ -25,6 +25,7 @@ GOPKGS=$(shell go list ./...)
 
 OUTPUT_FILE=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOARM)$(shell go env GOEXE)
 OUTPUT_LINK=$(NAME)$(shell go env GOEXE)
+WINDOWS_ZIP=$(shell echo $(OUTPUT_FILE) | sed 's/\.exe/\.zip/')
 
 default: build
 
@@ -69,7 +70,11 @@ build: go_generate _build
 	$(foreach TARGET,$(TARGETS),ln -sf $(OUTPUT_FILE) dist/$(OUTPUT_LINK);)
 
 compress: _build
+ifeq ($(GOOS),windows)
+	zip -j dist/$(WINDOWS_ZIP) dist/$(OUTPUT_FILE)
+else
 	tar czf dist/$(OUTPUT_FILE).tar.gz -C dist $(OUTPUT_FILE)
+endif
 	rm -f dist/$(OUTPUT_FILE)
 
 xc: go_generate
