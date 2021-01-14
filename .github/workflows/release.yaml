@@ -2,7 +2,7 @@ name: Publish release artifacts
 
 on:
   release:
-    type: [created]
+    types: [created]
 
 jobs:
   release:
