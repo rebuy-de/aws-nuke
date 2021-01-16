@@ -6,6 +6,7 @@ import (
 	"github.com/rebuy-de/aws-nuke/cmd"
 )
 
+// NukeParameters defines the command-line parameters for aws-nuke.
 type NukeParameters struct {
 	ConfigPath string
 

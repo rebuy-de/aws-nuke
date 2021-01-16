@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Nuke holds the current context of the aws-nuke application.
 type Nuke struct {
 	Parameters NukeParameters
 	Account    awsutil.Account
@@ -21,6 +22,7 @@ type Nuke struct {
 	items Queue
 }
 
+// NewNuke creates a new Nuke instance.
 func NewNuke(params NukeParameters, account awsutil.Account) *Nuke {
 	n := Nuke{
 		Parameters: params,
@@ -30,6 +32,7 @@ func NewNuke(params NukeParameters, account awsutil.Account) *Nuke {
 	return &n
 }
 
+// Run executes the nuke process.
 func (n *Nuke) Run() error {
 	var err error
 
@@ -134,6 +137,7 @@ func (n *Nuke) Run() error {
 	return nil
 }
 
+// Scan lists all the resources of the AWS accounts.
 func (n *Nuke) Scan() error {
 	accountConfig := n.Config.Accounts[n.Account.ID()]
 
@@ -183,6 +187,7 @@ func (n *Nuke) Scan() error {
 	return nil
 }
 
+// Filter marks a resource to be skipped if it matches the configuration filters.
 func (n *Nuke) Filter(item *Item) error {
 
 	checker, ok := item.Resource.(resources.Filter)
@@ -231,6 +236,7 @@ func (n *Nuke) Filter(item *Item) error {
 	return nil
 }
 
+// HandleQueue processes the content of the queue.
 func (n *Nuke) HandleQueue() {
 	listCache := make(map[string]map[string][]resources.Resource)
 
@@ -260,6 +266,7 @@ func (n *Nuke) HandleQueue() {
 		n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished))
 }
 
+// HandleRemove executes the deletion of a resource.
 func (n *Nuke) HandleRemove(item *Item) {
 	err := item.Resource.Remove()
 	if err != nil {
@@ -272,6 +279,7 @@ func (n *Nuke) HandleRemove(item *Item) {
 	item.Reason = ""
 }
 
+// HandleWait waits for a resource to be in a specific state.
 func (n *Nuke) HandleWait(item *Item, cache map[string]map[string][]resources.Resource) {
 	var err error
 	region := item.Region.Name

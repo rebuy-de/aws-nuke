@@ -9,6 +9,7 @@ import (
 	"github.com/rebuy-de/aws-nuke/resources"
 )
 
+// Colors for the decisions made.
 var (
 	ReasonSkip            = *color.New(color.FgYellow)
 	ReasonError           = *color.New(color.FgRed)
@@ -17,6 +18,7 @@ var (
 	ReasonSuccess         = *color.New(color.FgGreen)
 )
 
+// Colors used for specific elements of the output.
 var (
 	ColorRegion             = *color.New(color.Bold)
 	ColorResourceType       = *color.New()
@@ -24,7 +26,7 @@ var (
 	ColorResourceProperties = *color.New(color.Italic)
 )
 
-// Format the resource properties in sorted order ready for printing.
+// Sorted formats the resource properties in sorted order ready for printing.
 // This ensures that multiple runs of aws-nuke produce stable output so
 // that they can be compared with each other.
 func Sorted(m map[string]string) string {
@@ -40,6 +42,7 @@ func Sorted(m map[string]string) string {
 	return fmt.Sprintf("[%s]", strings.Join(sorted, ", "))
 }
 
+// Log outputs and colorizes a message for a specific resource.
 func Log(region *Region, resourceType string, r resources.Resource, c color.Color, msg string) {
 	ColorRegion.Printf("%s", region.Name)
 	fmt.Printf(" - ")
