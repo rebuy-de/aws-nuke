@@ -3,7 +3,7 @@ regions:
 - "global" # This is for all global resource types e.g. IAM
 - "eu-west-1"
 
-account-blacklist:
+account-blocklist:
 - 1234567890
 
 # optional: restrict nuking to these resources

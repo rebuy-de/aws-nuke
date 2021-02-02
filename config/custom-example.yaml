@@ -29,7 +29,7 @@ endpoints:
   - service: acm
     url: https://demo10.cloud.internal/api/v2/aws/acm
 
-account-blacklist:
+account-blocklist:
 - "account-id-of-custom-region-prod" # production
 
 accounts:

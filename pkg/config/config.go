@@ -23,7 +23,7 @@ type Account struct {
 }
 
 type Nuke struct {
-	AccountBlacklist []string                     `yaml:"account-blacklist"`
+	AccountBlocklist []string                     `yaml:"account-blocklist"`
 	Regions          []string                     `yaml:"regions"`
 	Accounts         map[string]Account           `yaml:"accounts"`
 	ResourceTypes    ResourceTypes                `yaml:"resource-types"`
@@ -83,13 +83,13 @@ func Load(path string) (*Nuke, error) {
 	return config, nil
 }
 
-func (c *Nuke) HasBlacklist() bool {
-	return c.AccountBlacklist != nil && len(c.AccountBlacklist) > 0
+func (c *Nuke) HasBlocklist() bool {
+	return c.AccountBlocklist != nil && len(c.AccountBlocklist) > 0
 }
 
-func (c *Nuke) InBlacklist(searchID string) bool {
-	for _, blacklistID := range c.AccountBlacklist {
-		if blacklistID == searchID {
+func (c *Nuke) InBlocklist(searchID string) bool {
+	for _, blocklistID := range c.AccountBlocklist {
+		if blocklistID == searchID {
 			return true
 		}
 	}
@@ -98,15 +98,15 @@ func (c *Nuke) InBlacklist(searchID string) bool {
 }
 
 func (c *Nuke) ValidateAccount(accountID string, aliases []string) error {
-	if !c.HasBlacklist() {
-		return fmt.Errorf("The config file contains an empty blacklist. " +
+	if !c.HasBlocklist() {
+		return fmt.Errorf("The config file contains an empty blocklist. " +
 			"For safety reasons you need to specify at least one account ID. " +
 			"This should be your production account.")
 	}
 
-	if c.InBlacklist(accountID) {
+	if c.InBlocklist(accountID) {
 		return fmt.Errorf("You are trying to nuke the account with the ID %s, "+
-			"but it is blacklisted. Aborting.", accountID)
+			"but it is blocklisted. Aborting.", accountID)
 	}
 
 	if len(aliases) == 0 {

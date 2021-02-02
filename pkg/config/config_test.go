@@ -9,39 +9,39 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
-func TestConfigBlacklist(t *testing.T) {
+func TestConfigBlocklist(t *testing.T) {
 	config := new(Nuke)
 
-	if config.HasBlacklist() {
-		t.Errorf("HasBlacklist() returned true on a nil backlist.")
+	if config.HasBlocklist() {
+		t.Errorf("HasBlocklist() returned true on a nil backlist.")
 	}
 
-	if config.InBlacklist("blubber") {
-		t.Errorf("InBlacklist() returned true on a nil backlist.")
+	if config.InBlocklist("blubber") {
+		t.Errorf("InBlocklist() returned true on a nil backlist.")
 	}
 
-	config.AccountBlacklist = []string{}
+	config.AccountBlocklist = []string{}
 
-	if config.HasBlacklist() {
-		t.Errorf("HasBlacklist() returned true on a empty backlist.")
+	if config.HasBlocklist() {
+		t.Errorf("HasBlocklist() returned true on a empty backlist.")
 	}
 
-	if config.InBlacklist("foobar") {
-		t.Errorf("InBlacklist() returned true on a empty backlist.")
+	if config.InBlocklist("foobar") {
+		t.Errorf("InBlocklist() returned true on a empty backlist.")
 	}
 
-	config.AccountBlacklist = append(config.AccountBlacklist, "bim")
+	config.AccountBlocklist = append(config.AccountBlocklist, "bim")
 
-	if !config.HasBlacklist() {
-		t.Errorf("HasBlacklist() returned false on a backlist with one element.")
+	if !config.HasBlocklist() {
+		t.Errorf("HasBlocklist() returned false on a backlist with one element.")
 	}
 
-	if !config.InBlacklist("bim") {
-		t.Errorf("InBlacklist() returned false on looking up an existing value.")
+	if !config.InBlocklist("bim") {
+		t.Errorf("InBlocklist() returned false on looking up an existing value.")
 	}
 
-	if config.InBlacklist("baz") {
-		t.Errorf("InBlacklist() returned true on looking up an non existing value.")
+	if config.InBlocklist("baz") {
+		t.Errorf("InBlocklist() returned true on looking up an non existing value.")
 	}
 }
 
@@ -52,7 +52,7 @@ func TestLoadExampleConfig(t *testing.T) {
 	}
 
 	expect := Nuke{
-		AccountBlacklist: []string{"1234567890"},
+		AccountBlocklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1", "stratoscale"},
 		Accounts: map[string]Account{
 			"555133742": Account{
@@ -115,7 +115,7 @@ func TestLoadExampleConfig(t *testing.T) {
 
 func TestResolveDeprecations(t *testing.T) {
 	config := Nuke{
-		AccountBlacklist: []string{"1234567890"},
+		AccountBlocklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": {
@@ -179,7 +179,7 @@ func TestResolveDeprecations(t *testing.T) {
 	}
 
 	invalidConfig := Nuke{
-		AccountBlacklist: []string{"1234567890"},
+		AccountBlocklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": {
