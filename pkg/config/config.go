@@ -23,6 +23,8 @@ type Account struct {
 }
 
 type Nuke struct {
+	// Deprecated: Use AccountBlocklist instead.
+	AccountBlacklist []string                     `yaml:"account-blacklist"`
 	AccountBlocklist []string                     `yaml:"account-blocklist"`
 	Regions          []string                     `yaml:"regions"`
 	Accounts         map[string]Account           `yaml:"accounts"`
@@ -83,12 +85,22 @@ func Load(path string) (*Nuke, error) {
 	return config, nil
 }
 
+func (c *Nuke) ResolveBlocklist() []string {
+	if c.AccountBlocklist != nil {
+		return c.AccountBlocklist
+	}
+
+	log.Warn("deprecated configuration key 'account-blacklist' - please use 'account-blocklist' instead")
+	return c.AccountBlacklist
+}
+
 func (c *Nuke) HasBlocklist() bool {
-	return c.AccountBlocklist != nil && len(c.AccountBlocklist) > 0
+	var blocklist = c.ResolveBlocklist()
+	return blocklist != nil && len(blocklist) > 0
 }
 
 func (c *Nuke) InBlocklist(searchID string) bool {
-	for _, blocklistID := range c.AccountBlocklist {
+	for _, blocklistID := range c.ResolveBlocklist() {
 		if blocklistID == searchID {
 			return true
 		}
