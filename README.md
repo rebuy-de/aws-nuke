@@ -1,7 +1,7 @@
 # aws-nuke
 
-[![Build Status](https://travis-ci.org/rebuy-de/aws-nuke.svg?branch=master)](https://travis-ci.org/rebuy-de/aws-nuke)
-[![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/blob/master/LICENSE)
+![Build Status](https://github.com/rebuy-de/aws-nuke/workflows/Golang%20CI/badge.svg?branch=main)
+[![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/blob/main/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/releases)
 [![Docker Repository on Quay](https://quay.io/repository/rebuy/aws-nuke/status "Docker Repository on Quay")](https://quay.io/repository/rebuy/aws-nuke)
 
@@ -592,7 +592,7 @@ Also you need to specify the correct AWS profile. Instead of mounting the AWS
 directory, you can use the `--access-key-id` and `--secret-access-key` flags.
 
 Make sure you use the latest version in the image tag. Alternatiely you can use
-`master` for the latest development version, but be aware that this is more
+`main` for the latest development version, but be aware that this is more
 likely to break at any time.
 
 
