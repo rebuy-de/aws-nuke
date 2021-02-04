@@ -33,16 +33,16 @@ To reduce the blast radius of accidents, there are some safety precautions:
 4. The Account Alias must not contain the string `prod`. This string is
    hardcoded and it is recommended to add it to every actual production account
    (eg `mycompany-production-ecr`).
-5. The config file contains a blacklist field. If the Account ID of the account
-   you want to nuke is part of this blacklist, *aws-nuke* will abort. It is
-   recommended, that you add every production account to this blacklist.
-6. To ensure you don't just ignore the blacklisting feature, the blacklist must
+5. The config file contains a blocklist field. If the Account ID of the account
+   you want to nuke is part of this blocklist, *aws-nuke* will abort. It is
+   recommended, that you add every production account to this blocklist.
+6. To ensure you don't just ignore the blocklisting feature, the blocklist must
    contain at least one Account ID.
 7. The config file contains account specific settings (eg. filters). The
    account you want to nuke must be explicitly listed there.
 8. To ensure to not accidentally delete a random account, it is required to
    specify a config file. It is recommended to have only a single config file
-   and add it to a central repository. This way the account blacklist is way
+   and add it to a central repository. This way the account blocklist is way
    easier to manage and keep up to date.
 
 Feel free to create an issue, if you have any ideas to improve the safety
@@ -80,7 +80,7 @@ regions:
 - eu-west-1
 - global
 
-account-blacklist:
+account-blocklist:
 - "999999999999" # production
 
 accounts:
@@ -125,7 +125,7 @@ our account. Therefore we have to extend the config so it ignores this user:
 regions:
 - eu-west-1
 
-account-blacklist:
+account-blocklist:
 - "999999999999" # production
 
 accounts:
@@ -258,7 +258,7 @@ endpoints:
   - service: acm
     url: https://10.16.145.115/api/v2/aws/acm
 
-account-blacklist:
+account-blocklist:
 - "account-id-of-custom-region-prod" # production
 
 accounts:
@@ -319,7 +319,7 @@ these examples:
 ---
 regions:
   - "eu-west-1"
-account-blacklist:
+account-blocklist:
 - 1234567890
 
 resource-types:
@@ -337,7 +337,7 @@ accounts:
 ---
 regions:
   - "eu-west-1"
-account-blacklist:
+account-blocklist:
 - 1234567890
 
 resource-types:
@@ -400,7 +400,7 @@ regions:
 - global
 - eu-west-1
 
-account-blacklist:
+account-blocklist:
 - 1234567890
 
 accounts:
@@ -516,7 +516,7 @@ regions:
 - "global"
 - "eu-west-1"
 
-account-blacklist:
+account-blocklist:
 - 1234567890
 
 accounts:

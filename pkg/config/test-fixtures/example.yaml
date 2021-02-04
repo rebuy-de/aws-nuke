@@ -3,7 +3,7 @@ regions:
 - "eu-west-1"
 - stratoscale
 
-account-blacklist:
+account-blocklist:
 - 1234567890
 
 endpoints:

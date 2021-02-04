@@ -23,7 +23,9 @@ type Account struct {
 }
 
 type Nuke struct {
+	// Deprecated: Use AccountBlocklist instead.
 	AccountBlacklist []string                     `yaml:"account-blacklist"`
+	AccountBlocklist []string                     `yaml:"account-blocklist"`
 	Regions          []string                     `yaml:"regions"`
 	Accounts         map[string]Account           `yaml:"accounts"`
 	ResourceTypes    ResourceTypes                `yaml:"resource-types"`
@@ -83,13 +85,23 @@ func Load(path string) (*Nuke, error) {
 	return config, nil
 }
 
-func (c *Nuke) HasBlacklist() bool {
-	return c.AccountBlacklist != nil && len(c.AccountBlacklist) > 0
+func (c *Nuke) ResolveBlocklist() []string {
+	if c.AccountBlocklist != nil {
+		return c.AccountBlocklist
+	}
+
+	log.Warn("deprecated configuration key 'account-blacklist' - please use 'account-blocklist' instead")
+	return c.AccountBlacklist
 }
 
-func (c *Nuke) InBlacklist(searchID string) bool {
-	for _, blacklistID := range c.AccountBlacklist {
-		if blacklistID == searchID {
+func (c *Nuke) HasBlocklist() bool {
+	var blocklist = c.ResolveBlocklist()
+	return blocklist != nil && len(blocklist) > 0
+}
+
+func (c *Nuke) InBlocklist(searchID string) bool {
+	for _, blocklistID := range c.ResolveBlocklist() {
+		if blocklistID == searchID {
 			return true
 		}
 	}
@@ -98,15 +110,15 @@ func (c *Nuke) InBlacklist(searchID string) bool {
 }
 
 func (c *Nuke) ValidateAccount(accountID string, aliases []string) error {
-	if !c.HasBlacklist() {
-		return fmt.Errorf("The config file contains an empty blacklist. " +
+	if !c.HasBlocklist() {
+		return fmt.Errorf("The config file contains an empty blocklist. " +
 			"For safety reasons you need to specify at least one account ID. " +
 			"This should be your production account.")
 	}
 
-	if c.InBlacklist(accountID) {
+	if c.InBlocklist(accountID) {
 		return fmt.Errorf("You are trying to nuke the account with the ID %s, "+
-			"but it is blacklisted. Aborting.", accountID)
+			"but it is blocklisted. Aborting.", accountID)
 	}
 
 	if len(aliases) == 0 {
