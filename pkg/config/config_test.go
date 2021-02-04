@@ -232,6 +232,17 @@ func TestConfigValidation(t *testing.T) {
 	}
 }
 
+func TestDeprecatedConfigKeys(t *testing.T) {
+	config, err := Load("test-fixtures/deprecated-keys-config.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !config.InBlocklist("1234567890") {
+		t.Errorf("Loading the config did not resolve the deprecated key 'account-blacklist' correctly")
+	}
+}
+
 func TestFilterMerge(t *testing.T) {
 	config, err := Load("test-fixtures/example.yaml")
 	if err != nil {
