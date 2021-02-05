@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type SecretsManagerSecret struct {
-	svc *secretsmanager.SecretsManager
-	ARN *string
+	svc  *secretsmanager.SecretsManager
+	ARN  *string
+	tags []*secretsmanager.Tag
 }
 
 func init() {
@@ -31,8 +33,9 @@ func ListSecretsManagerSecrets(sess *session.Session) ([]Resource, error) {
 
 		for _, secrets := range output.SecretList {
 			resources = append(resources, &SecretsManagerSecret{
-				svc: svc,
-				ARN: secrets.ARN,
+				svc:  svc,
+				ARN:  secrets.ARN,
+				tags: secrets.Tags,
 			})
 		}
 
@@ -54,6 +57,14 @@ func (f *SecretsManagerSecret) Remove() error {
 	})
 
 	return err
+}
+
+func (f *SecretsManagerSecret) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range f.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
 }
 
 func (f *SecretsManagerSecret) String() string {
