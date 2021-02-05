@@ -373,6 +373,9 @@ configured on the root-level of the config, like this:
 feature-flags:
   disable-deletion-protection:
     RDSInstance: true
+    EC2Instance: true
+    CloudformationStack: true
+  force-delete-lightsail-addons: true
 ```
 
 
