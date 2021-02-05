@@ -1,13 +1,19 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lightsail"
+	"github.com/rebuy-de/aws-nuke/pkg/config"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type LightsailInstance struct {
 	svc          *lightsail.Lightsail
 	instanceName *string
+	tags         []*lightsail.Tag
+
+	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -30,6 +36,7 @@ func ListLightsailInstances(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &LightsailInstance{
 				svc:          svc,
 				instanceName: instance.Name,
+				tags:         instance.Tags,
 			})
 		}
 
@@ -43,13 +50,27 @@ func ListLightsailInstances(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func (f *LightsailInstance) FeatureFlags(ff config.FeatureFlags) {
+	f.featureFlags = ff
+}
+
 func (f *LightsailInstance) Remove() error {
 
 	_, err := f.svc.DeleteInstance(&lightsail.DeleteInstanceInput{
-		InstanceName: f.instanceName,
+		InstanceName:      f.instanceName,
+		ForceDeleteAddOns: aws.Bool(f.featureFlags.ForceDeleteLightsailAddOns),
 	})
 
 	return err
+}
+
+func (f *LightsailInstance) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+	properties.Set("Name", f.instanceName)
+	return properties
 }
 
 func (f *LightsailInstance) String() string {

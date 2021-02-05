@@ -35,7 +35,8 @@ type Nuke struct {
 }
 
 type FeatureFlags struct {
-	DisableDeletionProtection DisableDeletionProtection `yaml:"disable-deletion-protection"`
+	DisableDeletionProtection  DisableDeletionProtection `yaml:"disable-deletion-protection"`
+	ForceDeleteLightsailAddOns bool                      `yaml:"force-delete-lightsail-addons"`
 }
 
 type DisableDeletionProtection struct {
