@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sagemaker"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type SageMakerNotebookInstanceLifecycleConfig struct {
@@ -57,4 +58,11 @@ func (f *SageMakerNotebookInstanceLifecycleConfig) Remove() error {
 
 func (f *SageMakerNotebookInstanceLifecycleConfig) String() string {
 	return *f.lifecycleConfigName
+}
+
+func (f *SageMakerNotebookInstanceLifecycleConfig) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.
+		Set("NotebookInstanceLifecycleConfigName", f.lifecycleConfigName)
+	return properties
 }
