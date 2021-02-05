@@ -6,13 +6,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	log "github.com/sirupsen/logrus"
 )
 
 type ServiceCatalogTagOptionPortfolioAttachment struct {
-	svc         *servicecatalog.ServiceCatalog
-	tagOptionID *string
-	resourceID  *string
+	svc            *servicecatalog.ServiceCatalog
+	tagOptionID    *string
+	resourceID     *string
+	tagOptionKey   *string
+	tagOptionValue *string
+	resourceName   *string
 }
 
 func init() {
@@ -64,9 +68,12 @@ func ListServiceCatalogTagOptionPortfolioAttachments(sess *session.Session) ([]R
 
 		for _, resourceDetail := range resp.ResourceDetails {
 			resources = append(resources, &ServiceCatalogTagOptionPortfolioAttachment{
-				svc:         svc,
-				tagOptionID: tagOption.Id,
-				resourceID:  resourceDetail.Id,
+				svc:            svc,
+				tagOptionID:    tagOption.Id,
+				resourceID:     resourceDetail.Id,
+				resourceName:   resourceDetail.Name,
+				tagOptionKey:   tagOption.Key,
+				tagOptionValue: tagOption.Value,
 			})
 		}
 
@@ -88,6 +95,16 @@ func (f *ServiceCatalogTagOptionPortfolioAttachment) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogTagOptionPortfolioAttachment) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("TagOptionID", f.tagOptionID)
+	properties.Set("TagOptionKey", f.tagOptionKey)
+	properties.Set("TagOptionValue", f.tagOptionValue)
+	properties.Set("ResourceID", f.resourceID)
+	properties.Set("ResourceName", f.resourceName)
+	return properties
 }
 
 func (f *ServiceCatalogTagOptionPortfolioAttachment) String() string {

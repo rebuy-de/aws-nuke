@@ -4,12 +4,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	log "github.com/sirupsen/logrus"
 )
 
 type ServiceCatalogTagOption struct {
-	svc *servicecatalog.ServiceCatalog
-	ID  *string
+	svc   *servicecatalog.ServiceCatalog
+	ID    *string
+	key   *string
+	value *string
 }
 
 func init() {
@@ -36,8 +39,10 @@ func ListServiceCatalogTagOptions(sess *session.Session) ([]Resource, error) {
 
 		for _, tagOptionDetail := range resp.TagOptionDetails {
 			resources = append(resources, &ServiceCatalogTagOption{
-				svc: svc,
-				ID:  tagOptionDetail.Id,
+				svc:   svc,
+				ID:    tagOptionDetail.Id,
+				key:   tagOptionDetail.Key,
+				value: tagOptionDetail.Value,
 			})
 		}
 
@@ -58,6 +63,14 @@ func (f *ServiceCatalogTagOption) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogTagOption) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("ID", f.ID)
+	properties.Set("Key", f.key)
+	properties.Set("Value", f.value)
+	return properties
 }
 
 func (f *ServiceCatalogTagOption) String() string {

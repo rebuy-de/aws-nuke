@@ -6,13 +6,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 	log "github.com/sirupsen/logrus"
 )
 
 type ServiceCatalogConstraintPortfolioAttachment struct {
-	svc          *servicecatalog.ServiceCatalog
-	constraintID *string
-	portfolioID  *string
+	svc           *servicecatalog.ServiceCatalog
+	constraintID  *string
+	portfolioID   *string
+	portfolioName *string
 }
 
 func init() {
@@ -64,9 +66,10 @@ func ListServiceCatalogPrincipalProductAttachments(sess *session.Session) ([]Res
 
 		for _, constraintDetail := range resp.ConstraintDetails {
 			resources = append(resources, &ServiceCatalogConstraintPortfolioAttachment{
-				svc:          svc,
-				portfolioID:  portfolio.Id,
-				constraintID: constraintDetail.ConstraintId,
+				svc:           svc,
+				portfolioID:   portfolio.Id,
+				constraintID:  constraintDetail.ConstraintId,
+				portfolioName: portfolio.DisplayName,
 			})
 		}
 
@@ -87,6 +90,14 @@ func (f *ServiceCatalogConstraintPortfolioAttachment) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogConstraintPortfolioAttachment) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("PortfolioID", f.portfolioID)
+	properties.Set("ConstraintID", f.constraintID)
+	properties.Set("PortfolioName", f.portfolioName)
+	return properties
 }
 
 func (f *ServiceCatalogConstraintPortfolioAttachment) String() string {
