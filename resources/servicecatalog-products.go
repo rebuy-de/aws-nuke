@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ServiceCatalogProduct struct {
-	svc *servicecatalog.ServiceCatalog
-	ID  *string
+	svc  *servicecatalog.ServiceCatalog
+	ID   *string
+	name *string
 }
 
 func init() {
@@ -31,8 +33,9 @@ func ListServiceCatalogProducts(sess *session.Session) ([]Resource, error) {
 
 		for _, productView := range resp.ProductViewDetails {
 			resources = append(resources, &ServiceCatalogProduct{
-				svc: svc,
-				ID:  productView.ProductViewSummary.ProductId,
+				svc:  svc,
+				ID:   productView.ProductViewSummary.ProductId,
+				name: productView.ProductViewSummary.Name,
 			})
 		}
 
@@ -53,6 +56,13 @@ func (f *ServiceCatalogProduct) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogProduct) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("ID", f.ID)
+	properties.Set("Name", f.name)
+	return properties
 }
 
 func (f *ServiceCatalogProduct) String() string {

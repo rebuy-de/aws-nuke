@@ -6,12 +6,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ServiceCatalogPortfolioShareAttachment struct {
-	svc         *servicecatalog.ServiceCatalog
-	portfolioID *string
-	accountID   *string
+	svc           *servicecatalog.ServiceCatalog
+	portfolioID   *string
+	accountID     *string
+	portfolioName *string
 }
 
 func init() {
@@ -59,9 +61,10 @@ func ListServiceCatalogPortfolioShareAttachments(sess *session.Session) ([]Resou
 
 		for _, account := range resp.AccountIds {
 			resources = append(resources, &ServiceCatalogPortfolioShareAttachment{
-				svc:         svc,
-				portfolioID: portfolio.Id,
-				accountID:   account,
+				svc:           svc,
+				portfolioID:   portfolio.Id,
+				accountID:     account,
+				portfolioName: portfolio.DisplayName,
 			})
 		}
 
@@ -78,6 +81,14 @@ func (f *ServiceCatalogPortfolioShareAttachment) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogPortfolioShareAttachment) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("PortfolioID", f.portfolioID)
+	properties.Set("PortfolioName", f.portfolioName)
+	properties.Set("AccountID", f.accountID)
+	return properties
 }
 
 func (f *ServiceCatalogPortfolioShareAttachment) String() string {

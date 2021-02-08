@@ -6,12 +6,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ServiceCatalogPrincipalPortfolioAttachment struct {
-	svc          *servicecatalog.ServiceCatalog
-	portfolioID  *string
-	principalARN *string
+	svc           *servicecatalog.ServiceCatalog
+	portfolioID   *string
+	principalARN  *string
+	portfolioName *string
 }
 
 func init() {
@@ -60,9 +62,10 @@ func ListServiceCatalogPrincipalPortfolioAttachments(sess *session.Session) ([]R
 
 		for _, principal := range resp.Principals {
 			resources = append(resources, &ServiceCatalogPrincipalPortfolioAttachment{
-				svc:          svc,
-				principalARN: principal.PrincipalARN,
-				portfolioID:  portfolio.Id,
+				svc:           svc,
+				principalARN:  principal.PrincipalARN,
+				portfolioID:   portfolio.Id,
+				portfolioName: portfolio.DisplayName,
 			})
 		}
 
@@ -84,6 +87,14 @@ func (f *ServiceCatalogPrincipalPortfolioAttachment) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogPrincipalPortfolioAttachment) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("PortfolioID", f.portfolioID)
+	properties.Set("PrincipalARN", f.principalARN)
+	properties.Set("PortfolioName", f.portfolioName)
+	return properties
 }
 
 func (f *ServiceCatalogPrincipalPortfolioAttachment) String() string {

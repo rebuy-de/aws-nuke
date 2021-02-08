@@ -4,12 +4,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ServiceCatalogProvisionedProduct struct {
 	svc            *servicecatalog.ServiceCatalog
 	ID             *string
 	terminateToken *string
+	name           *string
+	productID      *string
 }
 
 func init() {
@@ -39,6 +42,8 @@ func ListServiceCatalogProvisionedProducts(sess *session.Session) ([]Resource, e
 				svc:            svc,
 				ID:             provisionedProduct.Id,
 				terminateToken: provisionedProduct.IdempotencyToken,
+				name:           provisionedProduct.Name,
+				productID:      provisionedProduct.ProductId,
 			})
 		}
 
@@ -60,6 +65,14 @@ func (f *ServiceCatalogProvisionedProduct) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogProvisionedProduct) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("ID", f.ID)
+	properties.Set("Name", f.name)
+	properties.Set("ProductID", f.productID)
+	return properties
 }
 
 func (f *ServiceCatalogProvisionedProduct) String() string {
