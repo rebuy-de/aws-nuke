@@ -31,7 +31,7 @@ jobs:
 
   docker_build:
     runs-on: ubuntu-20.04
-    name: Docker build
+    name: Docker Build
 
     steps:
     - uses: actions/checkout@v2
@@ -41,7 +41,7 @@ jobs:
     - name: Generate image tags
       shell: bash
       run: |
-        if [ "${GITHUB_EVENT_NAME}" == "pull_request"]; then
+        if [ "${GITHUB_EVENT_NAME}" == "pull_request" ]; then
           echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:${GITHUB_HEAD_REF},docker.io/rebuy/aws-nuke:${GITHUB_HEAD_REF}"
         else
           echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:main,docker.io/rebuy/aws-nuke:main,\
