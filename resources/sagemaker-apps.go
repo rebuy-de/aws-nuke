@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sagemaker"
@@ -13,6 +15,7 @@ type SageMakerApp struct {
 	appName         *string
 	appType         *string
 	userProfileName *string
+	status          *string
 }
 
 func init() {
@@ -40,6 +43,7 @@ func ListSageMakerApps(sess *session.Session) ([]Resource, error) {
 				appName:         app.AppName,
 				appType:         app.AppType,
 				userProfileName: app.UserProfileName,
+				status:          app.Status,
 			})
 		}
 
@@ -76,4 +80,11 @@ func (i *SageMakerApp) Properties() types.Properties {
 		Set("AppType", i.appType).
 		Set("UserProfileName", i.userProfileName)
 	return properties
+}
+
+func (f *SageMakerApp) Filter() error {
+	if *f.status == sagemaker.AppStatusDeleted {
+		return fmt.Errorf("already deleted")
+	}
+	return nil
 }
