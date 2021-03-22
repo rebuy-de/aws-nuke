@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sagemaker"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type SageMakerDomain struct {
@@ -57,4 +58,11 @@ func (f *SageMakerDomain) Remove() error {
 
 func (f *SageMakerDomain) String() string {
 	return *f.domainId
+}
+
+func (i *SageMakerDomain) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.
+		Set("DomainId", i.domainId)
+	return properties
 }
