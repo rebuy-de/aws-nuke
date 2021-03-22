@@ -94,7 +94,8 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 func (e *IAMRolePolicyAttachment) Properties() types.Properties {
 	return types.NewProperties().
 		Set("RoleName", e.roleName).
-		Set("PolicyName", e.policyName)
+		Set("PolicyName", e.policyName).
+		Set("PolicyArn", e.policyArn)
 }
 
 func (e *IAMRolePolicyAttachment) String() string {
