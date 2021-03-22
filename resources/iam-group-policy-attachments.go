@@ -66,7 +66,8 @@ func (e *IAMGroupPolicyAttachment) Remove() error {
 func (e *IAMGroupPolicyAttachment) Properties() types.Properties {
 	return types.NewProperties().
 		Set("RoleName", e.roleName).
-		Set("PolicyName", e.policyName)
+		Set("PolicyName", e.policyName).
+		Set("PolicyArn", e.policyArn)
 }
 
 func (e *IAMGroupPolicyAttachment) String() string {
