@@ -68,6 +68,7 @@ func (f *AppSyncGraphqlAPI) Properties() types.Properties {
 		properties.SetTag(aws.String(key), value)
 	}
 	properties.Set("Name", f.name)
+	properties.Set("APIID", f.apiID)
 	return properties
 }
 
