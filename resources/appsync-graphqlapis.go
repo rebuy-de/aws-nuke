@@ -7,8 +7,8 @@ import (
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
-// AppSyncGraphqlApi - An AWS AppSync GraphQL API
-type AppSyncGraphqlApi struct {
+// AppSyncGraphqlAPI - An AWS AppSync GraphQL API
+type AppSyncGraphqlAPI struct {
 	svc   *appsync.AppSync
 	apiID *string
 	name  *string
@@ -16,11 +16,11 @@ type AppSyncGraphqlApi struct {
 }
 
 func init() {
-	register("AppSyncGraphqlApi", ListAppSyncGraphqlApis)
+	register("AppSyncGraphqlAPI", ListAppSyncGraphqlAPIs)
 }
 
-// ListAppSyncGraphqlApis - List all AWS AppSync GraphQL APIs in the account
-func ListAppSyncGraphqlApis(sess *session.Session) ([]Resource, error) {
+// ListAppSyncGraphqlAPIs - List all AWS AppSync GraphQL APIs in the account
+func ListAppSyncGraphqlAPIs(sess *session.Session) ([]Resource, error) {
 	svc := appsync.New(sess)
 	resources := []Resource{}
 
@@ -34,12 +34,12 @@ func ListAppSyncGraphqlApis(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		for _, graphqlApi := range resp.GraphqlApis {
-			resources = append(resources, &AppSyncGraphqlApi{
+		for _, graphqlAPI := range resp.GraphqlApis {
+			resources = append(resources, &AppSyncGraphqlAPI{
 				svc:   svc,
-				apiID: graphqlApi.ApiId,
-				name:  graphqlApi.Name,
-				tags:  graphqlApi.Tags,
+				apiID: graphqlAPI.ApiId,
+				name:  graphqlAPI.Name,
+				tags:  graphqlAPI.Tags,
 			})
 		}
 
@@ -54,7 +54,7 @@ func ListAppSyncGraphqlApis(sess *session.Session) ([]Resource, error) {
 }
 
 // Remove - remove an AWS AppSync GraphQL API
-func (f *AppSyncGraphqlApi) Remove() error {
+func (f *AppSyncGraphqlAPI) Remove() error {
 	_, err := f.svc.DeleteGraphqlApi(&appsync.DeleteGraphqlApiInput{
 		ApiId: f.apiID,
 	})
@@ -62,7 +62,7 @@ func (f *AppSyncGraphqlApi) Remove() error {
 }
 
 // Properties - Get the properties of an AWS AppSync GraphQL API
-func (f *AppSyncGraphqlApi) Properties() types.Properties {
+func (f *AppSyncGraphqlAPI) Properties() types.Properties {
 	properties := types.NewProperties()
 	for key, value := range f.tags {
 		properties.SetTag(aws.String(key), value)
@@ -71,6 +71,6 @@ func (f *AppSyncGraphqlApi) Properties() types.Properties {
 	return properties
 }
 
-func (f *AppSyncGraphqlApi) String() string {
+func (f *AppSyncGraphqlAPI) String() string {
 	return *f.apiID
 }
