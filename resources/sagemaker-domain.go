@@ -9,7 +9,7 @@ import (
 
 type SageMakerDomain struct {
 	svc      *sagemaker.SageMaker
-	domainId *string
+	domainID *string
 }
 
 func init() {
@@ -33,7 +33,7 @@ func ListSageMakerDomains(sess *session.Session) ([]Resource, error) {
 		for _, domain := range resp.Domains {
 			resources = append(resources, &SageMakerDomain{
 				svc:      svc,
-				domainId: domain.DomainId,
+				domainID: domain.DomainId,
 			})
 		}
 
@@ -49,7 +49,7 @@ func ListSageMakerDomains(sess *session.Session) ([]Resource, error) {
 
 func (f *SageMakerDomain) Remove() error {
 	_, err := f.svc.DeleteDomain(&sagemaker.DeleteDomainInput{
-		DomainId:        f.domainId,
+		DomainId:        f.domainID,
 		RetentionPolicy: &sagemaker.RetentionPolicy{HomeEfsFileSystem: aws.String(sagemaker.RetentionTypeDelete)},
 	})
 
@@ -57,12 +57,12 @@ func (f *SageMakerDomain) Remove() error {
 }
 
 func (f *SageMakerDomain) String() string {
-	return *f.domainId
+	return *f.domainID
 }
 
 func (i *SageMakerDomain) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
-		Set("DomainId", i.domainId)
+		Set("DomainID", i.domainID)
 	return properties
 }

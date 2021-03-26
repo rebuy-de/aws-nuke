@@ -11,7 +11,7 @@ import (
 
 type SageMakerApp struct {
 	svc             *sagemaker.SageMaker
-	domainId        *string
+	domainID        *string
 	appName         *string
 	appType         *string
 	userProfileName *string
@@ -39,7 +39,7 @@ func ListSageMakerApps(sess *session.Session) ([]Resource, error) {
 		for _, app := range resp.Apps {
 			resources = append(resources, &SageMakerApp{
 				svc:             svc,
-				domainId:        app.DomainId,
+				domainID:        app.DomainId,
 				appName:         app.AppName,
 				appType:         app.AppType,
 				userProfileName: app.UserProfileName,
@@ -59,7 +59,7 @@ func ListSageMakerApps(sess *session.Session) ([]Resource, error) {
 
 func (f *SageMakerApp) Remove() error {
 	_, err := f.svc.DeleteApp(&sagemaker.DeleteAppInput{
-		DomainId:        f.domainId,
+		DomainId:        f.domainID,
 		AppName:         f.appName,
 		AppType:         f.appType,
 		UserProfileName: f.userProfileName,
@@ -75,7 +75,7 @@ func (f *SageMakerApp) String() string {
 func (i *SageMakerApp) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
-		Set("DomainId", i.domainId).
+		Set("DomainID", i.domainID).
 		Set("AppName", i.appName).
 		Set("AppType", i.appType).
 		Set("UserProfileName", i.userProfileName)

@@ -9,7 +9,7 @@ import (
 
 type SageMakerUserProfile struct {
 	svc             *sagemaker.SageMaker
-	domainId        *string
+	domainID        *string
 	userProfileName *string
 }
 
@@ -34,7 +34,7 @@ func ListSageMakerUserProfiles(sess *session.Session) ([]Resource, error) {
 		for _, userProfile := range resp.UserProfiles {
 			resources = append(resources, &SageMakerUserProfile{
 				svc:             svc,
-				domainId:        userProfile.DomainId,
+				domainID:        userProfile.DomainId,
 				userProfileName: userProfile.UserProfileName,
 			})
 		}
@@ -51,7 +51,7 @@ func ListSageMakerUserProfiles(sess *session.Session) ([]Resource, error) {
 
 func (f *SageMakerUserProfile) Remove() error {
 	_, err := f.svc.DeleteUserProfile(&sagemaker.DeleteUserProfileInput{
-		DomainId:        f.domainId,
+		DomainId:        f.domainID,
 		UserProfileName: f.userProfileName,
 	})
 
@@ -65,7 +65,7 @@ func (f *SageMakerUserProfile) String() string {
 func (i *SageMakerUserProfile) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
-		Set("DomainId", i.domainId).
+		Set("DomainID", i.domainID).
 		Set("UserProfileName", i.userProfileName)
 	return properties
 }
