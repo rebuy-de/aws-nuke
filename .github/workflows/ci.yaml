@@ -32,6 +32,7 @@ jobs:
   docker_build:
     runs-on: ubuntu-20.04
     name: Docker Build
+    if: "github.repository == 'rebuy-de/aws-nuke'"
 
     steps:
     - uses: actions/checkout@v2
