@@ -8,8 +8,8 @@ import (
 )
 
 type SageMakerNotebookInstanceLifecycleConfig struct {
-	svc                 *sagemaker.SageMaker
-	lifecycleConfigName *string
+	svc  *sagemaker.SageMaker
+	Name *string
 }
 
 func init() {
@@ -32,8 +32,8 @@ func ListSageMakerNotebookInstanceLifecycleConfigs(sess *session.Session) ([]Res
 
 		for _, lifecycleConfig := range resp.NotebookInstanceLifecycleConfigs {
 			resources = append(resources, &SageMakerNotebookInstanceLifecycleConfig{
-				svc:                 svc,
-				lifecycleConfigName: lifecycleConfig.NotebookInstanceLifecycleConfigName,
+				svc:  svc,
+				Name: lifecycleConfig.NotebookInstanceLifecycleConfigName,
 			})
 		}
 
@@ -50,19 +50,19 @@ func ListSageMakerNotebookInstanceLifecycleConfigs(sess *session.Session) ([]Res
 func (f *SageMakerNotebookInstanceLifecycleConfig) Remove() error {
 
 	_, err := f.svc.DeleteNotebookInstanceLifecycleConfig(&sagemaker.DeleteNotebookInstanceLifecycleConfigInput{
-		NotebookInstanceLifecycleConfigName: f.lifecycleConfigName,
+		NotebookInstanceLifecycleConfigName: f.Name,
 	})
 
 	return err
 }
 
 func (f *SageMakerNotebookInstanceLifecycleConfig) String() string {
-	return *f.lifecycleConfigName
+	return *f.Name
 }
 
 func (f *SageMakerNotebookInstanceLifecycleConfig) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
-		Set("NotebookInstanceLifecycleConfigName", f.lifecycleConfigName)
+		Set("NotebookInstanceLifecycleConfigName", f.Name)
 	return properties
 }
