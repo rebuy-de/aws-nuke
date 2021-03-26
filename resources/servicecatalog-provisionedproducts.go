@@ -61,6 +61,7 @@ func (f *ServiceCatalogProvisionedProduct) Remove() error {
 
 	_, err := f.svc.TerminateProvisionedProduct(&servicecatalog.TerminateProvisionedProductInput{
 		ProvisionedProductId: f.ID,
+		IgnoreErrors:         aws.Bool(true),
 		TerminateToken:       f.terminateToken,
 	})
 
