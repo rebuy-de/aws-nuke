@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -36,6 +37,16 @@ func ListEC2NetworkInterfaces(sess *session.Session) ([]Resource, error) {
 }
 
 func (e *EC2NetworkInterface) Remove() error {
+	if e.eni.Attachment != nil {
+		_, err := e.svc.DetachNetworkInterface(&ec2.DetachNetworkInterfaceInput{
+			AttachmentId: e.eni.Attachment.AttachmentId,
+			Force:        aws.Bool(true),
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	params := &ec2.DeleteNetworkInterfaceInput{
 		NetworkInterfaceId: e.eni.NetworkInterfaceId,
 	}
