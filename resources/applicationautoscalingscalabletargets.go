@@ -72,7 +72,7 @@ func (a *AppAutoScaling) Remove() error {
 func (a *AppAutoScaling) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("ResourceID", a.id)
-	properties.Set("ScalableDemension", a.dimension)
+	properties.Set("ScalableDimension", a.dimension)
 	properties.Set("ServiceNamespace", a.namespace)
 
 	return properties
