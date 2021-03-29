@@ -79,7 +79,7 @@ func (f *AppMeshVirtualGateway) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
 		Set("MeshName", f.meshName).
-		Set("VirtualGatewayName", f.virtualGatewayName)
+		Set("Name", f.virtualGatewayName)
 
 	return properties
 }

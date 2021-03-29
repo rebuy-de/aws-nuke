@@ -79,7 +79,7 @@ func (f *AppMeshVirtualNode) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
 		Set("MeshName", f.meshName).
-		Set("VirtualNodeName", f.virtualNodeName)
+		Set("Name", f.virtualNodeName)
 
 	return properties
 }

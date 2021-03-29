@@ -79,7 +79,7 @@ func (f *AppMeshVirtualRouter) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
 		Set("MeshName", f.meshName).
-		Set("VirtualRouterName", f.virtualRouterName)
+		Set("Name", f.virtualRouterName)
 
 	return properties
 }

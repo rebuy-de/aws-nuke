@@ -79,7 +79,7 @@ func (f *AppMeshVirtualService) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
 		Set("MeshName", f.meshName).
-		Set("VirtualServiceName", f.virtualServiceName)
+		Set("Name", f.virtualServiceName)
 
 	return properties
 }
