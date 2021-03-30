@@ -9,7 +9,7 @@ import (
 
 type CodeStarConnection struct {
 	svc              *codestarconnections.CodeStarConnections
-	connectionArn    *string
+	connectionARN   *string
 	connectionName   *string
 	providerType     *string
 }
