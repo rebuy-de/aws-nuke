@@ -9,7 +9,7 @@ import (
 
 type CodeStarConnection struct {
 	svc              *codestarconnections.CodeStarConnections
-	connectionARN   *string
+	connectionARN    *string
 	connectionName   *string
 	providerType     *string
 }
@@ -35,7 +35,7 @@ func ListCodeStarConnections(sess *session.Session) ([]Resource, error) {
 		for _, connection := range output.Connections {
 			resources = append(resources, &CodeStarConnection{
 				svc:              svc,
-				connectionArn:    connection.ConnectionArn,
+				connectionARN:    connection.ConnectionArn,
 				connectionName:   connection.ConnectionName,
 				providerType:     connection.ProviderType,
 			})
@@ -54,7 +54,7 @@ func ListCodeStarConnections(sess *session.Session) ([]Resource, error) {
 func (f *CodeStarConnection) Remove() error {
 
 	_, err := f.svc.DeleteConnection(&codestarconnections.DeleteConnectionInput{
-		ConnectionArn: f.connectionArn,
+		ConnectionArn: f.connectionARN,
 	})
 
 	return err
