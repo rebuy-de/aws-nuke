@@ -63,6 +63,6 @@ func (f *SageMakerNotebookInstanceLifecycleConfig) String() string {
 func (f *SageMakerNotebookInstanceLifecycleConfig) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.
-		Set("NotebookInstanceLifecycleConfigName", f.Name)
+		Set("Name", f.Name)
 	return properties
 }
