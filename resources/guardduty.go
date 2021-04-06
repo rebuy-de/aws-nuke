@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/guardduty"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -48,10 +46,10 @@ func (detector *GuardDutyDetector) Remove() error {
 
 func (detector *GuardDutyDetector) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("DetectorId", detector.id)
+	properties.Set("DetectorID", detector.id)
 	return properties
 }
 
 func (detector *GuardDutyDetector) String() string {
-	return fmt.Sprintf("DetectorId: %s", *detector.id)
+	return *detector.id
 }
