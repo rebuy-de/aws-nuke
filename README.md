@@ -80,7 +80,7 @@ regions:
 - eu-west-1
 - global
 
-account-blocklist:
+account-blacklist:
 - "999999999999" # production
 
 accounts:
@@ -125,7 +125,7 @@ our account. Therefore we have to extend the config so it ignores this user:
 regions:
 - eu-west-1
 
-account-blocklist:
+account-blacklist:
 - "999999999999" # production
 
 accounts:
@@ -258,7 +258,7 @@ endpoints:
   - service: acm
     url: https://10.16.145.115/api/v2/aws/acm
 
-account-blocklist:
+account-blacklist:
 - "account-id-of-custom-region-prod" # production
 
 accounts:
@@ -319,7 +319,7 @@ these examples:
 ---
 regions:
   - "eu-west-1"
-account-blocklist:
+account-blacklist:
 - 1234567890
 
 resource-types:
@@ -337,7 +337,7 @@ accounts:
 ---
 regions:
   - "eu-west-1"
-account-blocklist:
+account-blacklist:
 - 1234567890
 
 resource-types:
@@ -403,7 +403,7 @@ regions:
 - global
 - eu-west-1
 
-account-blocklist:
+account-blacklist:
 - 1234567890
 
 accounts:
@@ -519,7 +519,7 @@ regions:
 - "global"
 - "eu-west-1"
 
-account-blocklist:
+account-blacklist:
 - 1234567890
 
 accounts:
