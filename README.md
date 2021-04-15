@@ -3,7 +3,7 @@
 ![Build Status](https://github.com/rebuy-de/aws-nuke/workflows/Golang%20CI/badge.svg?branch=main)
 [![license](https://img.shields.io/github/license/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/blob/main/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/releases)
-[![Docker Repository on Quay](https://quay.io/repository/rebuy/aws-nuke/status "Docker Repository on Quay")](https://quay.io/repository/rebuy/aws-nuke)
+[![Docker Hub](https://img.shields.io/docker/pulls/rebuy/aws-nuke)](https://hub.docker.com/r/rebuy/aws-nuke)
 
 Remove all resources from an AWS account.
 
@@ -65,10 +65,11 @@ procedures.
 We usually release a new version once enough changes came together and have
 been tested for a while.
 
-You can find Linux and macOS binaries on the
+You can find Linux, macOS and Windows binaries on the
 [releases page](https://github.com/rebuy-de/aws-nuke/releases), but we also
 provide containerized versions on [quay.io/rebuy/aws-nuke](https://quay.io/rebuy/aws-nuke)
-and [docker.io/rebuy/aws-nuke](https://hub.docker.com/r/rebuy/aws-nuke) (mirror).
+and [docker.io/rebuy/aws-nuke](https://hub.docker.com/r/rebuy/aws-nuke). Both
+are available for multiple architectures (amd64, arm64 & armv7).
 
 
 ## Usage
