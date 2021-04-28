@@ -19,17 +19,20 @@ func init() {
 
 func ListELBv2LoadBalancers(sess *session.Session) ([]Resource, error) {
 	svc := elbv2.New(sess)
-
-	elbResp, err := svc.DescribeLoadBalancers(nil)
-	if err != nil {
-		return nil, err
-	}
-
 	var tagReqELBv2ARNs []*string
 	ELBv2ArnToName := make(map[string]*string)
-	for _, elbv2 := range elbResp.LoadBalancers {
-		tagReqELBv2ARNs = append(tagReqELBv2ARNs, elbv2.LoadBalancerArn)
-		ELBv2ArnToName[*elbv2.LoadBalancerArn] = elbv2.LoadBalancerName
+
+	err := svc.DescribeLoadBalancersPages(nil,
+		func(page *elbv2.DescribeLoadBalancersOutput, lastPage bool) bool {
+			for _, elbv2 := range page.LoadBalancers {
+				tagReqELBv2ARNs = append(tagReqELBv2ARNs, elbv2.LoadBalancerArn)
+				ELBv2ArnToName[*elbv2.LoadBalancerArn] = elbv2.LoadBalancerName
+			}
+			return !lastPage
+		})
+
+	if err != nil {
+		return nil, err
 	}
 
 	// Tags for ELBv2s need to be fetched separately

@@ -10,21 +10,25 @@ func init() {
 }
 
 func ListLaunchConfigurations(s *session.Session) ([]Resource, error) {
+	resources := make([]Resource, 0)
 	svc := autoscaling.New(s)
 
 	params := &autoscaling.DescribeLaunchConfigurationsInput{}
-	resp, err := svc.DescribeLaunchConfigurations(params)
+	err := svc.DescribeLaunchConfigurationsPages(params,
+		func(page *autoscaling.DescribeLaunchConfigurationsOutput, lastPage bool) bool {
+			for _, launchconfig := range page.LaunchConfigurations {
+				resources = append(resources, &LaunchConfiguration{
+					svc:  svc,
+					name: launchconfig.LaunchConfigurationName,
+				})
+			}
+			return !lastPage
+		})
+
 	if err != nil {
 		return nil, err
 	}
 
-	resources := make([]Resource, 0)
-	for _, launchconfig := range resp.LaunchConfigurations {
-		resources = append(resources, &LaunchConfiguration{
-			svc:  svc,
-			name: launchconfig.LaunchConfigurationName,
-		})
-	}
 	return resources, nil
 }
 

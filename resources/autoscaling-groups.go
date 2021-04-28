@@ -12,20 +12,24 @@ func init() {
 
 func ListAutoscalingGroups(s *session.Session) ([]Resource, error) {
 	svc := autoscaling.New(s)
+	resources := make([]Resource, 0)
 
 	params := &autoscaling.DescribeAutoScalingGroupsInput{}
-	resp, err := svc.DescribeAutoScalingGroups(params)
+	err := svc.DescribeAutoScalingGroupsPages(params,
+		func(page *autoscaling.DescribeAutoScalingGroupsOutput, lastPage bool) bool {
+			for _, asg := range page.AutoScalingGroups {
+				resources = append(resources, &AutoScalingGroup{
+					svc:  svc,
+					name: asg.AutoScalingGroupName,
+				})
+			}
+			return !lastPage
+		})
+
 	if err != nil {
 		return nil, err
 	}
 
-	resources := make([]Resource, 0)
-	for _, asg := range resp.AutoScalingGroups {
-		resources = append(resources, &AutoScalingGroup{
-			svc:  svc,
-			name: asg.AutoScalingGroupName,
-		})
-	}
 	return resources, nil
 }
 
