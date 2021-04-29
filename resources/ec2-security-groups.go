@@ -23,23 +23,26 @@ func init() {
 
 func ListEC2SecurityGroups(sess *session.Session) ([]Resource, error) {
 	svc := ec2.New(sess)
+	resources := make([]Resource, 0)
 
 	params := &ec2.DescribeSecurityGroupsInput{}
-	resp, err := svc.DescribeSecurityGroups(params)
+	err := svc.DescribeSecurityGroupsPages(params,
+		func(page *ec2.DescribeSecurityGroupsOutput, lastPage bool) bool {
+			for _, group := range page.SecurityGroups {
+				resources = append(resources, &EC2SecurityGroup{
+					svc:     svc,
+					group:   group,
+					id:      group.GroupId,
+					name:    group.GroupName,
+					ingress: group.IpPermissions,
+					egress:  group.IpPermissionsEgress,
+				})
+			}
+			return !lastPage
+		})
+
 	if err != nil {
 		return nil, err
-	}
-
-	resources := make([]Resource, 0)
-	for _, group := range resp.SecurityGroups {
-		resources = append(resources, &EC2SecurityGroup{
-			svc:     svc,
-			group:   group,
-			id:      group.GroupId,
-			name:    group.GroupName,
-			ingress: group.IpPermissions,
-			egress:  group.IpPermissionsEgress,
-		})
 	}
 
 	return resources, nil
@@ -86,11 +89,11 @@ func (sg *EC2SecurityGroup) Remove() error {
 
 func (sg *EC2SecurityGroup) Properties() types.Properties {
 	properties := types.NewProperties()
-    for _, tagValue := range sg.group.Tags {
-        properties.SetTag(tagValue.Key, tagValue.Value)
-    }
-    properties.Set("Name", sg.name)
-    return properties
+	for _, tagValue := range sg.group.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("Name", sg.name)
+	return properties
 }
 
 func (sg *EC2SecurityGroup) String() string {

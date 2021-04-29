@@ -18,24 +18,33 @@ func init() {
 
 func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
-
+	elbNames := make([]*string, 0)
 	svc := elb.New(sess)
 
-	elbResp, err := svc.DescribeLoadBalancers(nil)
+	err := svc.DescribeLoadBalancersPages(nil,
+		func(page *elb.DescribeLoadBalancersOutput, lastPage bool) bool {
+			for _, desc := range page.LoadBalancerDescriptions {
+				elbNames = append(elbNames, desc.LoadBalancerName)
+			}
+			return !lastPage
+		})
+
 	if err != nil {
 		return nil, err
 	}
 
-	for _, elbLoadBalancer := range elbResp.LoadBalancerDescriptions {
-		// Tags for ELBs need to be fetched separately
-		tagResp, err := svc.DescribeTags(&elb.DescribeTagsInput{
-			LoadBalancerNames: []*string{elbLoadBalancer.LoadBalancerName},
-		})
+	for len(elbNames) > 0 {
+		requestElements := len(elbNames)
+		if requestElements > 20 {
+			requestElements = 20
+		}
 
+		tagResp, err := svc.DescribeTags(&elb.DescribeTagsInput{
+			LoadBalancerNames: elbNames[:requestElements],
+		})
 		if err != nil {
 			return nil, err
 		}
-
 		for _, elbTagInfo := range tagResp.TagDescriptions {
 			resources = append(resources, &ELBLoadBalancer{
 				svc:  svc,
@@ -43,6 +52,9 @@ func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 				tags: elbTagInfo.Tags,
 			})
 		}
+
+		// Remove the elements that were queried
+		elbNames = elbNames[requestElements:]
 	}
 
 	return resources, nil

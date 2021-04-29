@@ -19,17 +19,19 @@ func init() {
 
 func ListELBv2TargetGroups(sess *session.Session) ([]Resource, error) {
 	svc := elbv2.New(sess)
-
-	resourceResp, err := svc.DescribeTargetGroups(nil)
-	if err != nil {
-		return nil, err
-	}
-
 	var tagReqELBv2TargetGroupARNs []*string
 	targetGroupArnToName := make(map[string]*string)
-	for _, targetGroup := range resourceResp.TargetGroups {
-		tagReqELBv2TargetGroupARNs = append(tagReqELBv2TargetGroupARNs, targetGroup.TargetGroupArn)
-		targetGroupArnToName[*targetGroup.TargetGroupArn] = targetGroup.TargetGroupName
+
+	err := svc.DescribeTargetGroupsPages(nil,
+		func(page *elbv2.DescribeTargetGroupsOutput, lastPage bool) bool {
+			for _, targetGroup := range page.TargetGroups {
+				tagReqELBv2TargetGroupARNs = append(tagReqELBv2TargetGroupARNs, targetGroup.TargetGroupArn)
+				targetGroupArnToName[*targetGroup.TargetGroupArn] = targetGroup.TargetGroupName
+			}
+			return !lastPage
+		})
+	if err != nil {
+		return nil, err
 	}
 
 	// Tags for ELBv2 target groups need to be fetched separately
