@@ -102,14 +102,13 @@ func (b *BackupVaultAccessPolicy) Remove() error {
         }
     ]
 }`
-	_, err := b.svc.PutBackupVaultAccessPolicy(&backup.PutBackupVaultAccessPolicyInput{
+	// Ignore error from if we can't put permissive backup vault policy in for some reason, that's OK.
+	_, _ = b.svc.PutBackupVaultAccessPolicy(&backup.PutBackupVaultAccessPolicyInput{
 		BackupVaultName: &b.backupVaultName,
 		Policy:          &allowDeletionPolicy,
 	})
-	if err != nil {
-		return err
-	}
-	_, err = b.svc.DeleteBackupVaultAccessPolicy(&backup.DeleteBackupVaultAccessPolicyInput{
+	// In the end, this is the only call we actually really care about for err.
+	_, err := b.svc.DeleteBackupVaultAccessPolicy(&backup.DeleteBackupVaultAccessPolicyInput{
 		BackupVaultName: &b.backupVaultName,
 	})
 	return err
