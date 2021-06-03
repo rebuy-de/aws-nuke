@@ -3,15 +3,24 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/codebuild"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type CodeBuildProject struct {
 	svc         *codebuild.CodeBuild
 	projectName *string
+	tags        map[string]*string
 }
 
 func init() {
 	register("CodeBuildProject", ListCodeBuildProjects)
+}
+
+func GetTags(svc *codebuild.CodeBuild, projectName []*string) map[string]*string {
+	tags := make(map[string]*string)
+	batchResult, _ := svc.BatchGetProjects(&codebuild.BatchGetProjectsInput{Names: projectName})
+	tags[*batchResult.Projects[0].Tags[0].Key] = batchResult.Projects[0].Tags[0].Value
+	return tags
 }
 
 func ListCodeBuildProjects(sess *session.Session) ([]Resource, error) {
@@ -30,6 +39,7 @@ func ListCodeBuildProjects(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &CodeBuildProject{
 				svc:         svc,
 				projectName: project,
+				tags:        GetTags(svc, resp.Projects),
 			})
 		}
 
@@ -54,4 +64,14 @@ func (f *CodeBuildProject) Remove() error {
 
 func (f *CodeBuildProject) String() string {
 	return *f.projectName
+}
+
+func (f *CodeBuildProject) Properties() types.Properties {
+	properties := types.NewProperties()
+	for key, tag := range f.tags {
+		properties.SetTag(&key, tag)
+	}
+	properties.
+		Set("Project Name", f.projectName)
+	return properties
 }
