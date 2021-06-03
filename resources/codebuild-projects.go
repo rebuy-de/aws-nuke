@@ -16,11 +16,18 @@ func init() {
 	register("CodeBuildProject", ListCodeBuildProjects)
 }
 
-func GetTags(svc *codebuild.CodeBuild, projectName []*string) map[string]*string {
+func GetTags(svc *codebuild.CodeBuild, project *string) map[string]*string {
 	tags := make(map[string]*string)
-	batchResult, _ := svc.BatchGetProjects(&codebuild.BatchGetProjectsInput{Names: projectName})
-	tags[*batchResult.Projects[0].Tags[0].Key] = batchResult.Projects[0].Tags[0].Value
-	return tags
+	batchResult, _ := svc.BatchGetProjects(&codebuild.BatchGetProjectsInput{Names: []*string{project}})
+	for _, project := range batchResult.Projects {
+		if len(project.Tags) > 0 {
+			for _, v := range project.Tags {
+				tags[*v.Key] = v.Value
+			}
+			return tags
+		}
+	}
+	return nil
 }
 
 func ListCodeBuildProjects(sess *session.Session) ([]Resource, error) {
@@ -39,7 +46,7 @@ func ListCodeBuildProjects(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &CodeBuildProject{
 				svc:         svc,
 				projectName: project,
-				tags:        GetTags(svc, resp.Projects),
+				tags:        GetTags(svc, project),
 			})
 		}
 
