@@ -19,14 +19,18 @@ func init() {
 func GetTags(svc *codebuild.CodeBuild, project *string) map[string]*string {
 	tags := make(map[string]*string)
 	batchResult, _ := svc.BatchGetProjects(&codebuild.BatchGetProjectsInput{Names: []*string{project}})
+
 	for _, project := range batchResult.Projects {
 		if len(project.Tags) > 0 {
+
 			for _, v := range project.Tags {
 				tags[*v.Key] = v.Value
 			}
+
 			return tags
 		}
 	}
+
 	return nil
 }
 
