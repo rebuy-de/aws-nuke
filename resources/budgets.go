@@ -7,54 +7,80 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/budgets"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func init() {
-	register("Budgets", ListBudgets)
+	register("Budget", ListBudgets)
 }
 
 type Budget struct {
-	svc  *budgets.Budgets
-	name *string
-	// tags []*budgets.Tag
+	svc        *budgets.Budgets
+	name       *string
+	budgetType *string
+	accountId  *string
 }
-
-// if there are no tags what should properties be?
 
 func ListBudgets(sess *session.Session) ([]Resource, error) {
 	svc := budgets.New(sess)
 
-	resources := []Resource{}
-
-	// Lookup current account ID
-	fmt.Println("Entered Budgets Resource")
-
-	stsSvc := sts.New(sess)
-
-	callerID, err := stsSvc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	identityOutput, err := sts.New(sess).GetCallerIdentity(nil)
 	if err != nil {
+		fmt.Printf("sts error: %s \n", err)
 		return nil, err
 	}
-
-	accountID := callerID.Account
-	// fmt.Printf("account_num: %s \n", *accountID)
+	accountID := identityOutput.Account
 
 	params := &budgets.DescribeBudgetsInput{
-		AccountId: aws.String(*accountID),
+		AccountId:  aws.String(*accountID),
+		MaxResults: aws.Int64(100),
 	}
 
-	output, err := svc.DescribeBudgets(params)
+	buds := make([]*budgets.Budget, 0)
+	err = svc.DescribeBudgetsPages(params, func(page *budgets.DescribeBudgetsOutput, lastPage bool) bool {
+		for _, out := range page.Budgets {
+			buds = append(buds, out)
+		}
+		return true
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
-	for _, bud := range output.Budgets {
-		fmt.Println(bud.BudgetName)
+	resources := []Resource{}
+	for _, bud := range buds {
 		resources = append(resources, &Budget{
-			svc:  svc,
-			name: bud.BudgetName,
+			svc:        svc,
+			name:       bud.BudgetName,
+			budgetType: bud.BudgetType,
+			accountId:  accountID,
 		})
 	}
 
-	return nil, nil
+	return resources, nil
+}
+
+func (b *Budget) Remove() error {
+
+	_, err := b.svc.DeleteBudget(&budgets.DeleteBudgetInput{
+		AccountId:  b.accountId,
+		BudgetName: b.name,
+	})
+
+	return err
+}
+
+func (b *Budget) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.
+		Set("name", *b.name).
+		Set("budgetType", *b.budgetType).
+		Set("accoundId", *b.accountId)
+	return properties
+}
+
+func (b *Budget) String() string {
+	return *b.name
 }
