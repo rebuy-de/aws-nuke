@@ -32,7 +32,7 @@ jobs:
   docker_build:
     runs-on: ubuntu-20.04
     name: Docker Build
-    if: "github.repository == 'rebuy-de/aws-nuke'"
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'rebuy-de/aws-nuke' }}
 
     steps:
     - uses: actions/checkout@v2
