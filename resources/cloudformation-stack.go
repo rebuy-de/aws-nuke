@@ -147,7 +147,7 @@ func (cfs *CloudFormationStack) doRemove() error {
 			StackName: cfs.stack.StackName,
 		})
 	} else {
-		if err := cfs.waitForStackToStabalize(*stack.StackStatus); err != nil {
+		if err := cfs.waitForStackToStabilize(*stack.StackStatus); err != nil {
 			return err
 		} else if _, err := cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
 			StackName: cfs.stack.StackName,
@@ -162,7 +162,7 @@ func (cfs *CloudFormationStack) doRemove() error {
 		}
 	}
 }
-func (cfs *CloudFormationStack) waitForStackToStabalize(currentStatus string) error {
+func (cfs *CloudFormationStack) waitForStackToStabilize(currentStatus string) error {
 	switch currentStatus {
 	case cloudformation.StackStatusUpdateInProgress:
 		fallthrough

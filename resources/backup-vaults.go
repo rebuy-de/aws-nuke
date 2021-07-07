@@ -62,3 +62,10 @@ func (b *BackupVault) Remove() error {
 func (b *BackupVault) String() string {
 	return b.arn
 }
+
+func (b *BackupVault) Filter() error {
+	if b.name == "aws/efs/automatic-backup-vault" {
+		return fmt.Errorf("cannot delete EFS automatic backups vault")
+	}
+	return nil
+}
