@@ -24,6 +24,9 @@ const (
 var (
 	// DefaultRegionID The default region. Can be customized for non AWS implementations
 	DefaultRegionID = endpoints.UsEast1RegionID
+
+	// DefaultAWSPartitionID The default aws partition. Can be customized for non AWS implementations
+	DefaultAWSPartitionID = endpoints.AwsPartitionID
 )
 
 type Credentials struct {
@@ -193,7 +196,7 @@ func skipMissingServiceInRegionHandler(r *request.Request) {
 	region := *r.Config.Region
 	service := r.ClientInfo.ServiceName
 
-	rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), endpoints.AwsPartitionID, service)
+	rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), DefaultAWSPartitionID, service)
 	if !ok {
 		// This means that the service does not exist and this shouldn't be handled here.
 		return
@@ -216,7 +219,7 @@ func skipGlobalHandler(global bool) func(r *request.Request) {
 	return func(r *request.Request) {
 		service := r.ClientInfo.ServiceName
 
-		rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), endpoints.AwsPartitionID, service)
+		rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), DefaultAWSPartitionID, service)
 		if !ok {
 			// This means that the service does not exist in the endpoints list.
 			if global {
