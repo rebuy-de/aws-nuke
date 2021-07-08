@@ -83,6 +83,6 @@ func (f *CodeBuildProject) Properties() types.Properties {
 		properties.SetTag(&key, tag)
 	}
 	properties.
-		Set("Project Name", f.projectName)
+		Set("ProjectName", f.projectName)
 	return properties
 }
