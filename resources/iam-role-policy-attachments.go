@@ -15,6 +15,7 @@ type IAMRolePolicyAttachment struct {
 	policyArn  string
 	policyName string
 	roleName   string
+	roleTags   []*iam.Tag
 }
 
 func init() {
@@ -50,6 +51,7 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 						policyArn:  *pol.PolicyArn,
 						policyName: *pol.PolicyName,
 						roleName:   *role.RoleName,
+						roleTags:   *role.Tags
 					})
 				}
 
@@ -92,10 +94,14 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 }
 
 func (e *IAMRolePolicyAttachment) Properties() types.Properties {
-	return types.NewProperties().
+	properties := types.NewProperties().
 		Set("RoleName", e.roleName).
 		Set("PolicyName", e.policyName).
 		Set("PolicyArn", e.policyArn)
+	for _, tag := range e.roleTags {
+		properties.SetTagWithPrefix("roleTag", tag.Key, tag.Value)
+	}
+	return properties
 }
 
 func (e *IAMRolePolicyAttachment) String() string {
