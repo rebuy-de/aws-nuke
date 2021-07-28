@@ -15,7 +15,7 @@ type IAMRolePolicyAttachment struct {
 	policyArn  string
 	policyName string
 	roleName   string
-	roleTags   []*iam.Tag
+	roleTags   []iam.Tag
 }
 
 func init() {
