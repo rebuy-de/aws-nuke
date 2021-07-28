@@ -51,7 +51,7 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 						policyArn:  *pol.PolicyArn,
 						policyName: *pol.PolicyName,
 						roleName:   *role.RoleName,
-						roleTags:   *role.Tags
+						roleTags:   *role.Tags,
 					})
 				}
 
