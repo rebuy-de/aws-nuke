@@ -15,7 +15,7 @@ type IAMRolePolicyAttachment struct {
 	policyArn  string
 	policyName string
 	roleName   string
-	roleTags   []iam.Tag
+	roleTags   []*iam.Tag
 }
 
 func init() {
@@ -51,7 +51,7 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 						policyArn:  *pol.PolicyArn,
 						policyName: *pol.PolicyName,
 						roleName:   *role.RoleName,
-						roleTags:   *role.Tags,
+						roleTags:   role.Tags,
 					})
 				}
 
