@@ -19,6 +19,14 @@ func init() {
 	register("IAMPolicy", ListIAMPolicies)
 }
 
+func GetIAMPolicy(svc *iam.IAM, policyArn *string) (*iam.Policy, error) {
+	params := &iam.GetPolicyInput{
+		PolicyArn: policyArn,
+	}
+	resp, err := svc.GetPolicy(params)
+	return resp.Policy, err
+}
+
 func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
 
