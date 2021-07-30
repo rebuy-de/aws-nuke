@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -13,6 +14,7 @@ type IAMPolicy struct {
 	policyId string
 	arn      string
 	path     string
+	tags     []*iam.Tag
 }
 
 func init() {
@@ -61,6 +63,7 @@ func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 			path:     *out.Path,
 			arn:      *out.Arn,
 			policyId: *out.PolicyId,
+			tags:     out.Tags,
 		})
 	}
 
@@ -103,6 +106,9 @@ func (policy *IAMPolicy) Properties() types.Properties {
 	properties.Set("ARN", policy.arn)
 	properties.Set("Path", policy.path)
 	properties.Set("PolicyID", policy.policyId)
+	for _, tag := range policy.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
 	return properties
 }
 
