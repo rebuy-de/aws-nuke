@@ -32,7 +32,13 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		for _, role := range roleResp.Roles {
+		for _, listedRole := range roleResp.Roles {
+			role, err := GetIAMRole(svc, listedRole.RoleName)
+			if err != nil {
+				logrus.Errorf("Failed to get listed role %s: %v", *listedRole.RoleName, err)
+				continue
+			}
+
 			polParams := &iam.ListAttachedRolePoliciesInput{
 				RoleName: role.RoleName,
 			}

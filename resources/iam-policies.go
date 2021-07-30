@@ -38,7 +38,12 @@ func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 
 	err := svc.ListPoliciesPages(params,
 		func(page *iam.ListPoliciesOutput, lastPage bool) bool {
-			for _, policy := range page.Policies {
+			for _, listedPolicy := range page.Policies {
+				policy, err := GetIAMPolicy(svc, listedPolicy.Arn)
+				if err != nil {
+					logrus.Errorf("Failed to get listed policy %s: %v", *listedPolicy.PolicyName, err)
+					break
+				}
 				policies = append(policies, policy)
 			}
 			return true
