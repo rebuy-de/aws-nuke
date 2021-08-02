@@ -32,7 +32,13 @@ func ListIAMRolePolicies(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		for _, role := range roles.Roles {
+		for _, listedRole := range roles.Roles {
+			role, err := GetIAMRole(svc, listedRole.RoleName)
+			if err != nil {
+				logrus.Errorf("Failed to get listed role %s: %v", *listedRole.RoleName, err)
+				continue
+			}
+
 			polParams := &iam.ListRolePoliciesInput{
 				RoleName: role.RoleName,
 			}

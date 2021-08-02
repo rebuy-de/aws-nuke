@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -13,10 +14,19 @@ type IAMPolicy struct {
 	policyId string
 	arn      string
 	path     string
+	tags     []*iam.Tag
 }
 
 func init() {
 	register("IAMPolicy", ListIAMPolicies)
+}
+
+func GetIAMPolicy(svc *iam.IAM, policyArn *string) (*iam.Policy, error) {
+	params := &iam.GetPolicyInput{
+		PolicyArn: policyArn,
+	}
+	resp, err := svc.GetPolicy(params)
+	return resp.Policy, err
 }
 
 func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
@@ -30,7 +40,12 @@ func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 
 	err := svc.ListPoliciesPages(params,
 		func(page *iam.ListPoliciesOutput, lastPage bool) bool {
-			for _, policy := range page.Policies {
+			for _, listedPolicy := range page.Policies {
+				policy, err := GetIAMPolicy(svc, listedPolicy.Arn)
+				if err != nil {
+					logrus.Errorf("Failed to get listed policy %s: %v", *listedPolicy.PolicyName, err)
+					break
+				}
 				policies = append(policies, policy)
 			}
 			return true
@@ -48,6 +63,7 @@ func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 			path:     *out.Path,
 			arn:      *out.Arn,
 			policyId: *out.PolicyId,
+			tags:     out.Tags,
 		})
 	}
 
@@ -90,6 +106,9 @@ func (policy *IAMPolicy) Properties() types.Properties {
 	properties.Set("ARN", policy.arn)
 	properties.Set("Path", policy.path)
 	properties.Set("PolicyID", policy.policyId)
+	for _, tag := range policy.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
 	return properties
 }
 
