@@ -118,6 +118,11 @@ func NewRootCommand() *cobra.Command {
 			"Must be used together with --access-key-id and --secret-access-key. "+
 			"Cannot be used together with --profile.")
 	command.PersistentFlags().StringVar(
+		&creds.AssumeRoleArn, "assume-role-arn", "",
+		"AWS IAM role arn to assume. "+
+		    "The credentials provided via --access-key-id or --profile must "+
+			"be allowed to assume this role. ")
+	command.PersistentFlags().StringVar(
 		&defaultRegion, "default-region", "",
 		"Custom default region name.")
 

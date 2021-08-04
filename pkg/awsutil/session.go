@@ -35,6 +35,7 @@ type Credentials struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	SessionToken    string
+	AssumeRoleArn   string
 
 	Credentials *credentials.Credentials
 
