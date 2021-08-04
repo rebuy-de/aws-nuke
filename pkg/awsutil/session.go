@@ -111,6 +111,11 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 			return nil, err
 		}
 
+		// if given a role to assume, overwrite the session credentials with assume role credentials
+		if c.AssumeRoleArn != "" {
+			sess.Config.Credentials = stscreds.NewCredentials(sess, c.AssumeRoleArn)
+		}
+
 		c.session = sess
 	}
 
