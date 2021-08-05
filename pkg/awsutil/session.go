@@ -35,6 +35,7 @@ type Credentials struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	SessionToken    string
+	AssumeRoleArn   string
 
 	Credentials *credentials.Credentials
 
@@ -108,6 +109,11 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 		sess, err := session.NewSessionWithOptions(opts)
 		if err != nil {
 			return nil, err
+		}
+
+		// if given a role to assume, overwrite the session credentials with assume role credentials
+		if c.AssumeRoleArn != "" {
+			sess.Config.Credentials = stscreds.NewCredentials(sess, c.AssumeRoleArn)
 		}
 
 		c.session = sess
