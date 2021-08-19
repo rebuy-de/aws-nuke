@@ -64,7 +64,7 @@ func (i *RDSProxy) String() string {
 
 func (i *RDSProxy) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("Identifier", i.id)
+	properties.Set("ProxyName", i.id)
 
 	for _, tag := range i.tags {
 		properties.SetTag(tag.Key, tag.Value)
