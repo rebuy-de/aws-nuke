@@ -24,14 +24,15 @@ type Account struct {
 
 type Nuke struct {
 	// Deprecated: Use AccountBlocklist instead.
-	AccountBlacklist []string                     `yaml:"account-blacklist"`
-	AccountBlocklist []string                     `yaml:"account-blocklist"`
-	Regions          []string                     `yaml:"regions"`
-	Accounts         map[string]Account           `yaml:"accounts"`
-	ResourceTypes    ResourceTypes                `yaml:"resource-types"`
-	Presets          map[string]PresetDefinitions `yaml:"presets"`
-	FeatureFlags     FeatureFlags                 `yaml:"feature-flags"`
-	CustomEndpoints  CustomEndpoints              `yaml:"endpoints"`
+	AccountBlacklist  []string                     `yaml:"account-blacklist"`
+	AccountBlocklist  []string                     `yaml:"account-blocklist"`
+	Regions           []string                     `yaml:"regions"`
+	UseEnabledRegions bool                         `yaml:"use-enabled-regions"`
+	Accounts          map[string]Account           `yaml:"accounts"`
+	ResourceTypes     ResourceTypes                `yaml:"resource-types"`
+	Presets           map[string]PresetDefinitions `yaml:"presets"`
+	FeatureFlags      FeatureFlags                 `yaml:"feature-flags"`
+	CustomEndpoints   CustomEndpoints              `yaml:"endpoints"`
 }
 
 type FeatureFlags struct {

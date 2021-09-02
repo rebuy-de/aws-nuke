@@ -81,6 +81,9 @@ regions:
 - eu-west-1
 - global
 
+# Instead of explicitly listing regions, you can also enable this option.
+use-enabled-regions: false
+
 account-blocklist:
 - "999999999999" # production
 

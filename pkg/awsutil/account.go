@@ -3,6 +3,8 @@ package awsutil
 import (
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/pkg/errors"
@@ -14,6 +16,7 @@ type Account struct {
 
 	id      string
 	aliases []string
+	regions []string
 }
 
 func NewAccount(creds Credentials, endpoints config.CustomEndpoints) (*Account, error) {
@@ -63,8 +66,24 @@ func NewAccount(creds Credentials, endpoints config.CustomEndpoints) (*Account, 
 		}
 	}
 
+	regionsOutput, err := ec2.New(defaultSession).DescribeRegions(&ec2.DescribeRegionsInput{
+		Filters: []*ec2.Filter{{
+			Name:   aws.String("opt-in-status"),
+			Values: aws.StringSlice([]string{"opt-in-not-required", "opted-in"}),
+		}},
+	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to list enabled regions")
+	}
+
+	regions := []string{}
+	for _, region := range regionsOutput.Regions {
+		regions = append(regions, *region.RegionName)
+	}
+
 	account.id = *identityOutput.Account
 	account.aliases = aliases
+	account.regions = regions
 
 	return &account, nil
 }
@@ -79,6 +98,10 @@ func (a *Account) Alias() string {
 
 func (a *Account) Aliases() []string {
 	return a.aliases
+}
+
+func (a *Account) EnabledRegions() []string {
+	return append(a.regions, GlobalRegionID)
 }
 
 func (a *Account) ResourceTypeToServiceType(regionName, resourceType string) string {
