@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -84,6 +86,9 @@ func (i *RDSInstance) Properties() types.Properties {
 	properties.Set("DeletionProtection", i.instance.DeletionProtection)
 	properties.Set("AvailabilityZone", i.instance.AvailabilityZone)
 	properties.Set("InstanceClass", i.instance.DBInstanceClass)
+	if i.instance.InstanceCreateTime != nil {
+		properties.Set("InstanceCreateTime", i.instance.InstanceCreateTime.Format(time.RFC3339))
+	}
 	properties.Set("Engine", i.instance.Engine)
 	properties.Set("EngineVersion", i.instance.EngineVersion)
 	properties.Set("MultiAZ", i.instance.MultiAZ)
