@@ -1,14 +1,17 @@
 package resources
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ElasticacheReplicationGroup struct {
-	svc     *elasticache.ElastiCache
-	groupID *string
+	svc              *elasticache.ElastiCache
+	replicationGroup *elasticache.ReplicationGroup
 }
 
 func init() {
@@ -29,8 +32,8 @@ func ListElasticacheReplicationGroups(sess *session.Session) ([]Resource, error)
 
 		for _, replicationGroup := range resp.ReplicationGroups {
 			resources = append(resources, &ElasticacheReplicationGroup{
-				svc:     svc,
-				groupID: replicationGroup.ReplicationGroupId,
+				svc:              svc,
+				replicationGroup: replicationGroup,
 			})
 		}
 
@@ -44,9 +47,18 @@ func ListElasticacheReplicationGroups(sess *session.Session) ([]Resource, error)
 	return resources, nil
 }
 
+func (i *ElasticacheReplicationGroup) Properties() types.Properties {
+	properties := types.NewProperties()
+	if i.replicationGroup.ReplicationGroupCreateTime != nil {
+		properties.Set("CreationTime", i.replicationGroup.ReplicationGroupCreateTime.Format(time.RFC3339))
+	}
+
+	return properties
+}
+
 func (i *ElasticacheReplicationGroup) Remove() error {
 	params := &elasticache.DeleteReplicationGroupInput{
-		ReplicationGroupId: i.groupID,
+		ReplicationGroupId: i.replicationGroup.ReplicationGroupId,
 	}
 
 	_, err := i.svc.DeleteReplicationGroup(params)
@@ -58,5 +70,5 @@ func (i *ElasticacheReplicationGroup) Remove() error {
 }
 
 func (i *ElasticacheReplicationGroup) String() string {
-	return *i.groupID
+	return *i.replicationGroup.ReplicationGroupId
 }
