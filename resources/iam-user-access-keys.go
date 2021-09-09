@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -11,6 +12,7 @@ import (
 type IAMUserAccessKey struct {
 	svc         *iam.IAM
 	accessKeyId string
+	createDate  *time.Time
 	userName    string
 	status      string
 }
@@ -41,6 +43,7 @@ func ListIAMUserAccessKeys(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &IAMUserAccessKey{
 				svc:         svc,
 				accessKeyId: *meta.AccessKeyId,
+				createDate:  meta.CreateDate,
 				userName:    *meta.UserName,
 				status:      *meta.Status,
 			})
@@ -64,9 +67,15 @@ func (e *IAMUserAccessKey) Remove() error {
 }
 
 func (e *IAMUserAccessKey) Properties() types.Properties {
-	return types.NewProperties().
-		Set("UserName", e.userName).
-		Set("AccessKeyID", e.accessKeyId)
+	properties := types.NewProperties()
+
+	properties.Set("AccessKeyID", e.accessKeyId)
+	if e.createDate != nil {
+		properties.Set("CreateDate", e.createDate.Format(time.RFC3339))
+	}
+	properties.Set("UserName", e.userName)
+
+	return properties
 }
 
 func (e *IAMUserAccessKey) String() string {
