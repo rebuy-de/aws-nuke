@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
@@ -8,9 +10,11 @@ import (
 )
 
 type IAMUser struct {
-	svc  *iam.IAM
-	name string
-	tags []*iam.Tag
+	svc              *iam.IAM
+	name             string
+	tags             []*iam.Tag
+	createDate       *time.Time
+	passwordLastUsed *time.Time
 }
 
 func init() {
@@ -37,9 +41,11 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 				continue
 			}
 			resources = append(resources, &IAMUser{
-				svc:  svc,
-				name: *out.UserName,
-				tags: user.Tags,
+				svc:              svc,
+				name:             *user.UserName,
+				tags:             user.Tags,
+				createDate:       user.CreateDate,
+				passwordLastUsed: user.PasswordLastUsed,
 			})
 		}
 		return true
@@ -69,6 +75,9 @@ func (e *IAMUser) String() string {
 func (e *IAMUser) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Name", e.name)
+
+	properties.Set("CreateDate", e.createDate.Format(time.RFC3339))
+	properties.Set("PasswordLastUsed", e.passwordLastUsed.Format(time.RFC3339))
 
 	for _, tag := range e.tags {
 		properties.SetTag(tag.Key, tag.Value)
