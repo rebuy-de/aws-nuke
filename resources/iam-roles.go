@@ -21,6 +21,14 @@ func init() {
 	register("IAMRole", ListIAMRoles)
 }
 
+func GetIAMRole(svc *iam.IAM, roleName *string) (*iam.Role, error) {
+	params := &iam.GetRoleInput{
+		RoleName: roleName,
+	}
+	resp, err := svc.GetRole(params)
+	return resp.Role, err
+}
+
 func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
 	params := &iam.ListRolesInput{}
@@ -33,10 +41,7 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.Roles {
-			getroleParams := &iam.GetRoleInput{
-				RoleName: out.RoleName,
-			}
-			getroleOutput, err := svc.GetRole(getroleParams)
+			role, err := GetIAMRole(svc, out.RoleName)
 			if err != nil {
 				logrus.
 					WithError(err).
@@ -47,9 +52,9 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 
 			resources = append(resources, &IAMRole{
 				svc:  svc,
-				role: getroleOutput.Role,
-				name: *getroleOutput.Role.RoleName,
-				path: *getroleOutput.Role.Path,
+				role: role,
+				name: *role.RoleName,
+				path: *role.Path,
 			})
 		}
 

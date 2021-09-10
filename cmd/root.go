@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/pkg/config"
 	"github.com/rebuy-de/aws-nuke/resources"
@@ -63,10 +64,17 @@ func NewRootCommand() *cobra.Command {
 
 		if defaultRegion != "" {
 			awsutil.DefaultRegionID = defaultRegion
-			if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
-				err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)
-				log.Error(err.Error())
-				return err
+			switch defaultRegion {
+			case endpoints.UsEast1RegionID, endpoints.UsEast2RegionID, endpoints.UsWest1RegionID, endpoints.UsWest2RegionID:
+				awsutil.DefaultAWSPartitionID = endpoints.AwsPartitionID
+			case endpoints.UsGovEast1RegionID, endpoints.UsGovWest1RegionID:
+				awsutil.DefaultAWSPartitionID = endpoints.AwsUsGovPartitionID
+			default:
+				if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
+					err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)
+					log.Error(err.Error())
+					return err
+				}
 			}
 		}
 
@@ -109,6 +117,11 @@ func NewRootCommand() *cobra.Command {
 		"AWS session token for accessing the AWS API. "+
 			"Must be used together with --access-key-id and --secret-access-key. "+
 			"Cannot be used together with --profile.")
+	command.PersistentFlags().StringVar(
+		&creds.AssumeRoleArn, "assume-role-arn", "",
+		"AWS IAM role arn to assume. "+
+		    "The credentials provided via --access-key-id or --profile must "+
+			"be allowed to assume this role. ")
 	command.PersistentFlags().StringVar(
 		&defaultRegion, "default-region", "",
 		"Custom default region name.")

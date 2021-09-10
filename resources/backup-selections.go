@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/backup"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"strings"
 )
 
 type BackupSelection struct {
@@ -74,4 +75,11 @@ func (b *BackupSelection) Remove() error {
 
 func (b *BackupSelection) String() string {
 	return fmt.Sprintf("%s (%s)", b.planId, b.selectionId)
+}
+
+func (b *BackupSelection) Filter() error {
+	if strings.HasPrefix(b.selectionName, "aws/efs/") {
+		return fmt.Errorf("cannot delete EFS automatic backups backup selection")
+	}
+	return nil
 }
