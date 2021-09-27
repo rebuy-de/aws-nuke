@@ -7,9 +7,10 @@ import (
 )
 
 type CodeArtifactRepository struct {
-	svc  *codeartifact.CodeArtifact
-	name *string
-	tags map[string]*string
+	svc    *codeartifact.CodeArtifact
+	name   *string
+	domain *string
+	tags   map[string]*string
 }
 
 func init() {
@@ -30,9 +31,10 @@ func ListCodeArtifactRepositories(sess *session.Session) ([]Resource, error) {
 
 		for _, repo := range resp.Repositories {
 			resources = append(resources, &CodeArtifactRepository{
-				svc:  svc,
-				name: repo.Name,
-				tags: GetRepositoryTags(svc, repo.Arn),
+				svc:    svc,
+				name:   repo.Name,
+				domain: repo.DomainName,
+				tags:   GetRepositoryTags(svc, repo.Arn),
 			})
 		}
 
@@ -62,6 +64,7 @@ func GetRepositoryTags(svc *codeartifact.CodeArtifact, arn *string) map[string]*
 func (r *CodeArtifactRepository) Remove() error {
 	_, err := r.svc.DeleteRepository(&codeartifact.DeleteRepositoryInput{
 		Repository: r.name,
+		Domain:     r.domain,
 	})
 	return err
 }
@@ -76,5 +79,6 @@ func (r *CodeArtifactRepository) Properties() types.Properties {
 		properties.SetTag(&key, tag)
 	}
 	properties.Set("Name", r.name)
+	properties.Set("Domain", r.domain)
 	return properties
 }
