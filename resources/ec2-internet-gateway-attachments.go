@@ -10,11 +10,12 @@ import (
 )
 
 type EC2InternetGatewayAttachment struct {
-	svc     *ec2.EC2
-	vpcId   *string
-	vpcTags []*ec2.Tag
-	igwId   *string
-	igwTags []*ec2.Tag
+	svc         *ec2.EC2
+	vpcId       *string
+	vpcTags     []*ec2.Tag
+	igwId       *string
+	igwTags     []*ec2.Tag
+	defVpcAssoc bool
 }
 
 func init() {
@@ -47,11 +48,12 @@ func ListEC2InternetGatewayAttachments(sess *session.Session) ([]Resource, error
 
 		for _, igw := range resp.InternetGateways {
 			resources = append(resources, &EC2InternetGatewayAttachment{
-				svc:     svc,
-				vpcId:   vpc.VpcId,
-				vpcTags: vpc.Tags,
-				igwId:   igw.InternetGatewayId,
-				igwTags: igw.Tags,
+				svc:         svc,
+				vpcId:       vpc.VpcId,
+				vpcTags:     vpc.Tags,
+				igwId:       igw.InternetGatewayId,
+				igwTags:     igw.Tags,
+				defVpcAssoc: *vpc.IsDefault,
 			})
 		}
 	}
@@ -81,6 +83,7 @@ func (e *EC2InternetGatewayAttachment) Properties() types.Properties {
 	for _, tagValue := range e.vpcTags {
 		properties.SetTagWithPrefix("vpc", tagValue.Key, tagValue.Value)
 	}
+	properties.Set("DefaultVpcAssoc", e.defVpcAssoc)
 	return properties
 }
 
