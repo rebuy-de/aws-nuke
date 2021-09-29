@@ -7,9 +7,9 @@ import (
 )
 
 type EC2Subnet struct {
-	svc         *ec2.EC2
-	subnet      *ec2.Subnet
-	defVpcAssoc bool
+	svc        *ec2.EC2
+	subnet     *ec2.Subnet
+	defaultVPC bool
 }
 
 func init() {
@@ -30,9 +30,9 @@ func ListEC2Subnets(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Subnets {
 		resources = append(resources, &EC2Subnet{
-			svc:         svc,
-			subnet:      out,
-			defVpcAssoc: *defVpcId == *out.VpcId,
+			svc:        svc,
+			subnet:     out,
+			defaultVPC: *defVpcId == *out.VpcId,
 		})
 	}
 
@@ -58,7 +58,7 @@ func (e *EC2Subnet) Properties() types.Properties {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.Set("DefaultForAz", e.subnet.DefaultForAz)
-	properties.Set("DefaultVpcAssoc", e.defVpcAssoc)
+	properties.Set("DefaultVPC", e.defaultVPC)
 	return properties
 }
 
