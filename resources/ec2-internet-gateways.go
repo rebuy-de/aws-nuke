@@ -7,8 +7,9 @@ import (
 )
 
 type EC2InternetGateway struct {
-	svc *ec2.EC2
-	igw *ec2.InternetGateway
+	svc        *ec2.EC2
+	igw        *ec2.InternetGateway
+	defaultVPC bool
 }
 
 func init() {
@@ -23,15 +24,31 @@ func ListEC2InternetGateways(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
+	defVpcId := DefaultVpcID(svc)
+
 	resources := make([]Resource, 0)
 	for _, igw := range resp.InternetGateways {
 		resources = append(resources, &EC2InternetGateway{
-			svc: svc,
-			igw: igw,
+			svc:        svc,
+			igw:        igw,
+			defaultVPC: HasVpcAttachment(defVpcId, igw.Attachments),
 		})
 	}
 
 	return resources, nil
+}
+
+func HasVpcAttachment(vpcId *string, attachments []*ec2.InternetGatewayAttachment) bool {
+	if vpcId == nil {
+		return false
+	}
+
+	for _, attach := range attachments {
+		if *vpcId == *attach.VpcId {
+			return true
+		}
+	}
+	return false
 }
 
 func (e *EC2InternetGateway) Remove() error {
@@ -52,6 +69,7 @@ func (e *EC2InternetGateway) Properties() types.Properties {
 	for _, tagValue := range e.igw.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+	properties.Set("DefaultVPC", e.defaultVPC)
 	return properties
 }
 

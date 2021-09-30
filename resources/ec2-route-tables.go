@@ -9,6 +9,7 @@ import (
 type EC2RouteTable struct {
 	svc        *ec2.EC2
 	routeTable *ec2.RouteTable
+	defaultVPC bool
 }
 
 func init() {
@@ -23,11 +24,14 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
+	defVpcId := DefaultVpcID(svc)
+
 	resources := make([]Resource, 0)
 	for _, out := range resp.RouteTables {
 		resources = append(resources, &EC2RouteTable{
 			svc:        svc,
 			routeTable: out,
+			defaultVPC: *defVpcId == *out.VpcId,
 		})
 	}
 
@@ -52,6 +56,7 @@ func (e *EC2RouteTable) Properties() types.Properties {
 	for _, tagValue := range e.routeTable.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+	properties.Set("DefaultVPC", e.defaultVPC)
 	return properties
 }
 
