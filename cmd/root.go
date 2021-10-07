@@ -123,6 +123,11 @@ func NewRootCommand() *cobra.Command {
 			"The credentials provided via --access-key-id or --profile must "+
 			"be allowed to assume this role. ")
 	command.PersistentFlags().StringVar(
+		&creds.ExternalId, "external-id", "",
+		"AWS STS External ID parameter. "+
+			"If your assumed role is secured with an External ID string, "+
+			"pass this parameter. ")
+	command.PersistentFlags().StringVar(
 		&defaultRegion, "default-region", "",
 		"Custom default region name.")
 
