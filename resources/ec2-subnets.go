@@ -25,14 +25,17 @@ func ListEC2Subnets(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
-	defVpcId := DefaultVpcID(svc)
+	defVpcId := ""
+	if defVpc := DefaultVpc(svc); defVpc != nil {
+		defVpcId = *defVpc.VpcId
+	}
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.Subnets {
 		resources = append(resources, &EC2Subnet{
 			svc:        svc,
 			subnet:     out,
-			defaultVPC: *defVpcId == *out.VpcId,
+			defaultVPC: defVpcId == *out.VpcId,
 		})
 	}
 

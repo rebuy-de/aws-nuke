@@ -35,7 +35,7 @@ func ListEC2VPCs(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func DefaultVpcID(svc *ec2.EC2) *string {
+func DefaultVpc(svc *ec2.EC2) *ec2.Vpc {
 	resp, err := svc.DescribeVpcs(&ec2.DescribeVpcsInput{
 		Filters: []*ec2.Filter{
 			{
@@ -44,17 +44,15 @@ func DefaultVpcID(svc *ec2.EC2) *string {
 			},
 		},
 	})
-
-	noVpc := ""
 	if err != nil {
-		return &noVpc
+		return nil
 	}
 
 	if len(resp.Vpcs) == 0 {
-		return &noVpc
+		return nil
 	}
 
-	return resp.Vpcs[0].VpcId
+	return resp.Vpcs[0]
 }
 
 func (e *EC2VPC) Remove() error {
