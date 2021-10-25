@@ -1,14 +1,18 @@
 package resources
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EKSCluster struct {
-	svc  *eks.EKS
-	name *string
+	svc     *eks.EKS
+	name    *string
+	cluster *eks.Cluster
 }
 
 func init() {
@@ -30,9 +34,14 @@ func ListEKSClusters(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, cluster := range resp.Clusters {
+			dcResp, err := svc.DescribeCluster(&eks.DescribeClusterInput{Name: cluster})
+			if err != nil {
+				return nil, err
+			}
 			resources = append(resources, &EKSCluster{
-				svc:  svc,
-				name: cluster,
+				svc:     svc,
+				name:    cluster,
+				cluster: dcResp.Cluster,
 			})
 		}
 		if resp.NextToken == nil {
@@ -51,6 +60,15 @@ func (f *EKSCluster) Remove() error {
 	})
 
 	return err
+}
+
+func (f *EKSCluster) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("CreatedAt", f.cluster.CreatedAt.Format(time.RFC3339))
+	for key, value := range f.cluster.Tags {
+		properties.SetTag(&key, value)
+	}
+	return properties
 }
 
 func (f *EKSCluster) String() string {
