@@ -8,6 +8,7 @@ import (
 type ESDomain struct {
 	svc        *elasticsearchservice.ElasticsearchService
 	domainName *string
+	tagList    []*elasticsearchservice.Tag
 }
 
 func init() {
@@ -25,9 +26,19 @@ func ListESDomains(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, domain := range resp.DomainNames {
+		dedo, err := svc.DescribeElasticsearchDomain(
+			&elasticsearchservice.DescribeElasticsearchDomainInput{DomainName: domain.DomainName})
+		if err != nil {
+			return nil, err
+		}
+		lto, err := svc.ListTags(&elasticsearchservice.ListTagsInput{ARN: dedo.DomainStatus.ARN})
+		if err != nil {
+			return nil, err
+		}
 		resources = append(resources, &ESDomain{
 			svc:        svc,
 			domainName: domain.DomainName,
+			tagList:    lto.TagList,
 		})
 	}
 
