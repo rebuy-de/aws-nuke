@@ -3,12 +3,14 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/efs"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type EFSFileSystem struct {
-	svc  *efs.EFS
-	id   string
-	name string
+	svc     *efs.EFS
+	id      string
+	name    string
+	tagList []*efs.Tag
 }
 
 func init() {
@@ -25,10 +27,15 @@ func ListEFSFileSystems(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, fs := range resp.FileSystems {
+		lto, err := svc.ListTagsForResource(&efs.ListTagsForResourceInput{ResourceId: fs.FileSystemId})
+		if err != nil {
+			return nil, err
+		}
 		resources = append(resources, &EFSFileSystem{
-			svc:  svc,
-			id:   *fs.FileSystemId,
-			name: *fs.CreationToken,
+			svc:     svc,
+			id:      *fs.FileSystemId,
+			name:    *fs.CreationToken,
+			tagList: lto.Tags,
 		})
 
 	}
@@ -42,6 +49,14 @@ func (e *EFSFileSystem) Remove() error {
 	})
 
 	return err
+}
+
+func (e *EFSFileSystem) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, t := range e.tagList {
+		properties.SetTag(t.Key, t.Value)
+	}
+	return properties
 }
 
 func (e *EFSFileSystem) String() string {
