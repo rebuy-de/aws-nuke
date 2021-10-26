@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticsearchservice"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ESDomain struct {
@@ -52,6 +53,14 @@ func (f *ESDomain) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ESDomain) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, t := range f.tagList {
+		properties.SetTag(t.Key, t.Value)
+	}
+	return properties
 }
 
 func (f *ESDomain) String() string {
