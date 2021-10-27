@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
@@ -12,6 +13,7 @@ type EKSNodegroup struct {
 	svc     *eks.EKS
 	cluster *string
 	name    *string
+	tagList []*eks.Tag
 }
 
 func init() {
@@ -60,10 +62,20 @@ func ListEKSNodegroups(sess *session.Session) ([]Resource, error) {
 			}
 
 			for _, name := range resp.Nodegroups {
+				dngo, err := svc.DescribeNodegroup(
+					&eks.DescribeNodegroupInput{ClusterName: clusterName, NodegroupName: name})
+				if err != nil {
+					return nil, err
+				}
+				lto, err := svc.ListTagsForResource(&eks.ListTagsForResourceInput{ResourceArn: dngo.Nodegroup.NodegroupArn})
+				if err != nil {
+					return nil, err
+				}
 				resources = append(resources, &EKSNodegroup{
 					svc:     svc,
 					name:    name,
 					cluster: clusterName,
+					tagList: lto.Tags,
 				})
 			}
 
@@ -89,9 +101,13 @@ func (ng *EKSNodegroup) Remove() error {
 }
 
 func (ng *EKSNodegroup) Properties() types.Properties {
-	return types.NewProperties().
-		Set("Cluster", *ng.cluster).
+	properties := types.NewProperties()
+	for _, t := range ng.tagList {
+		properties.SetTag(t.Key, t.Value)
+	}
+	Set("Cluster", *ng.cluster).
 		Set("Profile", *ng.name)
+	return properties
 }
 
 func (ng *EKSNodegroup) String() string {
