@@ -4,11 +4,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/apigateway"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type APIGatewayUsagePlan struct {
 	svc         *apigateway.APIGateway
 	usagePlanID *string
+	name        *string
+	tags        map[string]*string
 }
 
 func init() {
@@ -33,6 +36,8 @@ func ListAPIGatewayUsagePlans(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &APIGatewayUsagePlan{
 				svc:         svc,
 				usagePlanID: item.Id,
+				name:        item.Name,
+				tags:        item.Tags,
 			})
 		}
 
@@ -57,4 +62,17 @@ func (f *APIGatewayUsagePlan) Remove() error {
 
 func (f *APIGatewayUsagePlan) String() string {
 	return *f.usagePlanID
+}
+
+func (f *APIGatewayUsagePlan) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	for key, tag := range f.tags {
+		properties.SetTag(&key, tag)
+	}
+
+	properties.
+		Set("UsagePlanID", f.usagePlanID).
+		Set("Name", f.name)
+	return properties
 }
