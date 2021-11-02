@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/neptune"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type NeptuneInstance struct {
@@ -58,4 +59,11 @@ func (f *NeptuneInstance) Remove() error {
 
 func (f *NeptuneInstance) String() string {
 	return *f.ID
+}
+
+func (f *NeptuneInstance) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Identifier", f.ID)
+
+	return properties
 }
