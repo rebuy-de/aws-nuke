@@ -3,6 +3,7 @@ package resources
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -188,6 +189,13 @@ func (cfs *CloudFormationStack) waitForStackToStabilize(currentStatus string) er
 func (cfs *CloudFormationStack) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Name", cfs.stack.StackName)
+	properties.Set("CreationTime", cfs.stack.CreationTime.Format(time.RFC3339))
+	if cfs.stack.LastUpdatedTime == nil {
+		properties.Set("LastUpdatedTime", cfs.stack.CreationTime.Format(time.RFC3339))
+	} else {
+		properties.Set("LastUpdatedTime", cfs.stack.LastUpdatedTime.Format(time.RFC3339))
+	}
+
 	for _, tagValue := range cfs.stack.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}

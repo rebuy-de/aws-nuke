@@ -246,7 +246,7 @@ func skipGlobalHandler(global bool) func(r *request.Request) {
 			return
 		}
 
-		if len(rs) > 0 && global {
+		if (len(rs) > 0 && global) && service != "sts" {
 			r.Error = ErrSkipRequest(fmt.Sprintf("service '%s' is not global, but the session is", service))
 			return
 		}
