@@ -230,6 +230,10 @@ func skipGlobalHandler(global bool) func(r *request.Request) {
 			// This means that the service does not exist in the endpoints list.
 			if global {
 				r.Error = ErrSkipRequest(fmt.Sprintf("service '%s' is was not found in the endpoint list; assuming it is not global", service))
+			} else if service != "s3-control" {
+				// Skip s3-control endpoint host lookup as host return is s3-control.{region}.amazonaws.com but API calls actually use {accountId}.s3-control.{region}.amazonaws.com
+				// https://github.com/rebuy-de/aws-nuke/issues/708
+				log.Debug("DNS lookup skipped for s3-control endpoints")
 			} else {
 				host := r.HTTPRequest.URL.Hostname()
 				_, err := net.LookupHost(host)
