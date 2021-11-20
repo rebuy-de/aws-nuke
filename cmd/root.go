@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
@@ -19,6 +20,7 @@ func NewRootCommand() *cobra.Command {
 		creds         awsutil.Credentials
 		defaultRegion string
 		verbose       bool
+		logLevel      string
 	)
 
 	command := &cobra.Command{
@@ -28,10 +30,26 @@ func NewRootCommand() *cobra.Command {
 	}
 
 	command.PreRun = func(cmd *cobra.Command, args []string) {
-		log.SetLevel(log.InfoLevel)
+		switch strings.ToLower(logLevel) {
+		case "trace":
+			log.SetLevel(log.TraceLevel)
+		case "debug":
+			log.SetLevel(log.DebugLevel)
+		case "info":
+			log.SetLevel(log.InfoLevel)
+		case "warn":
+			log.SetLevel(log.WarnLevel)
+		case "error":
+			log.SetLevel(log.ErrorLevel)
+		default:
+			log.SetLevel(log.InfoLevel)
+		}
+
 		if verbose {
 			log.SetLevel(log.DebugLevel)
+			log.Warn("--verbose CLI argument is deprecated, please use --log-level=debug instead")
 		}
+
 		log.SetFormatter(&log.TextFormatter{
 			EnvironmentOverrideColors: true,
 		})
@@ -90,9 +108,13 @@ func NewRootCommand() *cobra.Command {
 		return n.Run()
 	}
 
+	command.PersistentFlags().StringVarP(
+		&logLevel, "log-level", "l", "info",
+		"Controls log level for output.")
+
 	command.PersistentFlags().BoolVarP(
 		&verbose, "verbose", "v", false,
-		"Enables debug output.")
+		"Enables debug output. (Deprecated: use --log-level=debug instead)")
 
 	command.PersistentFlags().StringVarP(
 		&params.ConfigPath, "config", "c", "",
@@ -120,7 +142,7 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().StringVar(
 		&creds.AssumeRoleArn, "assume-role-arn", "",
 		"AWS IAM role arn to assume. "+
-		    "The credentials provided via --access-key-id or --profile must "+
+			"The credentials provided via --access-key-id or --profile must "+
 			"be allowed to assume this role. ")
 	command.PersistentFlags().StringVar(
 		&defaultRegion, "default-region", "",
