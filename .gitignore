@@ -4,3 +4,5 @@
 /dist
 /releases
 /mocks
+.envrc
+config.yaml
