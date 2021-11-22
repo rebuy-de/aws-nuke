@@ -31,6 +31,7 @@ archives:
   - id: default
     builds:
       - default
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     format_overrides:
       - goos: windows
         format: zip
