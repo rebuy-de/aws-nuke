@@ -48,7 +48,7 @@ dockers:
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://{{ .ModulePath }}"
+      - "--label=org.opencontainers.image.source=https://github.com/debuy-de/aws-nuke"
       - "--platform=linux/amd64"
   - use: buildx
     goos: linux
@@ -63,7 +63,7 @@ dockers:
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://{{ .ModulePath }}"
+      - "--label=org.opencontainers.image.source=https://github.com/debuy-de/aws-nuke"
       - "--platform=linux/arm64"
   - use: buildx
     goos: linux
@@ -79,7 +79,7 @@ dockers:
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://{{ .ModulePath }}"
+      - "--label=org.opencontainers.image.source=https://github.com/debuy-de/aws-nuke"
       - "--platform=linux/arm/v7"
 docker_manifests:
   - use: docker
