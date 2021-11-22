@@ -1,0 +1,106 @@
+dist: releases
+env:
+  - PACKAGE=github.com/rebuy-de/aws-nuke
+release:
+  github:
+    owner: rebuy-de
+    name: aws-nuke
+builds:
+  - id: default
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 7
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarch: arm
+      - goos: darwin
+        goarch: arm
+    ldflags:
+      - -s
+      - -X '{{ .ModulePath }}/cmd.BuildVersion={{ .Version }}'
+      - -X '{{ .ModulePath }}/cmd.BuildDate={{ .Date }}'
+      - -X '{{ .ModulePath }}/cmd.BuildHash={{ .Commit }}'
+archives:
+  - id: default
+    builds:
+      - default
+    format_overrides:
+      - goos: windows
+        format: zip
+dockers:
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    dockerfile: Dockerfile.goreleaser
+    image_templates:
+      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-amd64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-amd64'
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://{{ .ModulePath }}"
+      - "--platform=linux/amd64"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    dockerfile: Dockerfile.goreleaser
+    image_templates:
+      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm64'
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://{{ .ModulePath }}"
+      - "--platform=linux/arm64"
+  - use: buildx
+    goos: linux
+    goarch: arm
+    goarm: "7"
+    dockerfile: Dockerfile.goreleaser
+    image_templates:
+      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm32v7'
+      - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm32v7'
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://{{ .ModulePath }}"
+      - "--platform=linux/arm/v7"
+docker_manifests:
+  - use: docker
+    name_template: '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}'
+    image_templates:
+      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-amd64'
+      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm64'
+      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm32v7'
+  - use: docker
+    name_template: '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}'
+    image_templates:
+      - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-amd64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm32v7'
+checksum:
+  name_template: "checksums.txt"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"

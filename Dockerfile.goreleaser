@@ -1,0 +1,9 @@
+
+FROM alpine:3.14.3
+ENTRYPOINT ["/usr/local/bin/aws-nuke"]
+RUN apk add --no-cache ca-certificates
+RUN adduser -D aws-nuke
+
+COPY aws-nuke /usr/local/bin/aws-nuk
+
+USER aws-nuke
