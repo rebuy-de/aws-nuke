@@ -1,6 +1,4 @@
 dist: releases
-env:
-  - PACKAGE=github.com/rebuy-de/aws-nuke
 release:
   github:
     owner: rebuy-de
