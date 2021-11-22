@@ -4,6 +4,6 @@ ENTRYPOINT ["/usr/local/bin/aws-nuke"]
 RUN apk add --no-cache ca-certificates
 RUN adduser -D aws-nuke
 
-COPY aws-nuke /usr/local/bin/aws-nuk
+COPY aws-nuke /usr/local/bin/aws-nuke
 
 USER aws-nuke
