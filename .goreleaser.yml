@@ -55,7 +55,7 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm64'
+      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm64
       #- quay.io/rebuy/aws-nuke:{{ .Version }}-amd64
     build_flag_templates:
       - "--pull"
@@ -71,8 +71,8 @@ dockers:
     goarm: "7"
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7'
-      #- quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7'
+      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
+      #- quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -85,15 +85,15 @@ docker_manifests:
   - use: docker
     name_template: gchr.io/rebuy-de/aws-nuke:{{ .Version }}
     image_templates:
-      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-amd64'
-      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm64'
-      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7'
+      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-amd64
+      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm64
+      - gchr.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
   #- use: docker
   #  name_template: quay.io/rebuy-de/aws-nuke:{{ .Version }}
   #  image_templates:
-  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-amd64'
-  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm64'
-  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7'
+  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-amd64
+  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm64
+  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
 checksum:
   name_template: "checksums.txt"
 changelog:
