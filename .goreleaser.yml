@@ -40,7 +40,7 @@ dockers:
     goarch: amd64
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-amd64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-amd64'
       #- '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
@@ -55,7 +55,7 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm64'
       #- '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm64'
     build_flag_templates:
       - "--pull"
@@ -71,7 +71,7 @@ dockers:
     goarm: "7"
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm32v7'
+      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm32v7'
       #- '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm32v7'
     build_flag_templates:
       - "--pull"
@@ -83,11 +83,11 @@ dockers:
       - "--platform=linux/arm/v7"
 docker_manifests:
   - use: docker
-    name_template: '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}'
+    name_template: '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}'
     image_templates:
-      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-amd64'
-      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm64'
-      - '{{ replace .ModulePath "github.com" "gchr.io" }}:{{ .Version }}-arm32v7'
+      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-amd64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm64'
+      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm32v7'
   #- use: docker
   #  name_template: '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}'
   #  image_templates:
