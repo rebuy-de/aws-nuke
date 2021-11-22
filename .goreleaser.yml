@@ -24,14 +24,14 @@ builds:
         goarch: arm
     ldflags:
       - -s
-      - -X '{{ .ModulePath }}/cmd.BuildVersion={{ .Version }}'
+      - -X '{{ .ModulePath }}/cmd.BuildVersion=v{{ .Version }}'
       - -X '{{ .ModulePath }}/cmd.BuildDate={{ .Date }}'
       - -X '{{ .ModulePath }}/cmd.BuildHash={{ .Commit }}'
 archives:
   - id: default
     builds:
       - default
-    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ .Arm }}"
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ .Arm }}"
     format_overrides:
       - goos: windows
         format: zip
@@ -41,14 +41,14 @@ dockers:
     goarch: amd64
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - ghcr.io/rebuy-de/aws-nuke:{{ .Version }}-amd64
-      #- quay.io/rebuy/aws-nuke:{{ .Version }}-amd64
+      - ghcr.io/rebuy-de/aws-nuke:v{{ .Version }}-amd64
+      #- quay.io/rebuy/aws-nuke:v{{ .Version }}-amd64
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.version=v{{.Version}}"
       - "--label=org.opencontainers.image.source=https://github.com/debuy-de/aws-nuke"
       - "--platform=linux/amd64"
   - use: buildx
@@ -56,14 +56,14 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - ghcr.io/rebuy-de/aws-nuke:{{ .Version }}-arm64
-      #- quay.io/rebuy/aws-nuke:{{ .Version }}-amd64
+      - ghcr.io/rebuy-de/aws-nuke:v{{ .Version }}-arm64
+      #- quay.io/rebuy/aws-nuke:v{{ .Version }}-amd64
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.version=v{{.Version}}"
       - "--label=org.opencontainers.image.source=https://github.com/debuy-de/aws-nuke"
       - "--platform=linux/arm64"
   - use: buildx
@@ -72,29 +72,29 @@ dockers:
     goarm: "7"
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - ghcr.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
-      #- quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
+      - ghcr.io/rebuy-de/aws-nuke:v{{ .Version }}-arm32v7
+      #- quay.io/rebuy-de/aws-nuke:v{{ .Version }}-arm32v7
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.version=v{{.Version}}"
       - "--label=org.opencontainers.image.source=https://github.com/debuy-de/aws-nuke"
       - "--platform=linux/arm/v7"
 docker_manifests:
   - use: docker
-    name_template: ghcr.io/rebuy-de/aws-nuke:{{ .Version }}
+    name_template: ghcr.io/rebuy-de/aws-nuke:v{{ .Version }}
     image_templates:
-      - ghcr.io/rebuy-de/aws-nuke:{{ .Version }}-amd64
-      - ghcr.io/rebuy-de/aws-nuke:{{ .Version }}-arm64
-      - ghcr.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
+      - ghcr.io/rebuy-de/aws-nuke:v{{ .Version }}-amd64
+      - ghcr.io/rebuy-de/aws-nuke:v{{ .Version }}-arm64
+      - ghcr.io/rebuy-de/aws-nuke:v{{ .Version }}-arm32v7
   #- use: docker
-  #  name_template: quay.io/rebuy-de/aws-nuke:{{ .Version }}
+  #  name_template: quay.io/rebuy-de/aws-nuke:v{{ .Version }}
   #  image_templates:
-  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-amd64
-  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm64
-  #    - quay.io/rebuy-de/aws-nuke:{{ .Version }}-arm32v7
+  #    - quay.io/rebuy-de/aws-nuke:v{{ .Version }}-amd64
+  #    - quay.io/rebuy-de/aws-nuke:v{{ .Version }}-arm64
+  #    - quay.io/rebuy-de/aws-nuke:v{{ .Version }}-arm32v7
 checksum:
   name_template: "checksums.txt"
 changelog:
