@@ -40,8 +40,8 @@ dockers:
     goarch: amd64
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-amd64'
-      #- '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-amd64'
+      - '{{ replace .ModulePath "github.com/rebuy-de" "gchr.io/rebuy-de" }}:{{ .Version }}-amd64'
+      #- '{{ replace .ModulePath "github.com/rebuy-de" "quay.io/rebuy" }}:{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -55,8 +55,8 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm64'
-      #- '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm64'
+      - '{{ replace .ModulePath "github.com/rebuy-de" "gchr.io/rebuy-de" }}:{{ .Version }}-arm64'
+      #- '{{ replace .ModulePath "github.com/rebuy-de" "quay.io/rebuy" }}:{{ .Version }}-arm64'
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -71,8 +71,8 @@ dockers:
     goarm: "7"
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm32v7'
-      #- '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm32v7'
+      - '{{ replace .ModulePath "github.com/rebuy-de" "gchr.io/rebuy-de" }}:{{ .Version }}-arm32v7'
+      #- '{{ replace .ModulePath "github.com/rebuy-de" "quay.io/rebuy" }}:{{ .Version }}-arm32v7'
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -83,17 +83,17 @@ dockers:
       - "--platform=linux/arm/v7"
 docker_manifests:
   - use: docker
-    name_template: '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}'
+    name_template: '{{ replace .ModulePath "github.com/rebuy-de" "gchr.io/rebuy-de" }}:{{ .Version }}'
     image_templates:
-      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-amd64'
-      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm64'
-      - '{{ replace .ModulePath "github.com/debuy-de" "gchr.io/debuy-de" }}:{{ .Version }}-arm32v7'
+      - '{{ replace .ModulePath "github.com/rebuy-de" "gchr.io/rebuy-de" }}:{{ .Version }}-amd64'
+      - '{{ replace .ModulePath "github.com/rebuy-de" "gchr.io/rebuy-de" }}:{{ .Version }}-arm64'
+      - '{{ replace .ModulePath "github.com/rebuy-de" "gchr.io/rebuy-de" }}:{{ .Version }}-arm32v7'
   #- use: docker
-  #  name_template: '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}'
+  #  name_template: '{{ replace .ModulePath "github.com/rebuy-de" "quay.io/rebuy" }}:{{ .Version }}'
   #  image_templates:
-  #    - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-amd64'
-  #    - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm64'
-  #    - '{{ replace .ModulePath "github.com/debuy-de" "quay.io/debuy" }}:{{ .Version }}-arm32v7'
+  #    - '{{ replace .ModulePath "github.com/rebuy-de" "quay.io/rebuy" }}:{{ .Version }}-amd64'
+  #    - '{{ replace .ModulePath "github.com/rebuy-de" "quay.io/rebuy" }}:{{ .Version }}-arm64'
+  #    - '{{ replace .ModulePath "github.com/rebuy-de" "quay.io/rebuy" }}:{{ .Version }}-arm32v7'
 checksum:
   name_template: "checksums.txt"
 changelog:
