@@ -97,6 +97,8 @@ docker_manifests:
   #    - quay.io/rebuy-de/aws-nuke:v{{ .Version }}-arm32v7
 checksum:
   name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Summary }}"
 changelog:
   sort: asc
   filters:
