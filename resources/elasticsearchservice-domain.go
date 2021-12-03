@@ -3,11 +3,13 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticsearchservice"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type ESDomain struct {
 	svc        *elasticsearchservice.ElasticsearchService
 	domainName *string
+	tags []*elasticsearchservice.Tag
 }
 
 func init() {
@@ -28,6 +30,7 @@ func ListESDomains(sess *session.Session) ([]Resource, error) {
 		resources = append(resources, &ESDomain{
 			svc:        svc,
 			domainName: domain.DomainName,
+			tags: domain.Tags,
 		})
 	}
 
@@ -42,6 +45,14 @@ func (f *ESDomain) Remove() error {
 
 	return err
 }
+func (e *ESDomain) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
+}
+
 
 func (f *ESDomain) String() string {
 	return *f.domainName
