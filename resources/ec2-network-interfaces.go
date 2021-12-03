@@ -1,6 +1,9 @@
 package resources
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -37,13 +40,17 @@ func ListEC2NetworkInterfaces(sess *session.Session) ([]Resource, error) {
 }
 
 func (e *EC2NetworkInterface) Remove() error {
+
 	if e.eni.Attachment != nil {
 		_, err := e.svc.DetachNetworkInterface(&ec2.DetachNetworkInterfaceInput{
 			AttachmentId: e.eni.Attachment.AttachmentId,
 			Force:        aws.Bool(true),
 		})
 		if err != nil {
-			return err
+			expected := fmt.Sprintf("The interface attachment '%s' does not exist.", *e.eni.Attachment.AttachmentId)
+			if !strings.Contains(err.Error(), expected) {
+				return err
+			}
 		}
 	}
 
@@ -72,4 +79,8 @@ func (r *EC2NetworkInterface) Properties() types.Properties {
 		Set("SubnetID", r.eni.SubnetId).
 		Set("Status", r.eni.Status)
 	return properties
+}
+
+func (r *EC2NetworkInterface) String() string {
+	return *r.eni.NetworkInterfaceId
 }
