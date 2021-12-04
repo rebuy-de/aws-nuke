@@ -12,6 +12,7 @@ type WAFRegionalRule struct {
 	svc  *wafregional.WAFRegional
 	ID   *string
 	name *string
+	rule *waf.Rule
 }
 
 func init() {
@@ -33,10 +34,14 @@ func ListWAFRegionalRules(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, rule := range resp.Rules {
+			ruleResp, _ := svc.GetRule(&waf.GetRuleInput{
+				RuleId: rule.RuleId,
+			})
 			resources = append(resources, &WAFRegionalRule{
 				svc:  svc,
 				ID:   rule.RuleId,
 				name: rule.Name,
+				rule: ruleResp.Rule,
 			})
 		}
 
@@ -53,6 +58,29 @@ func ListWAFRegionalRules(sess *session.Session) ([]Resource, error) {
 func (f *WAFRegionalRule) Remove() error {
 
 	tokenOutput, err := f.svc.GetChangeToken(&waf.GetChangeTokenInput{})
+	if err != nil {
+		return err
+	}
+
+	ruleUpdates := []*waf.RuleUpdate{}
+	for _, predicate := range f.rule.Predicates {
+		ruleUpdates = append(ruleUpdates, &waf.RuleUpdate{
+			Action:    aws.String(waf.ChangeActionDelete),
+			Predicate: predicate,
+		})
+	}
+
+	_, err = f.svc.UpdateRule(&waf.UpdateRuleInput{
+		ChangeToken: tokenOutput.ChangeToken,
+		RuleId:      f.ID,
+		Updates:     ruleUpdates,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	tokenOutput, err = f.svc.GetChangeToken(&waf.GetChangeTokenInput{})
 	if err != nil {
 		return err
 	}
