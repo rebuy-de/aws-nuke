@@ -24,14 +24,17 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
-	defVpcId := DefaultVpcID(svc)
+	defVpcId := ""
+	if defVpc := DefaultVpc(svc); defVpc != nil {
+		defVpcId = *defVpc.VpcId
+	}
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.RouteTables {
 		resources = append(resources, &EC2RouteTable{
 			svc:        svc,
 			routeTable: out,
-			defaultVPC: *defVpcId == *out.VpcId,
+			defaultVPC: defVpcId == *out.VpcId,
 		})
 	}
 
