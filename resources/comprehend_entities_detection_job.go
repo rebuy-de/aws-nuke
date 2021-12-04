@@ -22,7 +22,8 @@ func ListComprehendEntitiesDetectionJobs(sess *session.Session) ([]Resource, err
 			return nil, err
 		}
 		for _, entitiesDetectionJob := range resp.EntitiesDetectionJobPropertiesList {
-			if *entitiesDetectionJob.JobStatus == "STOPPED" {
+			if *entitiesDetectionJob.JobStatus == "STOPPED" ||
+				*entitiesDetectionJob.JobStatus == "FAILED" {
 				// if the job has already been stopped, do not try to delete it again
 				continue
 			}
