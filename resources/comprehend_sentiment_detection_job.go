@@ -22,6 +22,11 @@ func ListComprehendSentimentDetectionJobs(sess *session.Session) ([]Resource, er
 			return nil, err
 		}
 		for _, sentimentDetectionJob := range resp.SentimentDetectionJobPropertiesList {
+			if *sentimentDetectionJob.JobStatus == "STOPPED" ||
+				*sentimentDetectionJob.JobStatus == "FAILED" {
+				// if the job has already been stopped, do not try to delete it again
+				continue
+			}
 			resources = append(resources, &ComprehendSentimentDetectionJob{
 				svc:                   svc,
 				sentimentDetectionJob: sentimentDetectionJob,

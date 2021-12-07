@@ -24,14 +24,17 @@ func ListEC2InternetGateways(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
-	defVpcId := DefaultVpcID(svc)
+	defVpcId := ""
+	if defVpc := DefaultVpc(svc); defVpc != nil {
+		defVpcId = *defVpc.VpcId
+	}
 
 	resources := make([]Resource, 0)
 	for _, igw := range resp.InternetGateways {
 		resources = append(resources, &EC2InternetGateway{
 			svc:        svc,
 			igw:        igw,
-			defaultVPC: HasVpcAttachment(defVpcId, igw.Attachments),
+			defaultVPC: HasVpcAttachment(&defVpcId, igw.Attachments),
 		})
 	}
 
@@ -39,7 +42,7 @@ func ListEC2InternetGateways(sess *session.Session) ([]Resource, error) {
 }
 
 func HasVpcAttachment(vpcId *string, attachments []*ec2.InternetGatewayAttachment) bool {
-	if vpcId == nil {
+	if *vpcId == "" {
 		return false
 	}
 

@@ -7,9 +7,10 @@ import (
 )
 
 type EC2DHCPOption struct {
-	svc  *ec2.EC2
-	id   *string
-	tags []*ec2.Tag
+	svc        *ec2.EC2
+	id         *string
+	tags       []*ec2.Tag
+	defaultVPC bool
 }
 
 func init() {
@@ -19,18 +20,23 @@ func init() {
 func ListEC2DHCPOptions(sess *session.Session) ([]Resource, error) {
 	svc := ec2.New(sess)
 
-	resp, err := svc.DescribeDhcpOptions(nil)
+	resp, err := svc.DescribeDhcpOptions(&ec2.DescribeDhcpOptionsInput{})
 	if err != nil {
 		return nil, err
 	}
 
+	defVpcDhcpOptsId := ""
+	if defVpc := DefaultVpc(svc); defVpc != nil {
+		defVpcDhcpOptsId = *defVpc.DhcpOptionsId
+	}
+
 	resources := make([]Resource, 0)
 	for _, out := range resp.DhcpOptions {
-
 		resources = append(resources, &EC2DHCPOption{
-			svc:  svc,
-			id:   out.DhcpOptionsId,
-			tags: out.Tags,
+			svc:        svc,
+			id:         out.DhcpOptionsId,
+			tags:       out.Tags,
+			defaultVPC: defVpcDhcpOptsId == *out.DhcpOptionsId,
 		})
 	}
 
@@ -55,6 +61,7 @@ func (e *EC2DHCPOption) Properties() types.Properties {
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+	properties.Set("DefaultVPC", e.defaultVPC)
 	return properties
 }
 
