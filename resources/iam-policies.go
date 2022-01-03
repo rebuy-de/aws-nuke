@@ -44,7 +44,7 @@ func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 				policy, err := GetIAMPolicy(svc, listedPolicy.Arn)
 				if err != nil {
 					logrus.Errorf("Failed to get listed policy %s: %v", *listedPolicy.PolicyName, err)
-					break
+					continue
 				}
 				policies = append(policies, policy)
 			}
