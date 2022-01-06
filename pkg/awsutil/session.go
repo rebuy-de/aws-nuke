@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3control"
 	"github.com/rebuy-de/aws-nuke/pkg/config"
 	log "github.com/sirupsen/logrus"
 )
@@ -224,7 +225,11 @@ func skipMissingServiceInRegionHandler(r *request.Request) {
 func skipGlobalHandler(global bool) func(r *request.Request) {
 	return func(r *request.Request) {
 		service := r.ClientInfo.ServiceName
-
+		if service == s3control.ServiceName {
+			service = s3control.EndpointsID
+			// Rewrite S3 Control ServiceName to proper EndpointsID
+			// https://github.com/rebuy-de/aws-nuke/issues/708
+		}
 		rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), DefaultAWSPartitionID, service)
 		if !ok {
 			// This means that the service does not exist in the endpoints list.
@@ -246,7 +251,7 @@ func skipGlobalHandler(global bool) func(r *request.Request) {
 			return
 		}
 
-		if len(rs) > 0 && global {
+		if (len(rs) > 0 && global) && service != "sts" {
 			r.Error = ErrSkipRequest(fmt.Sprintf("service '%s' is not global, but the session is", service))
 			return
 		}
