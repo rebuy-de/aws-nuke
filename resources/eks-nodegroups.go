@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -10,10 +11,8 @@ import (
 )
 
 type EKSNodegroup struct {
-	svc     *eks.EKS
-	cluster *string
-	name    *string
-	tags    map[string]*string
+	svc       *eks.EKS
+	nodegroup *eks.Nodegroup
 }
 
 func init() {
@@ -50,10 +49,12 @@ func ListEKSNodegroups(sess *session.Session) ([]Resource, error) {
 	nodegroupsInputParams := &eks.ListNodegroupsInput{
 		MaxResults: aws.Int64(100),
 	}
+	describeNodegroupInputParams := &eks.DescribeNodegroupInput{}
 
 	// fetch the associated node groups
 	for _, clusterName := range clusterNames {
 		nodegroupsInputParams.ClusterName = clusterName
+		describeNodegroupInputParams.ClusterName = clusterName
 
 		for {
 			resp, err := svc.ListNodegroups(nodegroupsInputParams)
@@ -61,18 +62,15 @@ func ListEKSNodegroups(sess *session.Session) ([]Resource, error) {
 				return nil, err
 			}
 
-			for _, name := range resp.Nodegroups {
-				dngo, err := svc.DescribeNodegroup(
-					&eks.DescribeNodegroupInput{ClusterName: clusterName, NodegroupName: name})
+			for _, nodegroupName := range resp.Nodegroups {
+				describeNodegroupInputParams.NodegroupName = nodegroupName
+				nodegroupDescriptionResponse, err := svc.DescribeNodegroup(describeNodegroupInputParams)
 				if err != nil {
 					return nil, err
 				}
-
 				resources = append(resources, &EKSNodegroup{
-					svc:     svc,
-					name:    name,
-					cluster: clusterName,
-					tags:    dngo.Nodegroup.Tags,
+					svc:       svc,
+					nodegroup: nodegroupDescriptionResponse.Nodegroup,
 				})
 			}
 
@@ -83,7 +81,6 @@ func ListEKSNodegroups(sess *session.Session) ([]Resource, error) {
 
 			nodegroupsInputParams.NextToken = resp.NextToken
 		}
-
 	}
 
 	return resources, nil
@@ -91,22 +88,25 @@ func ListEKSNodegroups(sess *session.Session) ([]Resource, error) {
 
 func (ng *EKSNodegroup) Remove() error {
 	_, err := ng.svc.DeleteNodegroup(&eks.DeleteNodegroupInput{
-		ClusterName:   ng.cluster,
-		NodegroupName: ng.name,
+		ClusterName:   ng.nodegroup.ClusterName,
+		NodegroupName: ng.nodegroup.NodegroupName,
 	})
 	return err
 }
 
 func (ng *EKSNodegroup) Properties() types.Properties {
 	properties := types.NewProperties()
-	for k, v := range ng.tags {
+	properties.Set("Cluster", ng.nodegroup.ClusterName)
+	properties.Set("Profile", ng.nodegroup.NodegroupName)
+	if ng.nodegroup.CreatedAt != nil {
+		properties.Set("CreatedAt", ng.nodegroup.CreatedAt.Format(time.RFC3339))
+	}
+	for k, v := range ng.nodegroup.Tags {
 		properties.SetTag(&k, v)
 	}
-	properties.Set("Cluster", *ng.cluster)
-	properties.Set("Profile", *ng.name)
 	return properties
 }
 
 func (ng *EKSNodegroup) String() string {
-	return fmt.Sprintf("%s:%s", *ng.cluster, *ng.name)
+	return fmt.Sprintf("%s:%s", *ng.nodegroup.ClusterName, *ng.nodegroup.NodegroupName)
 }
