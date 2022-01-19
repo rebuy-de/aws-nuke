@@ -101,6 +101,9 @@ func (ng *EKSNodegroup) Properties() types.Properties {
 	if ng.nodegroup.CreatedAt != nil {
 		properties.Set("CreatedAt", ng.nodegroup.CreatedAt.Format(time.RFC3339))
 	}
+	for k, v := range ng.nodegroup.Tags {
+		properties.SetTag(&k, v)
+	}
 	return properties
 }
 
