@@ -3,11 +3,13 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type IAMUser struct {
 	svc  *iam.IAM
 	name string
+	tags []*iam.Tag
 }
 
 func init() {
@@ -27,6 +29,7 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 		resources = append(resources, &IAMUser{
 			svc:  svc,
 			name: *out.UserName,
+			tags: out.Tags,
 		})
 	}
 
@@ -46,4 +49,15 @@ func (e *IAMUser) Remove() error {
 
 func (e *IAMUser) String() string {
 	return e.name
+}
+
+func (e *IAMUser) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", e.name)
+
+	for _, tag := range e.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }

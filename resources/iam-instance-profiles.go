@@ -3,11 +3,13 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type IAMInstanceProfile struct {
 	svc  *iam.IAM
 	name string
+	tags []*iam.Tag
 }
 
 func init() {
@@ -29,6 +31,7 @@ func ListIAMInstanceProfiles(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &IAMInstanceProfile{
 				svc:  svc,
 				name: *out.InstanceProfileName,
+				tags: out.Tags,
 			})
 		}
 
@@ -55,4 +58,15 @@ func (e *IAMInstanceProfile) Remove() error {
 
 func (e *IAMInstanceProfile) String() string {
 	return e.name
+}
+
+func (e *IAMInstanceProfile) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", e.name)
+
+	for _, tag := range e.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
