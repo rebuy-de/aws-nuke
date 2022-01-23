@@ -13,6 +13,7 @@ type IAMUserAccessKey struct {
 	accessKeyId string
 	userName    string
 	status      string
+	userTags    []*iam.Tag
 }
 
 func init() {
@@ -37,12 +38,18 @@ func ListIAMUserAccessKeys(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
+		userTags, err := svc.ListUserTags(&iam.ListUserTagsInput{UserName: role.UserName})
+		if err != nil {
+			return nil, err
+		}
+
 		for _, meta := range resp.AccessKeyMetadata {
 			resources = append(resources, &IAMUserAccessKey{
 				svc:         svc,
 				accessKeyId: *meta.AccessKeyId,
 				userName:    *meta.UserName,
 				status:      *meta.Status,
+				userTags:    userTags.Tags,
 			})
 		}
 	}
@@ -64,9 +71,15 @@ func (e *IAMUserAccessKey) Remove() error {
 }
 
 func (e *IAMUserAccessKey) Properties() types.Properties {
-	return types.NewProperties().
-		Set("UserName", e.userName).
-		Set("AccessKeyID", e.accessKeyId)
+	properties := types.NewProperties()
+	properties.Set("UserName", e.userName)
+	properties.Set("AccessKeyID", e.accessKeyId)
+
+	for _, tag := range e.userTags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (e *IAMUserAccessKey) String() string {
