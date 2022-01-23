@@ -73,6 +73,7 @@ func (e *EC2InternetGateway) Properties() types.Properties {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.igw.OwnerId)
 	return properties
 }
 

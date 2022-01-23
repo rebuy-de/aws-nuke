@@ -62,6 +62,7 @@ func (e *EC2Subnet) Properties() types.Properties {
 	}
 	properties.Set("DefaultForAz", e.subnet.DefaultForAz)
 	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.subnet.OwnerId)
 	return properties
 }
 
