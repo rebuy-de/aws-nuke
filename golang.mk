@@ -66,7 +66,7 @@ _build: vendor
 		$(TARGET);\
 	)
 
-build: go_generate _build
+build:  _build
 	$(foreach TARGET,$(TARGETS),ln -sf $(OUTPUT_FILE) dist/$(OUTPUT_LINK);)
 
 compress: _build

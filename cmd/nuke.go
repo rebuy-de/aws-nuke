@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -137,8 +138,25 @@ func (n *Nuke) Run() error {
 func (n *Nuke) Scan() error {
 	accountConfig := n.Config.Accounts[n.Account.ID()]
 
+	ctx := context.TODO()
+
+	var names []string
+
+	if n.Config.FeatureFlags.UseCloudControl {
+		session, err := n.Account.Credentials.RootSession()
+		if err != nil {
+			return err
+		}
+		names, err = CloudControlGetListerNames(ctx, session)
+		if err != nil {
+			return err
+		}
+	} else {
+		names = resources.GetListerNames()
+	}
+
 	resourceTypes := ResolveResourceTypes(
-		resources.GetListerNames(),
+		names,
 		[]types.Collection{
 			n.Parameters.Targets,
 			n.Config.ResourceTypes.Targets,
@@ -156,7 +174,16 @@ func (n *Nuke) Scan() error {
 	for _, regionName := range n.Config.Regions {
 		region := NewRegion(regionName, n.Account.ResourceTypeToServiceType, n.Account.NewSession)
 
-		items := Scan(region, resourceTypes)
+		var items <-chan *Item
+		if n.Config.FeatureFlags.UseCloudControl {
+			session, err := n.Account.Credentials.RootSession()
+			if err != nil {
+				return err
+			}
+			items = CloudControlScan(ctx, session, region, resourceTypes)
+		} else {
+			items = Scan(region, resourceTypes)
+		}
 		for item := range items {
 			ffGetter, ok := item.Resource.(resources.FeatureFlagGetter)
 			if ok {

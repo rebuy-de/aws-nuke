@@ -68,7 +68,7 @@ func (c *Credentials) Validate() error {
 	return nil
 }
 
-func (c *Credentials) rootSession() (*session.Session, error) {
+func (c *Credentials) RootSession() (*session.Session, error) {
 	if c.session == nil {
 		var opts session.Options
 
@@ -174,7 +174,7 @@ func (c *Credentials) NewSession(region, serviceType string) (*session.Session, 
 	}
 
 	if sess == nil {
-		root, err := c.rootSession()
+		root, err := c.RootSession()
 		if err != nil {
 			return nil, err
 		}
