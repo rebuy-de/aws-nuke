@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 func init() {
@@ -19,8 +20,9 @@ func ListAutoscalingGroups(s *session.Session) ([]Resource, error) {
 		func(page *autoscaling.DescribeAutoScalingGroupsOutput, lastPage bool) bool {
 			for _, asg := range page.AutoScalingGroups {
 				resources = append(resources, &AutoScalingGroup{
-					svc:  svc,
 					name: asg.AutoScalingGroupName,
+					svc:  svc,
+					tags: asg.Tags,
 				})
 			}
 			return !lastPage
@@ -36,6 +38,7 @@ func ListAutoscalingGroups(s *session.Session) ([]Resource, error) {
 type AutoScalingGroup struct {
 	svc  *autoscaling.AutoScaling
 	name *string
+	tags []*autoscaling.TagDescription
 }
 
 func (asg *AutoScalingGroup) Remove() error {
@@ -54,4 +57,15 @@ func (asg *AutoScalingGroup) Remove() error {
 
 func (asg *AutoScalingGroup) String() string {
 	return *asg.name
+}
+
+func (asg *AutoScalingGroup) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tag := range asg.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	properties.Set("Name", asg.name)
+
+	return properties
 }

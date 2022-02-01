@@ -15,6 +15,7 @@ type EC2SecurityGroup struct {
 	name    *string
 	ingress []*ec2.IpPermission
 	egress  []*ec2.IpPermission
+	ownerID *string
 }
 
 func init() {
@@ -36,6 +37,7 @@ func ListEC2SecurityGroups(sess *session.Session) ([]Resource, error) {
 					name:    group.GroupName,
 					ingress: group.IpPermissions,
 					egress:  group.IpPermissionsEgress,
+					ownerID: group.OwnerId,
 				})
 			}
 			return !lastPage
@@ -93,6 +95,7 @@ func (sg *EC2SecurityGroup) Properties() types.Properties {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.Set("Name", sg.name)
+	properties.Set("OwnerID", sg.ownerID)
 	return properties
 }
 

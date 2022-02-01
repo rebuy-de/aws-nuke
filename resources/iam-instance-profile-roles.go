@@ -2,15 +2,16 @@ package resources
 
 import (
 	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type IAMInstanceProfileRole struct {
 	svc     *iam.IAM
 	role    string
 	profile string
+	tags    []*iam.Tag
 }
 
 func init() {
@@ -34,6 +35,7 @@ func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
 					svc:     svc,
 					profile: *out.InstanceProfileName,
 					role:    *role.RoleName,
+					tags:    role.Tags,
 				})
 			}
 		}
@@ -59,6 +61,18 @@ func (e *IAMInstanceProfileRole) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *IAMInstanceProfileRole) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Role", e.role)
+	properties.Set("Profile", e.profile)
+
+	for _, tag := range e.tags {
+		properties.SetTagWithPrefix("role", tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (e *IAMInstanceProfileRole) String() string {

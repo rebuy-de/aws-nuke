@@ -75,6 +75,7 @@ func (e *EC2VPC) Properties() types.Properties {
 	}
 	properties.Set("ID", e.vpc.VpcId)
 	properties.Set("IsDefault", e.vpc.IsDefault)
+	properties.Set("OwnerID", e.vpc.OwnerId)
 	return properties
 }
 
