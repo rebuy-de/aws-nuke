@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
@@ -29,7 +31,7 @@ func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.InstanceProfiles {
-			for _, out_role := range out.Roles {
+			for _, outRole := range out.Roles {
 				profile, err := GetIAMInstanceProfile(svc, out.InstanceProfileName)
 				if err != nil {
 					logrus.
@@ -41,7 +43,7 @@ func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
 
 				resources = append(resources, &IAMInstanceProfileRole{
 					svc:     svc,
-					role:    *out_role.RoleName,
+					role:    *outRole.RoleName,
 					profile: profile,
 				})
 			}
@@ -68,6 +70,10 @@ func (e *IAMInstanceProfileRole) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *IAMInstanceProfileRole) String() string {
+	return fmt.Sprintf("%s -> %s", e.profile, e.role)
 }
 
 func (e *IAMInstanceProfileRole) Properties() types.Properties {
