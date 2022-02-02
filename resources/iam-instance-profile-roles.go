@@ -72,6 +72,18 @@ func (e *IAMInstanceProfileRole) Remove() error {
 	return nil
 }
 
+func (e *IAMInstanceProfileRole) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Role", e.role)
+	properties.Set("Profile", e.profile)
+
+	for _, tag := range e.tags {
+		properties.SetTagWithPrefix("role", tag.Key, tag.Value)
+	}
+
+	return properties
+}
+
 func (e *IAMInstanceProfileRole) String() string {
 	return fmt.Sprintf("%s -> %s", e.profile, e.role)
 }
