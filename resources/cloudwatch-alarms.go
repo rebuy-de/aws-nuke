@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type CloudWatchAlarm struct {
@@ -53,6 +54,11 @@ func (f *CloudWatchAlarm) Remove() error {
 	})
 
 	return err
+}
+
+func (f *CloudWatchAlarm) Properties() types.Properties {
+	return types.NewProperties().
+		Set("Name", f.alarmName)
 }
 
 func (f *CloudWatchAlarm) String() string {
