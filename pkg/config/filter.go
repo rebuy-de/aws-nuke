@@ -67,7 +67,7 @@ func (f Filter) Match(o string) (bool, error) {
 		}
 		fieldTime, err := parseDate(o)
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		fieldTimeWithOffset := fieldTime.Add(duration)
 
