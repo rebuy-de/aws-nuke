@@ -422,6 +422,7 @@ feature-flags:
     EC2Instance: true
     CloudformationStack: true
   force-delete-lightsail-addons: true
+  nuke-on-filter-failure: true
 ```
 
 

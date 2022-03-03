@@ -162,11 +162,13 @@ func (n *Nuke) Scan() error {
 	for _, regionName := range n.Config.Regions {
 		region := NewRegion(regionName, n.Account.ResourceTypeToServiceType, n.Account.NewSession)
 
+		var featureFlags = n.Config.FeatureFlags
+
 		items := Scan(region, resourceTypes)
 		for item := range items {
 			ffGetter, ok := item.Resource.(resources.FeatureFlagGetter)
 			if ok {
-				ffGetter.FeatureFlags(n.Config.FeatureFlags)
+				ffGetter.FeatureFlags(featureFlags)
 			}
 
 			queue = append(queue, item)
@@ -177,6 +179,16 @@ func (n *Nuke) Scan() error {
 
 			if item.State != ItemStateFiltered || !n.Parameters.Quiet {
 				item.Print()
+			}
+
+			if item.State == ItemStateFilterFailed {
+				if featureFlags.NukeOnFilterFailure {
+					//reset state to `new` after displayed for nuking
+					item.State = ItemStateNew
+				} else {
+					//set state to filtered after displayed
+					item.State = ItemStateFiltered //if +quiet then this would still have been displayed
+				}
 			}
 		}
 	}
@@ -220,6 +232,15 @@ func (n *Nuke) Filter(item *Item) error {
 
 		match, err := filter.Match(prop)
 		if err != nil {
+			fferr, ok := err.(*config.FilterFailed)
+			if ok {
+				if fferr.Fatal {
+					return fferr.Err
+				}
+				item.State = ItemStateFilterFailed
+				item.Reason = fmt.Sprintf("couldn't determine if resource should be filtered: %v", fferr.Err)
+				return nil
+			}
 			return err
 		}
 
