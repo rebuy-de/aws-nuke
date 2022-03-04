@@ -21,11 +21,12 @@ func init() {
 	// To get an overview of available cloud control resource types run this
 	// command in the repo root:
 	//     go run ./dev/list-cloudcontrol
+	registerCloudControl("AWS::MWAA::Environment")
+	registerCloudControl("AWS::Synthetics::Canary")
 	registerCloudControl("AWS::Timestream::Database")
 	registerCloudControl("AWS::Timestream::ScheduledQuery")
 	registerCloudControl("AWS::Timestream::Table")
 	registerCloudControl("AWS::Transfer::Workflow")
-	registerCloudControl("AWS::Synthetics::Canary")
 }
 
 func NewListCloudControlResource(typeName string) func(*session.Session) ([]Resource, error) {

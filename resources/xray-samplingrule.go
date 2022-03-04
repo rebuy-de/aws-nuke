@@ -13,8 +13,7 @@ type XRaySamplingRule struct {
 }
 
 func init() {
-	register("XRaySamplingRule", ListXRaySamplingRules,
-		mapCloudControl("AWS::XRay::SamplingRule"))
+	register("XRaySamplingRule", ListXRaySamplingRules)
 }
 
 func ListXRaySamplingRules(sess *session.Session) ([]Resource, error) {

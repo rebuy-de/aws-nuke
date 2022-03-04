@@ -13,8 +13,7 @@ type XRayGroup struct {
 }
 
 func init() {
-	register("XRayGroup", ListXRayGroups,
-		mapCloudControl("AWS::XRay::Group"))
+	register("XRayGroup", ListXRayGroups)
 }
 
 func ListXRayGroups(sess *session.Session) ([]Resource, error) {

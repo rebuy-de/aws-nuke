@@ -17,7 +17,8 @@ type ACMPCACertificateAuthority struct {
 }
 
 func init() {
-	register("ACMPCACertificateAuthority", ListACMPCACertificateAuthorities)
+	register("ACMPCACertificateAuthority", ListACMPCACertificateAuthorities,
+		mapCloudControl("AWS::ACMPCA::CertificateAuthority"))
 }
 
 func ListACMPCACertificateAuthorities(sess *session.Session) ([]Resource, error) {

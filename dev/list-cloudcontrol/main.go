@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -13,6 +14,10 @@ import (
 	"github.com/rebuy-de/rebuy-go-sdk/v3/pkg/cmdutil"
 	"github.com/sirupsen/logrus"
 )
+
+type CFTypeSchema struct {
+	Handlers map[string]interface{} `json:"handlers"`
+}
 
 func main() {
 	ctx := cmdutil.SignalRootContext()
@@ -48,6 +53,28 @@ func main() {
 			color.New(color.Bold).Printf("%-55s", typeName)
 			if !strings.HasPrefix(typeName, "AWS::") {
 				color.HiBlack("does not have a valid prefix")
+				continue
+			}
+
+			describe, err := cf.DescribeType(&cloudformation.DescribeTypeInput{
+				Type:     aws.String(cloudformation.RegistryTypeResource),
+				TypeName: aws.String(typeName),
+			})
+			if err != nil {
+				color.New(color.FgRed).Println(err)
+				continue
+			}
+
+			var schema CFTypeSchema
+			err = json.Unmarshal([]byte(aws.StringValue(describe.Schema)), &schema)
+			if err != nil {
+				color.New(color.FgRed).Println(err)
+				continue
+			}
+
+			_, canList := schema.Handlers["list"]
+			if !canList {
+				color.New(color.FgHiBlack).Println("does not support list")
 				continue
 			}
 
