@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/rebuy-de/aws-nuke/pkg/config"
@@ -38,13 +39,36 @@ type FeatureFlagGetter interface {
 
 var resourceListers = make(ResourceListers)
 
-func register(name string, lister ResourceLister) {
+func register(name string, lister ResourceLister, opts ...registerOption) {
 	_, exists := resourceListers[name]
 	if exists {
 		panic(fmt.Sprintf("a resource with the name %s already exists", name))
 	}
 
 	resourceListers[name] = lister
+
+	for _, opt := range opts {
+		opt(name, lister)
+	}
+}
+
+var cloudControlMapping = map[string]string{}
+
+func GetCloudControlMapping() map[string]string {
+	return cloudControlMapping
+}
+
+type registerOption func(name string, lister ResourceLister)
+
+func mapCloudControl(typeName string) registerOption {
+	return func(name string, lister ResourceLister) {
+		_, exists := cloudControlMapping[typeName]
+		if exists {
+			panic(fmt.Sprintf("a cloud control mapping for %s already exists", typeName))
+		}
+
+		cloudControlMapping[typeName] = name
+	}
 }
 
 func GetListers() ResourceListers {
@@ -52,6 +76,9 @@ func GetListers() ResourceListers {
 }
 
 func GetLister(name string) ResourceLister {
+	if strings.HasPrefix(name, "AWS::") {
+		return NewListCloudControlResource(name)
+	}
 	return resourceListers[name]
 }
 
@@ -62,4 +89,8 @@ func GetListerNames() []string {
 	}
 
 	return names
+}
+
+func registerCloudControl(typeName string) {
+	register(typeName, NewListCloudControlResource(typeName), mapCloudControl(typeName))
 }
