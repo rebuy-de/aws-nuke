@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudcontrolapi"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
 	"github.com/sirupsen/logrus"
@@ -23,6 +24,8 @@ func init() {
 	registerCloudControl("AWS::Timestream::Database")
 	registerCloudControl("AWS::Timestream::ScheduledQuery")
 	registerCloudControl("AWS::Timestream::Table")
+	registerCloudControl("AWS::Transfer::Workflow")
+	registerCloudControl("AWS::Synthetics::Canary")
 }
 
 func NewListCloudControlResource(typeName string) func(*session.Session) ([]Resource, error) {
@@ -69,10 +72,11 @@ func NewListCloudControlResource(typeName string) func(*session.Session) ([]Reso
 				}
 
 				resources = append(resources, &CloudControlResource{
-					svc:        svc,
-					typeName:   typeName,
-					identifier: identifier,
-					properties: properties,
+					svc:         svc,
+					clientToken: uuid.New().String(),
+					typeName:    typeName,
+					identifier:  identifier,
+					properties:  properties,
 				})
 			}
 
@@ -88,10 +92,11 @@ func NewListCloudControlResource(typeName string) func(*session.Session) ([]Reso
 }
 
 type CloudControlResource struct {
-	svc        *cloudcontrolapi.CloudControlApi
-	typeName   string
-	identifier string
-	properties types.Properties
+	svc         *cloudcontrolapi.CloudControlApi
+	clientToken string
+	typeName    string
+	identifier  string
+	properties  types.Properties
 }
 
 func (r *CloudControlResource) String() string {
@@ -99,7 +104,12 @@ func (r *CloudControlResource) String() string {
 }
 
 func (i *CloudControlResource) Remove() error {
-	return nil
+	_, err := i.svc.DeleteResource(&cloudcontrolapi.DeleteResourceInput{
+		ClientToken: &i.clientToken,
+		Identifier:  &i.identifier,
+		TypeName:    &i.typeName,
+	})
+	return err
 }
 
 func (r *CloudControlResource) Properties() types.Properties {

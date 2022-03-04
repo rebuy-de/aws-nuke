@@ -71,10 +71,6 @@ func mapCloudControl(typeName string) registerOption {
 	}
 }
 
-func GetListers() ResourceListers {
-	return resourceListers
-}
-
 func GetLister(name string) ResourceLister {
 	if strings.HasPrefix(name, "AWS::") {
 		return NewListCloudControlResource(name)
@@ -84,7 +80,7 @@ func GetLister(name string) ResourceLister {
 
 func GetListerNames() []string {
 	names := []string{}
-	for resourceType, _ := range GetListers() {
+	for resourceType := range resourceListers {
 		names = append(names, resourceType)
 	}
 
