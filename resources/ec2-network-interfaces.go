@@ -47,10 +47,13 @@ func (e *EC2NetworkInterface) Remove() error {
 			Force:        aws.Bool(true),
 		})
 		if err != nil {
-			expected := fmt.Sprintf("The interface attachment '%s' does not exist.", *e.eni.Attachment.AttachmentId)
-			if !strings.Contains(err.Error(), expected) {
-				return err
+			if e.eni.Attachment.AttachmentId != nil {
+				expected := fmt.Sprintf("The interface attachment '%s' does not exist.", *e.eni.Attachment.AttachmentId)
+				if !strings.Contains(err.Error(), expected) {
+					return err
+				}
 			}
+
 		}
 	}
 
