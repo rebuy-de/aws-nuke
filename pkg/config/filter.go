@@ -31,16 +31,16 @@ func (f Filters) Merge(f2 Filters) {
 }
 
 type FilterFailed struct{
-	Filter string //?
-	Fatal bool
-	Err error
+	Filter string	//What Filter Failed?
+	Fatal bool		//Is this life threating?
+	Err error		//What caused it?
 }
 
 func (f *FilterFailed) Error() string {
 	return fmt.Sprintf("filter: %v isFatal?: %t err: %v", f.Filter, f.Fatal, f.Err)
 }
 
-
+//creates a FillterFailed with a custom message
 func createFilterFailed(filter string, fatal bool, msg string) error {
 	return &FilterFailed{
 		Filter: filter,
@@ -88,13 +88,13 @@ func (f Filter) Match(o string) (bool, error) {
 		}
 		fieldTime, err := parseDate(o)
 		if err != nil {
-			var ferr = &FilterFailed{
+			var fferr = &FilterFailed{
 				Filter: FilterTypeDateOlderThan,
 				Fatal: false,
 				Err: err,
 			}
 
-			return false, ferr
+			return false, fferr
 		}
 		fieldTimeWithOffset := fieldTime.Add(duration)
 
