@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 type Properties map[string]string
@@ -48,6 +49,11 @@ func (p Properties) Set(key string, value interface{}) Properties {
 			return p
 		}
 		p[key] = fmt.Sprint(*v)
+	case *time.Time:
+		if v == nil {
+			return p
+		}
+		p[key] = v.Format(time.RFC3339)
 	default:
 		// Fallback to Stringer interface. This produces gibberish on pointers,
 		// but is the only way to avoid reflection.
