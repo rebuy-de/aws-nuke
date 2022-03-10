@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudtrail"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
@@ -37,6 +38,11 @@ func (trail *CloudTrailTrail) Remove() error {
 		Name: trail.name,
 	})
 	return err
+}
+
+func (trail *CloudTrailTrail) Properties() types.Properties {
+	return types.NewProperties().
+		Set("Name", trail.name)
 }
 
 func (trail *CloudTrailTrail) String() string {
