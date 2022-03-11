@@ -35,7 +35,7 @@ func ListServiceSpecificCredentials(sess *session.Session) ([]Resource, error) {
 			continue
 		}
 		params := &iam.ListServiceSpecificCredentialsInput{
-			UserName: user.user.UserName,
+			UserName: user.userName,
 		}
 		serviceCredentials, err := svc.ListServiceSpecificCredentials(params)
 		if err != nil {
@@ -48,7 +48,7 @@ func ListServiceSpecificCredentials(sess *session.Session) ([]Resource, error) {
 				name:        *credential.ServiceUserName,
 				serviceName: *credential.ServiceName,
 				id:          *credential.ServiceSpecificCredentialId,
-				userName:    *user.user.UserName,
+				userName:    *user.userName,
 			})
 		}
 	}

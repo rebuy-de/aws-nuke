@@ -4,11 +4,22 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+
+	"time"
 )
 
 type IAMUser struct {
 	svc  *iam.IAM
-	user *iam.User
+
+	userName 	*string
+	userId 		*string
+	path 		*string
+	arn 		*string
+	createDate 		*time.Time
+	passwordLastUsed 	*time.Time
+	permissionsBoundaryArn 	*string
+	permissionsBoundaryType *string
+	tags []*iam.Tag
 }
 
 func init() {
@@ -34,12 +45,24 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 
 		fullUser := getuseroutput.User
 
-		thing := &IAMUser{
+		iamuser := &IAMUser{
 			svc:  svc,
-			user: fullUser,
+
+			userName: fullUser.UserName,
+			userId: fullUser.UserId,
+			path: fullUser.Path,
+			arn: fullUser.Arn,
+			createDate: fullUser.CreateDate,
+			passwordLastUsed: fullUser.PasswordLastUsed,
+			tags: fullUser.Tags,
 		}
 
-		resources = append(resources, thing) 
+		if (fullUser.PermissionsBoundary != nil) {
+			iamuser.permissionsBoundaryArn = fullUser.PermissionsBoundary.PermissionsBoundaryArn
+			iamuser.permissionsBoundaryType = fullUser.PermissionsBoundary.PermissionsBoundaryType
+		}
+
+		resources = append(resources, iamuser) 
 	}
 
 	return resources, nil
@@ -47,7 +70,7 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 
 func (e *IAMUser) Remove() error {
 	_, err := e.svc.DeleteUser(&iam.DeleteUserInput{
-		UserName: e.user.UserName,
+		UserName: e.userName,
 	})
 	if err != nil {
 		return err
@@ -57,26 +80,21 @@ func (e *IAMUser) Remove() error {
 }
 
 func (e *IAMUser) String() string {
-	return *e.user.UserName
+	return *e.userName
 }
 
 func (e *IAMUser) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("UserName", e.user.UserName)
-	properties.Set("UserId", e.user.UserId)
-	properties.Set("Path", e.user.Path)
-	properties.Set("Arn", e.user.Arn)
-	properties.Set("CreateDate", e.user.CreateDate)
-	properties.Set("PasswordLastUsed", e.user.PasswordLastUsed)
+	properties.Set("UserName", e.userName)
+	properties.Set("UserId", e.userId)
+	properties.Set("Path", e.path)
+	properties.Set("Arn", e.arn)
+	properties.Set("CreateDate", e.createDate)
+	properties.Set("PasswordLastUsed", e.passwordLastUsed)
+	properties.Set("PermissionsBoundaryArn", e.permissionsBoundaryArn)
+	properties.Set("PermissionsBoundaryType", e.permissionsBoundaryType)
 
-
-	if (e.user.PermissionsBoundary != nil) {
-		properties.Set("PermissionsBoundaryArn", e.user.PermissionsBoundary.PermissionsBoundaryArn)
-		properties.Set("PermissionsBoundaryType", e.user.PermissionsBoundary.PermissionsBoundaryType)
-	}
-	
-
-	for _, tag := range e.user.Tags {
+	for _, tag := range e.tags {
 		properties.SetTag(tag.Key, tag.Value)
 	}
 
