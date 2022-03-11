@@ -12,7 +12,8 @@ type APIGatewayClientCertificate struct {
 }
 
 func init() {
-	register("APIGatewayClientCertificate", ListAPIGatewayClientCertificates)
+	register("APIGatewayClientCertificate", ListAPIGatewayClientCertificates,
+		mapCloudControl("AWS::ApiGateway::ClientCertificate"))
 }
 
 func ListAPIGatewayClientCertificates(sess *session.Session) ([]Resource, error) {

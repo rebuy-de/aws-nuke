@@ -21,6 +21,12 @@ func init() {
 	// To get an overview of available cloud control resource types run this
 	// command in the repo root:
 	//     go run ./dev/list-cloudcontrol
+	registerCloudControl("AWS::AppFlow::ConnectorProfile")
+	registerCloudControl("AWS::AppFlow::Flow")
+	registerCloudControl("AWS::AppRunner::Service")
+	registerCloudControl("AWS::ApplicationInsights::Application")
+	registerCloudControl("AWS::Athena::DataCatalog")
+	registerCloudControl("AWS::Backup::Framework")
 	registerCloudControl("AWS::MWAA::Environment")
 	registerCloudControl("AWS::Synthetics::Canary")
 	registerCloudControl("AWS::Timestream::Database")
