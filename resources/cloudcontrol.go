@@ -47,8 +47,7 @@ func NewListCloudControlResource(typeName string) func(*session.Session) ([]Reso
 			for _, desc := range page.ResourceDescriptions {
 				identifier := aws.StringValue(desc.Identifier)
 
-				propMap := map[string]interface{}{}
-				err := json.Unmarshal([]byte(aws.StringValue(desc.Properties)), &propMap)
+				properties, err := cloudControlParseProperties(aws.StringValue(desc.Properties))
 				if err != nil {
 					logrus.
 						WithError(errors.WithStack(err)).
@@ -57,27 +56,7 @@ func NewListCloudControlResource(typeName string) func(*session.Session) ([]Reso
 						Error("failed to parse cloud control properties")
 					continue
 				}
-				properties := types.NewProperties().
-					Set("Identifier", identifier)
-				for name, value := range propMap {
-					switch v := value.(type) {
-					case string:
-						properties = properties.Set(name, v)
-					default:
-						// We cannot rely on the default handling of
-						// properties.Set, because it would fall back to
-						// fmt.Sprintf. Since the cloud control properties are
-						// nested it would create properties that are not
-						// suitable for filtering. Therefore we have to
-						// implemented more sophisticated parsing.
-						logrus.
-							WithField("type-name", typeName).
-							WithField("identifier", identifier).
-							WithField("value", fmt.Sprintf("%q", v)).
-							Debugf("cloud control property type %T is not supported", v)
-					}
-				}
-
+				properties = properties.Set("Identifier", identifier)
 				resources = append(resources, &CloudControlResource{
 					svc:         svc,
 					clientToken: uuid.New().String(),
@@ -96,6 +75,63 @@ func NewListCloudControlResource(typeName string) func(*session.Session) ([]Reso
 
 		return resources, nil
 	}
+}
+
+func cloudControlParseProperties(payload string) (types.Properties, error) {
+	// Warning: The implementation of this function is not very straighforward,
+	// because the aws-nuke filter functions expect a very rigid structure and
+	// the properties from the Cloud Control API are very dynamic.
+
+	propMap := map[string]interface{}{}
+	err := json.Unmarshal([]byte(payload), &propMap)
+	if err != nil {
+		return nil, err
+	}
+	properties := types.NewProperties()
+	for name, value := range propMap {
+		switch v := value.(type) {
+		case string:
+			properties = properties.Set(name, v)
+		case []interface{}:
+			for _, value2 := range v {
+				switch v2 := value2.(type) {
+				case string:
+					properties.Set(
+						fmt.Sprintf("%s.[%q]", name, v2),
+						true,
+					)
+				case map[string]interface{}:
+					if len(v2) == 2 && v2["Key"] != nil && v2["Value"] != nil {
+						properties.Set(
+							fmt.Sprintf("%s.[%q]", name, v2["Key"]),
+							v2["Value"],
+						)
+					} else {
+						logrus.
+							WithField("value", fmt.Sprintf("%q", v)).
+							Debugf("nested cloud control property type []%T is not supported", value)
+					}
+				default:
+					logrus.
+						WithField("value", fmt.Sprintf("%q", v)).
+						Debugf("nested cloud control property type []%T is not supported", value)
+				}
+			}
+
+		default:
+			// We cannot rely on the default handling of
+			// properties.Set, because it would fall back to
+			// fmt.Sprintf. Since the cloud control properties are
+			// nested it would create properties that are not
+			// suitable for filtering. Therefore we have to
+			// implemented more sophisticated parsing.
+			logrus.
+				WithField("value", fmt.Sprintf("%q", v)).
+				Debugf("cloud control property type %T is not supported", v)
+		}
+	}
+
+	return properties, nil
 }
 
 type CloudControlResource struct {
