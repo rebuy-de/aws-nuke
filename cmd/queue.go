@@ -49,12 +49,12 @@ func (i *Item) Print() {
 
 // List gets all resource items of the same resource type like the Item.
 func (i *Item) List() ([]resources.Resource, error) {
-	listers := resources.GetListers()
+	lister := resources.GetLister(i.Type)
 	sess, err := i.Region.Session(i.Type)
 	if err != nil {
 		return nil, err
 	}
-	return listers[i.Type](sess)
+	return lister(sess)
 }
 
 func (i *Item) GetProperty(key string) (string, error) {
