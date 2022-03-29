@@ -4,8 +4,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
-
-	"time"
+	"github.com/sirupsen/logrus"
+  
+  "time"
 )
 
 type IAMUser struct {
@@ -26,6 +27,15 @@ func init() {
 	register("IAMUser", ListIAMUsers)
 }
 
+//gets full user atributes with GetUser()
+func GetIAMUser(svc *iam.IAM, userName *string) (*iam.User, error) {
+	params := &iam.GetUserInput{
+		UserName: userName,
+	}
+	resp, err := svc.GetUser(params)
+	return resp.User, err
+}
+
 func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
 	params := &iam.ListUsersInput{}
@@ -35,31 +45,29 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 	}
 
 	resources := make([]Resource, 0)
-	for _, smalluser := range resp.Users {
-		getuseroutput, err := svc.GetUser(&iam.GetUserInput{
-			UserName: smalluser.UserName,
-		})
+	for _, out := range resp.Users {
+    //ListUsers() does not return all parameters for a users.
+		user, err := GetIAMUser(svc, out.UserName)
 		if err != nil {
-			return nil, err
+			logrus.Errorf("Failed to get user %s: %v", *out.UserName, err)
+			continue
 		}
-
-		fullUser := getuseroutput.User
-
+    
 		iamuser := &IAMUser{
 			svc:  svc,
 
-			userName: fullUser.UserName,
-			userId: fullUser.UserId,
-			path: fullUser.Path,
-			arn: fullUser.Arn,
-			createDate: fullUser.CreateDate,
-			passwordLastUsed: fullUser.PasswordLastUsed,
-			tags: fullUser.Tags,
+			userName: user.UserName,
+			userId: user.UserId,
+			path: user.Path,
+			arn: user.Arn,
+			createDate: user.CreateDate,
+			passwordLastUsed: user.PasswordLastUsed,
+			tags: user.Tags,
 		}
 
-		if (fullUser.PermissionsBoundary != nil) {
-			iamuser.permissionsBoundaryArn = fullUser.PermissionsBoundary.PermissionsBoundaryArn
-			iamuser.permissionsBoundaryType = fullUser.PermissionsBoundary.PermissionsBoundaryType
+		if (user.PermissionsBoundary != nil) {
+			iamuser.permissionsBoundaryArn = user.PermissionsBoundary.PermissionsBoundaryArn
+			iamuser.permissionsBoundaryType = user.PermissionsBoundary.PermissionsBoundaryType
 		}
 
 		resources = append(resources, iamuser) 

@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 )
@@ -17,6 +18,8 @@ func (p Properties) String() string {
 	for k, v := range p {
 		parts = append(parts, fmt.Sprintf(`%s: "%v"`, k, v))
 	}
+
+	sort.Strings(parts)
 
 	return fmt.Sprintf("[%s]", strings.Join(parts, ", "))
 }
