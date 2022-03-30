@@ -16,7 +16,8 @@ type WAFv2RegexPatternSet struct {
 }
 
 func init() {
-	register("WAFv2RegexPatternSet", ListWAFv2RegexPatternSets)
+	register("WAFv2RegexPatternSet", ListWAFv2RegexPatternSets,
+		mapCloudControl("AWS::WAFv2::RegexPatternSet"))
 }
 
 func ListWAFv2RegexPatternSets(sess *session.Session) ([]Resource, error) {

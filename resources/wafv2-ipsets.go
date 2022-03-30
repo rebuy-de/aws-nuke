@@ -16,7 +16,8 @@ type WAFv2IPSet struct {
 }
 
 func init() {
-	register("WAFv2IPSet", ListWAFv2IPSets)
+	register("WAFv2IPSet", ListWAFv2IPSets,
+		mapCloudControl("AWS::WAFv2::IPSet"))
 }
 
 func ListWAFv2IPSets(sess *session.Session) ([]Resource, error) {

@@ -16,7 +16,8 @@ type WAFv2WebACL struct {
 }
 
 func init() {
-	register("WAFv2WebACL", ListWAFv2WebACLs)
+	register("WAFv2WebACL", ListWAFv2WebACLs,
+		mapCloudControl("AWS::WAFv2::WebACL"))
 }
 
 func ListWAFv2WebACLs(sess *session.Session) ([]Resource, error) {

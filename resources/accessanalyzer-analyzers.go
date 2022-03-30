@@ -16,7 +16,8 @@ type AccessAnalyzer struct {
 }
 
 func init() {
-	register("AccessAnalyzer", ListAccessAnalyzer)
+	register("AccessAnalyzer", ListAccessAnalyzer,
+		mapCloudControl("AWS::AccessAnalyzer::Analyzer"))
 }
 
 func ListAccessAnalyzer(sess *session.Session) ([]Resource, error) {

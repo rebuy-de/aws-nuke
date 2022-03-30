@@ -15,7 +15,8 @@ type APIGatewayUsagePlan struct {
 }
 
 func init() {
-	register("APIGatewayUsagePlan", ListAPIGatewayUsagePlans)
+	register("APIGatewayUsagePlan", ListAPIGatewayUsagePlans,
+		mapCloudControl("AWS::ApiGateway::UsagePlan"))
 }
 
 func ListAPIGatewayUsagePlans(sess *session.Session) ([]Resource, error) {

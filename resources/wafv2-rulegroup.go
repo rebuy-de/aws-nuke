@@ -16,7 +16,8 @@ type WAFv2RuleGroup struct {
 }
 
 func init() {
-	register("WAFv2RuleGroup", ListWAFv2RuleGroups)
+	register("WAFv2RuleGroup", ListWAFv2RuleGroups,
+		mapCloudControl("AWS::WAFv2::RuleGroup"))
 }
 
 func ListWAFv2RuleGroups(sess *session.Session) ([]Resource, error) {
