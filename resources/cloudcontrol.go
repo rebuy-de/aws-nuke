@@ -25,7 +25,6 @@ func init() {
 	registerCloudControl("AWS::AppFlow::Flow")
 	registerCloudControl("AWS::AppRunner::Service")
 	registerCloudControl("AWS::ApplicationInsights::Application")
-	registerCloudControl("AWS::Athena::DataCatalog")
 	registerCloudControl("AWS::Backup::Framework")
 	registerCloudControl("AWS::MWAA::Environment")
 	registerCloudControl("AWS::Synthetics::Canary")
