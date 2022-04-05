@@ -43,6 +43,10 @@ func ListEC2SecurityGroupRules(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
+	if len(groupIds) == 0 {
+		return resources, nil
+	}
+
 	sgRuleFilters := []*ec2.Filter{
 		{
 			Name:   aws.String("group-id"),
