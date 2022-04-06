@@ -219,6 +219,7 @@ func (n *Nuke) Filter(item *Item) error {
 		prop, err := item.GetProperty(filter.Property)
 		if err != nil {
 			fmt.Printf("non-fatal error: %s\n", err.Error())
+			continue
 		}
 		match, err := filter.Match(prop)
 		if err != nil {
