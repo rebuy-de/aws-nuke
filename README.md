@@ -362,6 +362,51 @@ If an exclude is used, then all its resource types will not be deleted.
 aws-nuke resource-types
 ```
 
+### AWS Cloud Control API Support
+
+> This feature is not yet released and is probably part of `v2.18`.
+
+_aws-nuke_ supports removing resources via the AWS Cloud Control API. When
+executing _aws-nuke_ it will automatically remove a manually managed set of
+resources via Cloud Control.
+
+Only a subset of Cloud Control supported resources will be removed
+automatically, because there might be resources that were already implemented
+and adding them too would bypass existing filters in user configs as Cloud
+Control has another naming scheme and a different set of properties. Moreover,
+there are some Cloud Control resources that need special handling which is not
+yet supported by _aws-nuke_.
+
+Even though the subset of automatically supported Cloud Control resources is
+limited, you can can configure _aws-nuke_ to make it try any additional
+resource. Either via command line flags of via the config file.
+
+For the config file you have to add the resource to
+the`resource-types.cloud-control` list:
+
+```yaml
+resource-types:
+  cloud-control:
+  - AWS::EC2::TransitGateway
+  - AWS::EC2::VPC
+```
+
+If you want to use the command line, you have to add a `--cloud-control` flag
+for each resource you want to add:
+
+```sh
+aws-nuke \
+    -c nuke-config.yaml \
+    --cloud-control AWS::EC2::TransitGateway \
+    --cloud-control AWS::EC2::VPC
+```
+
+**Note:** There are some resources that are supported by Cloud Control and are
+already natively implemented by _aws-nuke_. If you configure to use Cloud
+Control for those resources, it will not execute the natively implemented code
+for this resource. For example with the `--cloud-control AWS::EC2::VPC` it will
+not use the `EC2VPC` resource.
+
 
 ### Feature Flags
 
@@ -460,9 +505,9 @@ There are also additional comparision types than an exact match:
   Details about the syntax can be found in the [library
   documentation](https://golang.org/pkg/regexp/syntax/).
 * `dateOlderThan` - The identifier is parsed as a timestamp. After the offset is added to it (specified in the `value` field), the resulting timestamp must be AFTER the current
-  time. Details on offset syntax can be found in 
+  time. Details on offset syntax can be found in
   the [library documentation](https://golang.org/pkg/time/#ParseDuration). Supported
-  date formats are epoch time, `2006-01-02`, `2006/01/02`, `2006-01-02T15:04:05Z`, 
+  date formats are epoch time, `2006-01-02`, `2006/01/02`, `2006-01-02T15:04:05Z`,
   `2006-01-02T15:04:05.999999999Z07:00`, and `2006-01-02T15:04:05Z07:00`.
 
 To use a non-default comparision type, it is required to specify an object with
@@ -561,13 +606,13 @@ presets:
 The easiest way of installing it, is to download the latest
 [release](https://github.com/rebuy-de/aws-nuke/releases) from GitHub.
 
-#### Example for Linux Intel/AMD 
+#### Example for Linux Intel/AMD
 
 Download and extract
 `$ wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.16.0/aws-nuke-v2.16.0-linux-amd64.tar.gz -O - | sudo tar -xz -C $HOME/bin`
 
 Run
-`$ aws-nuke-v2.16.0-linux-amd64` 
+`$ aws-nuke-v2.16.0-linux-amd64`
 
 ### Compile from Source
 

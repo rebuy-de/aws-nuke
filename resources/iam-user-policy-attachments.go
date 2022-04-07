@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMUserPolicyAttachment struct {
@@ -13,6 +14,7 @@ type IAMUserPolicyAttachment struct {
 	policyArn  string
 	policyName string
 	userName   string
+	userTags   []*iam.Tag
 }
 
 func init() {
@@ -28,10 +30,16 @@ func ListIAMUserPolicyAttachments(sess *session.Session) ([]Resource, error) {
 	}
 
 	resources := make([]Resource, 0)
-	for _, role := range resp.Users {
+	for _, user := range resp.Users {
+		iamUser, err := GetIAMUser(svc, user.UserName)
+		if err != nil {
+			logrus.Errorf("Failed to get user %s: %v", *user.UserName, err)
+			continue
+		}
+
 		resp, err := svc.ListAttachedUserPolicies(
 			&iam.ListAttachedUserPoliciesInput{
-				UserName: role.UserName,
+				UserName: user.UserName,
 			})
 		if err != nil {
 			return nil, err
@@ -42,7 +50,8 @@ func ListIAMUserPolicyAttachments(sess *session.Session) ([]Resource, error) {
 				svc:        svc,
 				policyArn:  *pol.PolicyArn,
 				policyName: *pol.PolicyName,
-				userName:   *role.UserName,
+				userName:   *user.UserName,
+				userTags:   iamUser.Tags,
 			})
 		}
 	}
@@ -64,10 +73,14 @@ func (e *IAMUserPolicyAttachment) Remove() error {
 }
 
 func (e *IAMUserPolicyAttachment) Properties() types.Properties {
-	return types.NewProperties().
+	properties := types.NewProperties().
 		Set("PolicyArn", e.policyArn).
 		Set("PolicyName", e.policyName).
 		Set("UserName", e.userName)
+	for _, tag := range e.userTags {
+		properties.SetTagWithPrefix("user", tag.Key, tag.Value)
+	}
+	return properties
 }
 
 func (e *IAMUserPolicyAttachment) String() string {

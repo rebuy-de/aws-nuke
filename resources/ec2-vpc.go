@@ -13,7 +13,8 @@ type EC2VPC struct {
 }
 
 func init() {
-	register("EC2VPC", ListEC2VPCs)
+	register("EC2VPC", ListEC2VPCs,
+		mapCloudControl("AWS::EC2::VPC"))
 }
 
 func ListEC2VPCs(sess *session.Session) ([]Resource, error) {

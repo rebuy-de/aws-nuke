@@ -120,7 +120,7 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().StringVar(
 		&creds.AssumeRoleArn, "assume-role-arn", "",
 		"AWS IAM role arn to assume. "+
-		    "The credentials provided via --access-key-id or --profile must "+
+			"The credentials provided via --access-key-id or --profile must "+
 			"be allowed to assume this role. ")
 	command.PersistentFlags().StringVar(
 		&defaultRegion, "default-region", "",
@@ -133,6 +133,12 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().StringSliceVarP(
 		&params.Excludes, "exclude", "e", []string{},
 		"Prevent nuking of certain resource types (eg IAMServerCertificate). "+
+			"This flag can be used multiple times.")
+	command.PersistentFlags().StringSliceVar(
+		&params.CloudControl, "cloud-control", []string{},
+		"Nuke given resource via Cloud Control API. "+
+			"If there is an old-style method for the same resource, the old-style one will not be executed. "+
+			"Note that old-style and cloud-control filters are not compatible! "+
 			"This flag can be used multiple times.")
 	command.PersistentFlags().BoolVar(
 		&params.NoDryRun, "no-dry-run", false,
