@@ -15,7 +15,8 @@ import (
 )
 
 func init() {
-	register("S3Bucket", ListS3Buckets)
+	register("S3Bucket", ListS3Buckets,
+		mapCloudControl("AWS::S3::Bucket"))
 }
 
 type S3Bucket struct {
@@ -42,7 +43,7 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 			if aerr, ok := err.(awserr.Error); ok {
 				if aerr.Code() == "NoSuchTagSet" {
 					resources = append(resources, &S3Bucket{
-						svc: svc,
+						svc:  svc,
 						name: name,
 						tags: make([]*s3.Tag, 0),
 					})

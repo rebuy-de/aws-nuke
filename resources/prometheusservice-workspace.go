@@ -14,7 +14,8 @@ type AMPWorkspace struct {
 }
 
 func init() {
-	register("AMPWorkspace", ListAMPWorkspaces)
+	register("AMPWorkspace", ListAMPWorkspaces,
+		mapCloudControl("AWS::APS::Workspace"))
 }
 
 func ListAMPWorkspaces(sess *session.Session) ([]Resource, error) {

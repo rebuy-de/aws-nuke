@@ -7,7 +7,8 @@ import (
 )
 
 func init() {
-	register("AthenaNamedQuery", ListAthenaNamedQueries)
+	register("AthenaNamedQuery", ListAthenaNamedQueries,
+		mapCloudControl("AWS::Athena::NamedQuery"))
 }
 
 type AthenaNamedQuery struct {

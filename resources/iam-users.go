@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMUser struct {
@@ -16,6 +17,14 @@ func init() {
 	register("IAMUser", ListIAMUsers)
 }
 
+func GetIAMUser(svc *iam.IAM, userName *string) (*iam.User, error) {
+	params := &iam.GetUserInput{
+		UserName: userName,
+	}
+	resp, err := svc.GetUser(params)
+	return resp.User, err
+}
+
 func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
 
@@ -26,10 +35,15 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.Users {
+		user, err := GetIAMUser(svc, out.UserName)
+		if err != nil {
+			logrus.Errorf("Failed to get user %s: %v", *out.UserName, err)
+			continue
+		}
 		resources = append(resources, &IAMUser{
 			svc:  svc,
 			name: *out.UserName,
-			tags: out.Tags,
+			tags: user.Tags,
 		})
 	}
 
