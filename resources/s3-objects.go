@@ -102,7 +102,7 @@ func (e *S3Object) Properties() types.Properties {
 		Set("Bucket", e.bucket).
 		Set("Key", e.key).
 		Set("VersionID", e.versionID).
-		Set("IsLatest", e.latest)
+		Set("IsLatest", e.latest).
 		Set("CreationDate", e.CreationDate())
 }
 

@@ -139,7 +139,7 @@ func (e *S3Bucket) RemoveAllObjects() error {
 
 func (e *S3Bucket) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("Name", e.name)
+	properties.Set("Name", e.name).
 	properties.Set("CreationDate", e.CreationDate())
 
 	for _, tag := range e.tags {
