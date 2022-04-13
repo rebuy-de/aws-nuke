@@ -32,6 +32,9 @@ func init() {
 	registerCloudControl("AWS::Timestream::ScheduledQuery")
 	registerCloudControl("AWS::Timestream::Table")
 	registerCloudControl("AWS::Transfer::Workflow")
+	registerCloudControl("AWS::NetworkFirewall::Firewall")
+	registerCloudControl("AWS::NetworkFirewall::FirewallPolicy")
+	registerCloudControl("AWS::NetworkFirewall::RuleGroup")
 }
 
 func NewListCloudControlResource(typeName string) func(*session.Session) ([]Resource, error) {
