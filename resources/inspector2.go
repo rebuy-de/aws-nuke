@@ -48,6 +48,14 @@ func (e *Inspector2) Remove() error {
 	return nil
 }
 
+func (e *Inspector2) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("AccountID", a.accountId)
+
+	return properties
+}
+
 func (e *Inspector2) String() string {
 	return *e.accountId
 }
