@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/inspector2"
+	"github.com/rebuy-de/aws-nuke/pkg/types"
 )
 
 type Inspector2 struct {
@@ -51,7 +52,7 @@ func (e *Inspector2) Remove() error {
 func (e *Inspector2) Properties() types.Properties {
 	properties := types.NewProperties()
 
-	properties.Set("AccountID", a.accountId)
+	properties.Set("AccountID", e.accountId)
 
 	return properties
 }
