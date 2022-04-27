@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.42.45
 	github.com/fatih/color v1.13.0
 	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.3.0
 	github.com/mb0/glob v0.0.0-20160210091149-1eb79d2de6c4
 	github.com/pkg/errors v0.9.1
 	github.com/rebuy-de/rebuy-go-sdk/v3 v3.11.0
@@ -15,8 +16,6 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/yaml.v2 v2.4.0
 )
-
-require github.com/google/uuid v1.3.0
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
