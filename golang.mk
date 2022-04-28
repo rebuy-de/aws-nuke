@@ -78,6 +78,7 @@ endif
 	rm -f dist/$(OUTPUT_FILE)
 
 xc: go_generate
+	git status
 	GOOS=linux GOARCH=amd64 make compress
 	GOOS=linux GOARCH=arm64 make compress
 	GOOS=linux GOARCH=arm GOARM=7 make compress

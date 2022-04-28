@@ -9,25 +9,24 @@ on:
   - cron: '15 3 * * 0'
 
 jobs:
-  build:
-    name: CI Build
+  release:
+    name: Publish binaries
     runs-on: ubuntu-latest
     steps:
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
         go-version: '1.17'
-    - name: Setup tools
-      run: |
-        go get golang.org/x/lint/golint
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Test Project
+      with:
+        fetch-depth: 0
+    - name: Build Project binaries
+      env:
+        CGO_ENABLED: 0
       run: |
-        make test
-    - name: Build Project
-      run: |
-        make
+        git status
+        make xc
 
   docker_build:
     runs-on: ubuntu-20.04

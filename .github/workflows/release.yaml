@@ -21,6 +21,7 @@ jobs:
       env:
         CGO_ENABLED: 0
       run: |
+        git status
         make xc
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
