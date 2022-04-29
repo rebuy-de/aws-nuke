@@ -218,7 +218,7 @@ func (n *Nuke) Filter(item *Item) error {
 	for _, filter := range itemFilters {
 		prop, err := item.GetProperty(filter.Property)
 		if err != nil {
-			fmt.Printf("non-fatal error: %s\n", err.Error())
+			logrus.Warnf(err.Error())
 			continue
 		}
 		match, err := filter.Match(prop)
