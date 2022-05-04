@@ -55,7 +55,7 @@ func TestLoadExampleConfig(t *testing.T) {
 		AccountBlocklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1", "stratoscale"},
 		Accounts: map[string]Account{
-			"555133742": Account{
+			"555133742": {
 				Presets: []string{"terraform"},
 				Filters: Filters{
 					"IAMRole": {
@@ -66,8 +66,7 @@ func TestLoadExampleConfig(t *testing.T) {
 					},
 				},
 				ResourceTypes: ResourceTypes{
-					types.Collection{"S3Bucket"},
-					nil,
+					Targets: types.Collection{"S3Bucket"},
 				},
 			},
 		},
@@ -76,7 +75,7 @@ func TestLoadExampleConfig(t *testing.T) {
 			Excludes: types.Collection{"IAMRole"},
 		},
 		Presets: map[string]PresetDefinitions{
-			"terraform": PresetDefinitions{
+			"terraform": {
 				Filters: Filters{
 					"S3Bucket": {
 						Filter{
@@ -88,7 +87,7 @@ func TestLoadExampleConfig(t *testing.T) {
 			},
 		},
 		CustomEndpoints: []*CustomRegion{
-			&CustomRegion{
+			{
 				Region:                "stratoscale",
 				TLSInsecureSkipVerify: true,
 				Services: CustomServices{
@@ -256,18 +255,18 @@ func TestFilterMerge(t *testing.T) {
 
 	expect := Filters{
 		"S3Bucket": []Filter{
-			Filter{
+			{
 				Type: "glob", Value: "my-statebucket-*",
 			},
 		},
 		"IAMRole": []Filter{
-			Filter{
+			{
 				Type:  "exact",
 				Value: "uber.admin",
 			},
 		},
 		"IAMRolePolicyAttachment": []Filter{
-			Filter{
+			{
 				Type:  "exact",
 				Value: "uber.admin -> AdministratorAccess",
 			},

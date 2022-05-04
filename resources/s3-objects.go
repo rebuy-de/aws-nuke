@@ -2,18 +2,21 @@ package resources
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type S3Object struct {
-	svc       *s3.S3
-	bucket    string
-	key       string
-	versionID *string
-	latest    bool
+	svc          *s3.S3
+	bucket       string
+	creationDate time.Time
+	key          string
+	versionID    *string
+	latest       bool
 }
 
 func init() {
@@ -30,9 +33,9 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
-	for _, name := range buckets {
+	for _, bucket := range buckets {
 		params := &s3.ListObjectVersionsInput{
-			Bucket: &name,
+			Bucket: bucket.Name,
 		}
 
 		for {
@@ -47,11 +50,12 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 				}
 
 				resources = append(resources, &S3Object{
-					svc:       svc,
-					bucket:    name,
-					key:       *out.Key,
-					versionID: out.VersionId,
-					latest:    UnPtrBool(out.IsLatest, false),
+					svc:          svc,
+					bucket:       aws.StringValue(bucket.Name),
+					creationDate: aws.TimeValue(bucket.CreationDate),
+					key:          *out.Key,
+					versionID:    out.VersionId,
+					latest:       UnPtrBool(out.IsLatest, false),
 				})
 			}
 
@@ -61,11 +65,12 @@ func ListS3Objects(sess *session.Session) ([]Resource, error) {
 				}
 
 				resources = append(resources, &S3Object{
-					svc:       svc,
-					bucket:    name,
-					key:       *out.Key,
-					versionID: out.VersionId,
-					latest:    UnPtrBool(out.IsLatest, false),
+					svc:          svc,
+					bucket:       aws.StringValue(bucket.Name),
+					creationDate: aws.TimeValue(bucket.CreationDate),
+					key:          *out.Key,
+					versionID:    out.VersionId,
+					latest:       UnPtrBool(out.IsLatest, false),
 				})
 			}
 
@@ -102,7 +107,8 @@ func (e *S3Object) Properties() types.Properties {
 		Set("Bucket", e.bucket).
 		Set("Key", e.key).
 		Set("VersionID", e.versionID).
-		Set("IsLatest", e.latest)
+		Set("IsLatest", e.latest).
+		Set("CreationDate", e.creationDate)
 }
 
 func (e *S3Object) String() string {

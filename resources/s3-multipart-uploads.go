@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
@@ -29,9 +30,9 @@ func ListS3MultipartUpload(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
-	for _, name := range buckets {
+	for _, bucket := range buckets {
 		params := &s3.ListMultipartUploadsInput{
-			Bucket: &name,
+			Bucket: bucket.Name,
 		}
 
 		for {
@@ -47,7 +48,7 @@ func ListS3MultipartUpload(sess *session.Session) ([]Resource, error) {
 
 				resources = append(resources, &S3MultipartUpload{
 					svc:      svc,
-					bucket:   name,
+					bucket:   aws.StringValue(bucket.Name),
 					key:      *upload.Key,
 					uploadID: *upload.UploadId,
 				})
