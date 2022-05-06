@@ -2,7 +2,7 @@
 
 TARGETS?="."
 PACKAGE=$(shell GOPATH= go list $(TARGET))
-NAME=$(notdir $(PACKAGE))
+NAME=$(notdir $(shell echo $(PACKAGE) | sed 's/\/v2//'))
 
 BUILD_VERSION=$(shell git describe --always --dirty --tags | tr '-' '.' )
 BUILD_DATE=$(shell LC_ALL=C date)
