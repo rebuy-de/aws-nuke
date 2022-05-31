@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2Instance struct {

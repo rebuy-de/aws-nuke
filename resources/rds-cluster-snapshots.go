@@ -9,34 +9,35 @@ import (
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
-type RDSSnapshot struct {
+type RDSClusterSnapshot struct {
 	svc      *rds.RDS
-	snapshot *rds.DBSnapshot
+	snapshot *rds.DBClusterSnapshot
 	tags     []*rds.Tag
 }
 
 func init() {
-	register("RDSSnapshot", ListRDSSnapshots)
+	register("RDSClusterSnapshot", ListRDSClusterSnapshots)
 }
 
-func ListRDSSnapshots(sess *session.Session) ([]Resource, error) {
+func ListRDSClusterSnapshots(sess *session.Session) ([]Resource, error) {
 	svc := rds.New(sess)
 
-	params := &rds.DescribeDBSnapshotsInput{MaxRecords: aws.Int64(100)}
-	resp, err := svc.DescribeDBSnapshots(params)
+	params := &rds.DescribeDBClusterSnapshotsInput{MaxRecords: aws.Int64(100)}
+
+	resp, err := svc.DescribeDBClusterSnapshots(params)
 	if err != nil {
 		return nil, err
 	}
 	var resources []Resource
-	for _, snapshot := range resp.DBSnapshots {
+	for _, snapshot := range resp.DBClusterSnapshots {
 		tags, err := svc.ListTagsForResource(&rds.ListTagsForResourceInput{
-			ResourceName: snapshot.DBSnapshotArn,
+			ResourceName: snapshot.DBClusterSnapshotArn,
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		resources = append(resources, &RDSSnapshot{
+		resources = append(resources, &RDSClusterSnapshot{
 			svc:      svc,
 			snapshot: snapshot,
 			tags:     tags.TagList,
@@ -47,25 +48,25 @@ func ListRDSSnapshots(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (i *RDSSnapshot) Filter() error {
+func (i *RDSClusterSnapshot) Filter() error {
 	if *i.snapshot.SnapshotType == "automated" {
 		return fmt.Errorf("cannot delete automated snapshots")
 	}
 	return nil
 }
 
-func (i *RDSSnapshot) Remove() error {
-	if i.snapshot.DBSnapshotIdentifier == nil {
+func (i *RDSClusterSnapshot) Remove() error {
+	if i.snapshot.DBClusterSnapshotIdentifier == nil {
 		// Sanity check to make sure the delete request does not skip the
 		// identifier.
 		return nil
 	}
 
-	params := &rds.DeleteDBSnapshotInput{
-		DBSnapshotIdentifier: i.snapshot.DBSnapshotIdentifier,
+	params := &rds.DeleteDBClusterSnapshotInput{
+		DBClusterSnapshotIdentifier: i.snapshot.DBClusterSnapshotIdentifier,
 	}
 
-	_, err := i.svc.DeleteDBSnapshot(params)
+	_, err := i.svc.DeleteDBClusterSnapshot(params)
 	if err != nil {
 		return err
 	}
@@ -73,17 +74,16 @@ func (i *RDSSnapshot) Remove() error {
 	return nil
 }
 
-func (i *RDSSnapshot) String() string {
-	return *i.snapshot.DBSnapshotIdentifier
+func (i *RDSClusterSnapshot) String() string {
+	return *i.snapshot.DBClusterSnapshotIdentifier
 }
 
-func (i *RDSSnapshot) Properties() types.Properties {
+func (i *RDSClusterSnapshot) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("ARN", i.snapshot.DBSnapshotArn)
-	properties.Set("Identifier", i.snapshot.DBSnapshotIdentifier)
+	properties.Set("ARN", i.snapshot.DBClusterSnapshotArn)
+	properties.Set("Identifier", i.snapshot.DBClusterSnapshotIdentifier)
 	properties.Set("SnapshotType", i.snapshot.SnapshotType)
 	properties.Set("Status", i.snapshot.Status)
-	properties.Set("AvailabilityZone", i.snapshot.AvailabilityZone)
 
 	for _, tag := range i.tags {
 		properties.SetTag(tag.Key, tag.Value)
