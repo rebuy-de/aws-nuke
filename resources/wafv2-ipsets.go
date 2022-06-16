@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/wafv2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type WAFv2IPSet struct {
@@ -16,7 +16,8 @@ type WAFv2IPSet struct {
 }
 
 func init() {
-	register("WAFv2IPSet", ListWAFv2IPSets)
+	register("WAFv2IPSet", ListWAFv2IPSets,
+		mapCloudControl("AWS::WAFv2::IPSet"))
 }
 
 func ListWAFv2IPSets(sess *session.Session) ([]Resource, error) {

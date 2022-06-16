@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -11,17 +12,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
-	register("S3Bucket", ListS3Buckets)
+	register("S3Bucket", ListS3Buckets,
+		mapCloudControl("AWS::S3::Bucket"))
 }
 
 type S3Bucket struct {
-	svc  *s3.S3
-	name string
-	tags []*s3.Tag
+	svc          *s3.S3
+	name         string
+	creationDate time.Time
+	tags         []*s3.Tag
 }
 
 func ListS3Buckets(s *session.Session) ([]Resource, error) {
@@ -33,18 +36,19 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 	}
 
 	resources := make([]Resource, 0)
-	for _, name := range buckets {
+	for _, bucket := range buckets {
 		tags, err := svc.GetBucketTagging(&s3.GetBucketTaggingInput{
-			Bucket: aws.String(name),
+			Bucket: bucket.Name,
 		})
 
 		if err != nil {
 			if aerr, ok := err.(awserr.Error); ok {
 				if aerr.Code() == "NoSuchTagSet" {
 					resources = append(resources, &S3Bucket{
-						svc: svc,
-						name: name,
-						tags: make([]*s3.Tag, 0),
+						svc:          svc,
+						name:         aws.StringValue(bucket.Name),
+						creationDate: aws.TimeValue(bucket.CreationDate),
+						tags:         make([]*s3.Tag, 0),
 					})
 				}
 			}
@@ -52,22 +56,23 @@ func ListS3Buckets(s *session.Session) ([]Resource, error) {
 		}
 
 		resources = append(resources, &S3Bucket{
-			svc:  svc,
-			name: name,
-			tags: tags.TagSet,
+			svc:          svc,
+			name:         aws.StringValue(bucket.Name),
+			creationDate: aws.TimeValue(bucket.CreationDate),
+			tags:         tags.TagSet,
 		})
 	}
 
 	return resources, nil
 }
 
-func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
+func DescribeS3Buckets(svc *s3.S3) ([]s3.Bucket, error) {
 	resp, err := svc.ListBuckets(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	buckets := make([]string, 0)
+	buckets := make([]s3.Bucket, 0)
 	for _, out := range resp.Buckets {
 		bucketLocationResponse, err := svc.GetBucketLocation(&s3.GetBucketLocationInput{Bucket: out.Name})
 
@@ -77,10 +82,9 @@ func DescribeS3Buckets(svc *s3.S3) ([]string, error) {
 
 		location := UnPtrString(bucketLocationResponse.LocationConstraint, endpoints.UsEast1RegionID)
 		region := UnPtrString(svc.Config.Region, endpoints.UsEast1RegionID)
-		if location == region {
-			buckets = append(buckets, *out.Name)
+		if location == region && out != nil {
+			buckets = append(buckets, *out)
 		}
-
 	}
 
 	return buckets, nil
@@ -138,8 +142,9 @@ func (e *S3Bucket) RemoveAllObjects() error {
 }
 
 func (e *S3Bucket) Properties() types.Properties {
-	properties := types.NewProperties()
-	properties.Set("Name", e.name)
+	properties := types.NewProperties().
+		Set("Name", e.name).
+		Set("CreationDate", e.creationDate)
 
 	for _, tag := range e.tags {
 		properties.SetTag(tag.Key, tag.Value)

@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/accessanalyzer"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type AccessAnalyzer struct {
@@ -16,7 +16,8 @@ type AccessAnalyzer struct {
 }
 
 func init() {
-	register("AccessAnalyzer", ListAccessAnalyzer)
+	register("AccessAnalyzer", ListAccessAnalyzer,
+		mapCloudControl("AWS::AccessAnalyzer::Analyzer"))
 }
 
 func ListAccessAnalyzer(sess *session.Session) ([]Resource, error) {

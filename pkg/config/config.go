@@ -5,15 +5,16 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
 type ResourceTypes struct {
-	Targets  types.Collection `yaml:"targets"`
-	Excludes types.Collection `yaml:"excludes"`
+	Targets      types.Collection `yaml:"targets"`
+	Excludes     types.Collection `yaml:"excludes"`
+	CloudControl types.Collection `yaml:"cloud-control"`
 }
 
 type Account struct {

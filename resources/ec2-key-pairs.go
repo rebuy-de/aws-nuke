@@ -3,11 +3,13 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2KeyPair struct {
 	svc  *ec2.EC2
 	name string
+	tags []*ec2.Tag
 }
 
 func init() {
@@ -27,6 +29,7 @@ func ListEC2KeyPairs(sess *session.Session) ([]Resource, error) {
 		resources = append(resources, &EC2KeyPair{
 			svc:  svc,
 			name: *out.KeyName,
+			tags: out.Tags,
 		})
 	}
 
@@ -44,6 +47,17 @@ func (e *EC2KeyPair) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *EC2KeyPair) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", e.name)
+
+	for _, tag := range e.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (e *EC2KeyPair) String() string {

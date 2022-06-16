@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2NetworkACL struct {
@@ -13,6 +13,7 @@ type EC2NetworkACL struct {
 	id        *string
 	isDefault *bool
 	tags      []*ec2.Tag
+	ownerID   *string
 }
 
 func init() {
@@ -35,6 +36,7 @@ func ListEC2NetworkACLs(sess *session.Session) ([]Resource, error) {
 			id:        out.NetworkAclId,
 			isDefault: out.IsDefault,
 			tags:      out.Tags,
+			ownerID:   out.OwnerId,
 		})
 	}
 
@@ -68,6 +70,7 @@ func (f *EC2NetworkACL) Properties() types.Properties {
 		properties.SetTag(tag.Key, tag.Value)
 	}
 	properties.Set("ID", f.id)
+	properties.Set("OwnerID", f.ownerID)
 	return properties
 }
 

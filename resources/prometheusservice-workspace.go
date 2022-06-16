@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/prometheusservice"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type AMPWorkspace struct {
@@ -14,7 +14,8 @@ type AMPWorkspace struct {
 }
 
 func init() {
-	register("AMPWorkspace", ListAMPWorkspaces)
+	register("AMPWorkspace", ListAMPWorkspaces,
+		mapCloudControl("AWS::APS::Workspace"))
 }
 
 func ListAMPWorkspaces(sess *session.Session) ([]Resource, error) {

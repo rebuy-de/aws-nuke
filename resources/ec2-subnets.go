@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2Subnet struct {
@@ -62,6 +62,7 @@ func (e *EC2Subnet) Properties() types.Properties {
 	}
 	properties.Set("DefaultForAz", e.subnet.DefaultForAz)
 	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.subnet.OwnerId)
 	return properties
 }
 

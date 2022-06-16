@@ -10,8 +10,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -33,6 +33,9 @@ func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 		for _, stack := range resp.Stacks {
+			if aws.StringValue(stack.ParentId) != "" {
+				continue
+			}
 			resources = append(resources, &CloudFormationStack{
 				svc:               svc,
 				stack:             stack,

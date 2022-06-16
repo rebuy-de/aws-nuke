@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/efs"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EFSMountTarget struct {
@@ -54,6 +55,12 @@ func (e *EFSMountTarget) Remove() error {
 	})
 
 	return err
+}
+
+func (e *EFSMountTarget) Properties() types.Properties {
+	return types.NewProperties().
+		Set("Name", e.id).
+		Set("ID", e.fsid)
 }
 
 func (e *EFSMountTarget) String() string {

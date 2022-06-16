@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2VPC struct {
@@ -13,7 +13,8 @@ type EC2VPC struct {
 }
 
 func init() {
-	register("EC2VPC", ListEC2VPCs)
+	register("EC2VPC", ListEC2VPCs,
+		mapCloudControl("AWS::EC2::VPC"))
 }
 
 func ListEC2VPCs(sess *session.Session) ([]Resource, error) {
@@ -75,6 +76,7 @@ func (e *EC2VPC) Properties() types.Properties {
 	}
 	properties.Set("ID", e.vpc.VpcId)
 	properties.Set("IsDefault", e.vpc.IsDefault)
+	properties.Set("OwnerID", e.vpc.OwnerId)
 	return properties
 }
 

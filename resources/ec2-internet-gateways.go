@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2InternetGateway struct {
@@ -73,6 +73,7 @@ func (e *EC2InternetGateway) Properties() types.Properties {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.igw.OwnerId)
 	return properties
 }
 

@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/wafv2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type WAFv2RegexPatternSet struct {
@@ -16,7 +16,8 @@ type WAFv2RegexPatternSet struct {
 }
 
 func init() {
-	register("WAFv2RegexPatternSet", ListWAFv2RegexPatternSets)
+	register("WAFv2RegexPatternSet", ListWAFv2RegexPatternSets,
+		mapCloudControl("AWS::WAFv2::RegexPatternSet"))
 }
 
 func ListWAFv2RegexPatternSets(sess *session.Session) ([]Resource, error) {

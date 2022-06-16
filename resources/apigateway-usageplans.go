@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/apigateway"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type APIGatewayUsagePlan struct {
@@ -15,7 +15,8 @@ type APIGatewayUsagePlan struct {
 }
 
 func init() {
-	register("APIGatewayUsagePlan", ListAPIGatewayUsagePlans)
+	register("APIGatewayUsagePlan", ListAPIGatewayUsagePlans,
+		mapCloudControl("AWS::ApiGateway::UsagePlan"))
 }
 
 func ListAPIGatewayUsagePlans(sess *session.Session) ([]Resource, error) {

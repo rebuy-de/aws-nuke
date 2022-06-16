@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/wafv2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type WAFv2WebACL struct {
@@ -16,7 +16,8 @@ type WAFv2WebACL struct {
 }
 
 func init() {
-	register("WAFv2WebACL", ListWAFv2WebACLs)
+	register("WAFv2WebACL", ListWAFv2WebACLs,
+		mapCloudControl("AWS::WAFv2::WebACL"))
 }
 
 func ListWAFv2WebACLs(sess *session.Session) ([]Resource, error) {

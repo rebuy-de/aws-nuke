@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/globalaccelerator"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 // GlobalAccelerator model
@@ -51,7 +51,22 @@ func ListGlobalAccelerators(sess *session.Session) ([]Resource, error) {
 
 // Remove resource
 func (ga *GlobalAccelerator) Remove() error {
-	_, err := ga.svc.DeleteAccelerator(&globalaccelerator.DeleteAcceleratorInput{
+	accel, err := ga.svc.DescribeAccelerator(&globalaccelerator.DescribeAcceleratorInput{
+		AcceleratorArn: ga.ARN,
+	})
+	if err != nil {
+		return err
+	}
+	if *accel.Accelerator.Enabled {
+		_, err := ga.svc.UpdateAccelerator(&globalaccelerator.UpdateAcceleratorInput{
+			AcceleratorArn: ga.ARN,
+			Enabled:        aws.Bool(false),
+		})
+		if err != nil {
+			return err
+		}
+	}
+	_, err = ga.svc.DeleteAccelerator(&globalaccelerator.DeleteAcceleratorInput{
 		AcceleratorArn: ga.ARN,
 	})
 

@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3control"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	log "github.com/sirupsen/logrus"
 )
 
