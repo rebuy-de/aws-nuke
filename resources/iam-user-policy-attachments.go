@@ -68,6 +68,7 @@ func (e *IAMUserPolicyAttachment) Remove() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
