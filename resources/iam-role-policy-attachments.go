@@ -95,7 +95,13 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 	if err != nil {
 		return err
 	}
-
+	_, err = e.svc.DeleteRolePermissionsBoundary(
+		&iam.DeleteRolePermissionsBoundaryInput{
+			RoleName: &e.roleName,
+		})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
