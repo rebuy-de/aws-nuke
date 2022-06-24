@@ -11,10 +11,11 @@ import (
 )
 
 type IAMRole struct {
-	svc  *iam.IAM
-	role *iam.Role
-	name string
-	path string
+	svc      *iam.IAM
+	role     *iam.Role
+	name     string
+	path     string
+	boundary *iam.AttachedPermissionsBoundary
 }
 
 func init() {
@@ -51,10 +52,11 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 			}
 
 			resources = append(resources, &IAMRole{
-				svc:  svc,
-				role: role,
-				name: *role.RoleName,
-				path: *role.Path,
+				svc:      svc,
+				role:     role,
+				name:     *role.RoleName,
+				path:     *role.Path,
+				boundary: role.PermissionsBoundary,
 			})
 		}
 
@@ -76,6 +78,15 @@ func (e *IAMRole) Filter() error {
 }
 
 func (e *IAMRole) Remove() error {
+	if e.boundary != nil {
+		_, err := e.svc.DeleteRolePermissionsBoundary(
+			&iam.DeleteRolePermissionsBoundaryInput{
+				RoleName: &e.name,
+			})
+		if err != nil {
+			return err
+		}
+	}
 	_, err := e.svc.DeleteRole(&iam.DeleteRoleInput{
 		RoleName: &e.name,
 	})

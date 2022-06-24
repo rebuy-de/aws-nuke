@@ -8,9 +8,10 @@ import (
 )
 
 type IAMUser struct {
-	svc  *iam.IAM
-	name string
-	tags []*iam.Tag
+	svc      *iam.IAM
+	name     string
+	tags     []*iam.Tag
+	boundary *iam.AttachedPermissionsBoundary
 }
 
 func init() {
@@ -41,9 +42,10 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 			continue
 		}
 		resources = append(resources, &IAMUser{
-			svc:  svc,
-			name: *out.UserName,
-			tags: user.Tags,
+			svc:      svc,
+			name:     *out.UserName,
+			tags:     user.Tags,
+			boundary: out.PermissionsBoundary,
 		})
 	}
 
@@ -51,6 +53,15 @@ func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 }
 
 func (e *IAMUser) Remove() error {
+	if e.boundary != nil {
+		_, err := e.svc.DeleteUserPermissionsBoundary(
+			&iam.DeleteUserPermissionsBoundaryInput{
+				UserName: &e.name,
+			})
+		if err != nil {
+			return err
+		}
+	}
 	_, err := e.svc.DeleteUser(&iam.DeleteUserInput{
 		UserName: &e.name,
 	})

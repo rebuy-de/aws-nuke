@@ -68,13 +68,6 @@ func (e *IAMUserPolicyAttachment) Remove() error {
 	if err != nil {
 		return err
 	}
-	_, err = e.svc.DeleteUserPermissionsBoundary(
-		&iam.DeleteUserPermissionsBoundaryInput{
-			UserName: &e.userName,
-		})
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
