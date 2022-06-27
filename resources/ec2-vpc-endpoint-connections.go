@@ -14,6 +14,7 @@ type EC2VPCEndpointConnection struct {
 	serviceID     *string
 	vpcEndpointID *string
 	state         *string
+	owner         *string
 }
 
 func init() {
@@ -39,6 +40,7 @@ func ListEC2VPCEndpointConnections(sess *session.Session) ([]Resource, error) {
 				vpcEndpointID: endpointConnection.VpcEndpointId,
 				serviceID:     endpointConnection.ServiceId,
 				state:         endpointConnection.VpcEndpointState,
+				owner:         endpointConnection.VpcEndpointOwner,
 			})
 		}
 
@@ -78,6 +80,7 @@ func (c *EC2VPCEndpointConnection) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("VpcEndpointID", c.vpcEndpointID)
 	properties.Set("State", c.state)
+	properties.Set("Owner", c.owner)
 	return properties
 }
 
