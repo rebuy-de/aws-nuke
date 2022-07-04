@@ -80,7 +80,7 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 }
 
 func (e *IAMRolePolicyAttachment) Filter() error {
-	if strings.HasPrefix(e.policyArn, "arn:aws:iam::aws:policy/aws-service-role/") {
+	if strings.Contains(e.policyArn, ":iam::aws:policy/aws-service-role/") {
 		return fmt.Errorf("cannot detach from service roles")
 	}
 	return nil
