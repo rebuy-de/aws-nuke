@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
 )
@@ -46,5 +44,5 @@ func (bus *CloudWatchEventsBus) Remove() error {
 }
 
 func (bus *CloudWatchEventsBus) String() string {
-	return fmt.Sprintf("Bus: %s", *bus.name)
+	return *bus.name
 }
