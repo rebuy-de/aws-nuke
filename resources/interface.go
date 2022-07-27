@@ -37,6 +37,13 @@ type FeatureFlagGetter interface {
 	FeatureFlags(config.FeatureFlags)
 }
 
+// Revenant is an interface marker to indicate that the resource may come back after Remove()
+// This can happen when resources are created by other resources (example: log groups managed by EKS clusters)
+type Revenant interface {
+	revenant()
+	String() string
+}
+
 var resourceListers = make(ResourceListers)
 
 func register(name string, lister ResourceLister, opts ...registerOption) {
