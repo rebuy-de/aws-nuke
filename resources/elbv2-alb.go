@@ -1,16 +1,20 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elbv2"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ELBv2LoadBalancer struct {
-	svc  *elbv2.ELBV2
-	name *string
-	arn  *string
-	tags []*elbv2.Tag
+	svc          *elbv2.ELBV2
+	name         *string
+	arn          *string
+	tags         []*elbv2.Tag
+	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -66,6 +70,10 @@ func ListELBv2LoadBalancers(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func (e *ELBv2LoadBalancer) FeatureFlags(ff config.FeatureFlags) {
+	e.featureFlags = ff
+}
+
 func (e *ELBv2LoadBalancer) Remove() error {
 	params := &elbv2.DeleteLoadBalancerInput{
 		LoadBalancerArn: e.arn,
@@ -73,9 +81,40 @@ func (e *ELBv2LoadBalancer) Remove() error {
 
 	_, err := e.svc.DeleteLoadBalancer(params)
 	if err != nil {
+		if e.featureFlags.DisableDeletionProtection.ELBv2 {
+			awsErr, ok := err.(awserr.Error)
+			if ok && awsErr.Code() == "OperationNotPermitted" &&
+				awsErr.Message() == "Load balancer '"+*e.arn+"' cannot be deleted because deletion protection is enabled" {
+				err = e.DisableProtection()
+				if err != nil {
+					return err
+				}
+				_, err := e.svc.DeleteLoadBalancer(params)
+				if err != nil {
+					return err
+				}
+				return nil
+			}
+		}
 		return err
 	}
+	return nil
+}
 
+func (e *ELBv2LoadBalancer) DisableProtection() error {
+	params := &elbv2.ModifyLoadBalancerAttributesInput{
+		LoadBalancerArn: e.arn,
+		Attributes: []*elbv2.LoadBalancerAttribute{
+			{
+				Key:   aws.String("deletion_protection.enabled"),
+				Value: aws.String("false"),
+			},
+		},
+	}
+	_, err := e.svc.ModifyLoadBalancerAttributes(params)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
