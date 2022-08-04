@@ -3,7 +3,6 @@ package resources
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
@@ -46,7 +45,6 @@ func (i *EC2SpotInstanceRequest) Filter() error {
 
 func (i *EC2SpotInstanceRequest) Remove() error {
 	params := &ec2.CancelSpotInstanceRequestsInput{
-		TerminateInstances: aws.Bool(true),
 		SpotInstanceRequestIds: []*string{
 			&i.id,
 		},
