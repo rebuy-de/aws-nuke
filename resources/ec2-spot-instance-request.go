@@ -27,11 +27,10 @@ func ListEC2SpotInstanceRequests(sess *session.Session) ([]Resource, error) {
 	}
 
 	resources := make([]Resource, 0)
-	for _, config := range resp.SpotInstanceRequestConfigs {
+	for _, config := range resp.SpotInstanceRequest {
 		resources = append(resources, &EC2SpotInstanceRequest{
-			svc:   svc,
-			id:    *config.SpotInstanceRequestId,
-			state: *config.SpotInstanceRequestState,
+			svc: svc,
+			id:  *config.SpotInstanceRequestId,
 		})
 	}
 
