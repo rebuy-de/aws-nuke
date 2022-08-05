@@ -26,7 +26,7 @@ func ListEC2SpotInstanceRequests(sess *session.Session) ([]Resource, error) {
 	}
 
 	resources := make([]Resource, 0)
-	for _, config := range resp.SpotInstanceRequest {
+	for _, config := range resp.SpotInstanceRequests {
 		resources = append(resources, &EC2SpotInstanceRequest{
 			svc: svc,
 			id:  *config.SpotInstanceRequestId,
@@ -45,6 +45,7 @@ func (i *EC2SpotInstanceRequest) Filter() error {
 
 func (i *EC2SpotInstanceRequest) Remove() error {
 	params := &ec2.CancelSpotInstanceRequestsInput{
+		// TerminateInstances: aws.Bool(true),
 		SpotInstanceRequestIds: []*string{
 			&i.id,
 		},
