@@ -2,15 +2,18 @@ package resources
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2SpotInstanceRequest struct {
-	svc   *ec2.EC2
-	id    string
-	state string
+	svc                 *ec2.EC2
+	spotInstanceRequest *ec2.SpotInstanceRequest
+	id                  string
+	state               string
 }
 
 func init() {
@@ -57,6 +60,24 @@ func (i *EC2SpotInstanceRequest) Remove() error {
 	}
 
 	return nil
+}
+
+func (i *EC2SpotInstanceRequest) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("AvailabilityZoneGroup", i.spotInstanceRequest.AvailabilityZoneGroup)
+	properties.Set("InstanceId", i.spotInstanceRequest.InstanceId)
+	properties.Set("SpotInstanceRequestId", i.spotInstanceRequest.SpotInstanceRequestId)
+	properties.Set("SpotPrice", i.spotInstanceRequest.SpotPrice)
+	properties.Set("SpotPrice", i.spotInstanceRequest.SpotPrice)
+	properties.Set("SpotInstanceState", i.spotInstanceRequest.State)
+	properties.Set("LaunchTime", i.spotInstanceRequest.CreateTime.Format(time.RFC1123))
+	properties.Set("SpotInstanceType", i.spotInstanceRequest.Type)
+
+	for _, tagValue := range i.spotInstanceRequest.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+
+	return properties
 }
 
 func (i *EC2SpotInstanceRequest) String() string {
