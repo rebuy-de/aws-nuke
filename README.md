@@ -5,7 +5,7 @@
 [![GitHub release](https://img.shields.io/github/release/rebuy-de/aws-nuke.svg)](https://github.com/rebuy-de/aws-nuke/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/rebuy/aws-nuke)](https://hub.docker.com/r/rebuy/aws-nuke)
 
-Remove all resources from an AWS account.
+![aws-nuke logo](logo.png)
 
 > **Development Status** *aws-nuke* is stable, but it is likely that not all AWS
 resources are covered by it. Be encouraged to add missing resources and create
