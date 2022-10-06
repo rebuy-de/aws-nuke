@@ -21,16 +21,23 @@ func ListIoTCertificates(sess *session.Session) ([]Resource, error) {
 
 	params := &iot.ListCertificatesInput{}
 
-	output, err := svc.ListCertificates(params)
-	if err != nil {
-		return nil, err
-	}
+	for {
+		output, err := svc.ListCertificates(params)
+		if err != nil {
+			return nil, err
+		}
 
-	for _, certificate := range output.Certificates {
-		resources = append(resources, &IoTCertificate{
-			svc: svc,
-			ID:  certificate.CertificateId,
-		})
+		for _, certificate := range output.Certificates {
+			resources = append(resources, &IoTCertificate{
+				svc: svc,
+				ID:  certificate.CertificateId,
+			})
+		}
+		if output.NextMarker == nil {
+			break
+		}
+
+		params.Marker = output.NextMarker
 	}
 
 	return resources, nil
