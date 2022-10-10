@@ -43,7 +43,8 @@ jobs:
       shell: bash
       run: |
         if [ "${GITHUB_EVENT_NAME}" == "pull_request" ]; then
-          echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:${GITHUB_HEAD_REF},docker.io/rebuy/aws-nuke:${GITHUB_HEAD_REF}"
+          BRANCH="$(echo ${GITHUB_HEAD_REF} | tr '/' '_')"
+          echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:${BRANCH},docker.io/rebuy/aws-nuke:${BRANCH}"
         else
           echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:main,docker.io/rebuy/aws-nuke:main,\
             quay.io/rebuy/aws-nuke:latest,docker.io/rebuy/aws-nuke:latest"
