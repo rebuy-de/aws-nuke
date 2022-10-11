@@ -45,6 +45,7 @@ type DisableDeletionProtection struct {
 	EC2Instance         bool `yaml:"EC2Instance"`
 	CloudformationStack bool `yaml:"CloudformationStack"`
 	ELBv2               bool `yaml:"ELBv2"`
+	QLDBLedger          bool `yaml:"QLDBLedger"`
 }
 
 type PresetDefinitions struct {
