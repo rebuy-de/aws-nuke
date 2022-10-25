@@ -6,3 +6,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "Europe/Berlin"
