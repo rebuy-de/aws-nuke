@@ -4,8 +4,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lightsail"
-	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
-	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"github.com/hunterkepley/aws-nuke/v2/pkg/config"
+	"github.com/hunterkepley/aws-nuke/v2/pkg/types"
 )
 
 type LightsailInstance struct {

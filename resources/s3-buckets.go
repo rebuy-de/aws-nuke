@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"github.com/hunterkepley/aws-nuke/v2/pkg/types"
 )
 
 func init() {

@@ -2,7 +2,7 @@ package resources
 
 import (
 	"fmt"
-	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"github.com/hunterkepley/aws-nuke/v2/pkg/types"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
