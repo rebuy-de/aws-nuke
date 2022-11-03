@@ -1,4 +1,4 @@
-module github.com/rebuy-de/aws-nuke/v2
+module github.com/hunterkepley/aws-nuke/v2
 
 go 1.19
 
