@@ -30,6 +30,11 @@ func DescribeECSCapacityProviders(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, capacityProviders := range output.CapacityProviders {
+			if *capacityProviders.Name == "FARGATE" || *capacityProviders.Name == "FARGATE_SPOT" {
+				// The FARGATE and FARGATE_SPOT capacity providers cannot be deleted
+				continue
+			}
+
 			resources = append(resources, &ECSCapacityProvider{
 				svc: svc,
 				ARN: capacityProviders.CapacityProviderArn,
