@@ -59,5 +59,9 @@ func (ce *ComprehendKeyPhrasesDetectionJob) Properties() types.Properties {
 }
 
 func (ce *ComprehendKeyPhrasesDetectionJob) String() string {
-	return *ce.keyPhrasesDetectionJob.JobName
+	if ce.keyPhrasesDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.keyPhrasesDetectionJob.JobName
+	}
 }
