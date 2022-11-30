@@ -5,6 +5,22 @@ on:
     types: [created]
 
 jobs:
+  update_readme:
+    name: Update Readme
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - run: |
+        sed -r -i "s/aws-nuke:v[0-9]+\.[0-9]+\.[0-9]+/aws-nuke:${GITHUB_REF#refs/tags/}/" README.md
+        sed -r -i "s/aws-nuke-v[0-9]+\.[0-9]+\.[0-9]+/aws-nuke-${GITHUB_REF#refs/tags/}/" README.md
+        sed -r -i "s/\/v[0-9]+\.[0-9]+\.[0-9]+\//\/${GITHUB_REF#refs/tags/}\//" README.md
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Update readme for ${GITHUB_REF#refs/tags/}
+
   release:
     name: Publish binaries
     runs-on: ubuntu-22.04
