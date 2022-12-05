@@ -86,15 +86,22 @@ func (e *IAMRole) Remove() error {
 	return nil
 }
 
-func (role *IAMRole) Properties() types.Properties {
+func (role *IAMRole) Properties() (types.Properties, error) {
 	properties := types.NewProperties()
-	for _, tagValue := range role.role.Tags {
+
+	tagsParams := &iam.ListRoleTagsInput{RoleName: role.role.RoleName}
+	tagsOutput, err := role.svc.ListRoleTags(tagsParams)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, tagValue := range tagsOutput.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.
 		Set("Name", role.name).
 		Set("Path", role.path)
-	return properties
+	return properties, nil
 }
 
 func (e *IAMRole) String() string {
