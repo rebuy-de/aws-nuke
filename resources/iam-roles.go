@@ -15,6 +15,7 @@ type IAMRole struct {
 	role *iam.Role
 	name string
 	path string
+	tags []*iam.Tag
 }
 
 func init() {
@@ -55,6 +56,7 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 				role: role,
 				name: *role.RoleName,
 				path: *role.Path,
+				tags: role.Tags,
 			})
 		}
 
@@ -86,22 +88,15 @@ func (e *IAMRole) Remove() error {
 	return nil
 }
 
-func (role *IAMRole) Properties() (types.Properties, error) {
+func (role *IAMRole) Properties() types.Properties {
 	properties := types.NewProperties()
-
-	tagsParams := &iam.ListRoleTagsInput{RoleName: role.role.RoleName}
-	tagsOutput, err := role.svc.ListRoleTags(tagsParams)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, tagValue := range tagsOutput.Tags {
+	for _, tagValue := range role.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.
 		Set("Name", role.name).
 		Set("Path", role.path)
-	return properties, nil
+	return properties
 }
 
 func (e *IAMRole) String() string {
