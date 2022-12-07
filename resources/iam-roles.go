@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -92,6 +93,12 @@ func (role *IAMRole) Properties() types.Properties {
 	properties := types.NewProperties()
 	for _, tagValue := range role.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("CreateDate", role.role.CreateDate.Format(time.RFC3339))
+	if role.role.RoleLastUsed.LastUsedDate == nil {
+		properties.Set("LastUsedDate", role.role.CreateDate.Format(time.RFC3339))
+	} else {
+		properties.Set("LastUsedDate", role.role.RoleLastUsed.LastUsedDate.Format(time.RFC3339))
 	}
 	properties.
 		Set("Name", role.name).
