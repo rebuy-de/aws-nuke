@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 func TestUnmarshalFilter(t *testing.T) {
