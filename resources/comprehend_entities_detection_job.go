@@ -64,5 +64,9 @@ func (ce *ComprehendEntitiesDetectionJob) Properties() types.Properties {
 }
 
 func (ce *ComprehendEntitiesDetectionJob) String() string {
-	return *ce.entitiesDetectionJob.JobName
+	if ce.entitiesDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.entitiesDetectionJob.JobName
+	}
 }
