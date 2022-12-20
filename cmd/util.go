@@ -9,10 +9,11 @@ import (
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
+var stdinReader = bufio.NewReader(os.Stdin)
+
 func Prompt(expect string) error {
 	fmt.Print("> ")
-	reader := bufio.NewReader(os.Stdin)
-	text, err := reader.ReadString('\n')
+	text, err := stdinReader.ReadString('\n')
 	if err != nil {
 		return err
 	}
