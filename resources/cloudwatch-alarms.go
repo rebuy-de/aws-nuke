@@ -10,6 +10,7 @@ import (
 type CloudWatchAlarm struct {
 	svc       *cloudwatch.CloudWatch
 	alarmName *string
+	tags      []*cloudwatch.Tag
 }
 
 func init() {
@@ -34,6 +35,7 @@ func ListCloudWatchAlarms(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &CloudWatchAlarm{
 				svc:       svc,
 				alarmName: metricAlarm.AlarmName,
+				tags:      GetAlarmTags(svc, metricAlarm.AlarmArn),
 			})
 		}
 
@@ -47,6 +49,11 @@ func ListCloudWatchAlarms(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func GetAlarmTags(svc *cloudwatch.CloudWatch, arn *string) []*cloudwatch.Tag {
+	resp, _ := svc.ListTagsForResource(&cloudwatch.ListTagsForResourceInput{ResourceARN: arn})
+	return resp.Tags
+}
+
 func (f *CloudWatchAlarm) Remove() error {
 
 	_, err := f.svc.DeleteAlarms(&cloudwatch.DeleteAlarmsInput{
@@ -57,8 +64,13 @@ func (f *CloudWatchAlarm) Remove() error {
 }
 
 func (f *CloudWatchAlarm) Properties() types.Properties {
-	return types.NewProperties().
-		Set("Name", f.alarmName)
+	properties := types.NewProperties()
+	properties.Set("Name", f.alarmName)
+
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+	return properties
 }
 
 func (f *CloudWatchAlarm) String() string {
