@@ -32,10 +32,14 @@ func ListCloudWatchAlarms(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, metricAlarm := range output.MetricAlarms {
+			tags, err := GetAlarmTags(svc, metricAlarm.AlarmArn)
+			if err != nil {
+				return nil, err
+			}
 			resources = append(resources, &CloudWatchAlarm{
 				svc:       svc,
 				alarmName: metricAlarm.AlarmName,
-				tags:      GetAlarmTags(svc, metricAlarm.AlarmArn),
+				tags:      tags,
 			})
 		}
 
@@ -49,9 +53,13 @@ func ListCloudWatchAlarms(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func GetAlarmTags(svc *cloudwatch.CloudWatch, arn *string) []*cloudwatch.Tag {
-	resp, _ := svc.ListTagsForResource(&cloudwatch.ListTagsForResourceInput{ResourceARN: arn})
-	return resp.Tags
+func GetAlarmTags(svc *cloudwatch.CloudWatch, arn *string) ([]*cloudwatch.Tag, error) {
+	resp, err := svc.ListTagsForResource(&cloudwatch.ListTagsForResourceInput{ResourceARN: arn})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Tags, nil
 }
 
 func (f *CloudWatchAlarm) Remove() error {
