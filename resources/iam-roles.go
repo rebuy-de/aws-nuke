@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 	"github.com/sirupsen/logrus"
 )
@@ -16,6 +17,8 @@ type IAMRole struct {
 	role *iam.Role
 	name string
 	path string
+
+	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -69,6 +72,10 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func (e *IAMRole) FeatureFlags(ff config.FeatureFlags) {
+	e.featureFlags = ff
+}
+
 func (e *IAMRole) Filter() error {
 	if strings.HasPrefix(e.path, "/aws-service-role/") {
 		return fmt.Errorf("cannot delete service roles")
@@ -77,6 +84,32 @@ func (e *IAMRole) Filter() error {
 }
 
 func (e *IAMRole) Remove() error {
+	if e.featureFlags.ForceDeleteIAMRoles {
+		managedPolicies, err := listSingleIAMRolePolicyAttachments(e.role, e.svc)
+		if err != nil {
+			return err
+		}
+
+		inlinePolicies, err := listSingleIAMRolePolicy(e.role, e.svc)
+		if err != nil {
+			return err
+		}
+
+		instanceProfiles, err := listSingleIAMInstanceProfileRoles(e.role, e.svc)
+		if err != nil {
+			return err
+		}
+
+		for _, rsc := range [][]Resource{managedPolicies, inlinePolicies, instanceProfiles} {
+			for _, att := range rsc {
+				err := att.Remove()
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	_, err := e.svc.DeleteRole(&iam.DeleteRoleInput{
 		RoleName: &e.name,
 	})

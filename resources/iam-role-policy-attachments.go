@@ -39,43 +39,53 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 				logrus.Errorf("Failed to get listed role %s: %v", *listedRole.RoleName, err)
 				continue
 			}
-
-			polParams := &iam.ListAttachedRolePoliciesInput{
-				RoleName: role.RoleName,
+			polAttachments, err := listSingleIAMRolePolicyAttachments(role, svc)
+			if err != nil {
+				logrus.Errorf("failed to list attached policies for role %s: %v",
+					*role.RoleName, err)
+				continue
 			}
-
-			for {
-				polResp, err := svc.ListAttachedRolePolicies(polParams)
-				if err != nil {
-					logrus.Errorf("failed to list attached policies for role %s: %v",
-						*role.RoleName, err)
-					break
-				}
-				for _, pol := range polResp.AttachedPolicies {
-					resources = append(resources, &IAMRolePolicyAttachment{
-						svc:        svc,
-						policyArn:  *pol.PolicyArn,
-						policyName: *pol.PolicyName,
-						roleName:   *role.RoleName,
-						roleTags:   role.Tags,
-					})
-				}
-
-				if *polResp.IsTruncated == false {
-					break
-				}
-
-				polParams.Marker = polResp.Marker
-			}
+			resources = append(resources, polAttachments...)
 		}
 
-		if *roleResp.IsTruncated == false {
+		if !*roleResp.IsTruncated {
 			break
 		}
 
 		roleParams.Marker = roleResp.Marker
 	}
 
+	return resources, nil
+}
+
+func listSingleIAMRolePolicyAttachments(role *iam.Role, svc *iam.IAM) ([]Resource, error) {
+	resources := make([]Resource, 0)
+
+	params := &iam.ListAttachedRolePoliciesInput{
+		RoleName: role.RoleName,
+	}
+
+	for {
+		resp, err := svc.ListAttachedRolePolicies(params)
+		if err != nil {
+			return resources, err
+		}
+		for _, pol := range resp.AttachedPolicies {
+			resources = append(resources, &IAMRolePolicyAttachment{
+				svc:        svc,
+				policyArn:  *pol.PolicyArn,
+				policyName: *pol.PolicyName,
+				roleName:   *role.RoleName,
+				roleTags:   role.Tags,
+			})
+		}
+
+		if !*resp.IsTruncated {
+			break
+		}
+
+		params.Marker = resp.Marker
+	}
 	return resources, nil
 }
 

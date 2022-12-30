@@ -422,6 +422,7 @@ feature-flags:
     EC2Instance: true
     CloudformationStack: true
   force-delete-lightsail-addons: true
+  force-delete-iam-roles: true
 ```
 
 
