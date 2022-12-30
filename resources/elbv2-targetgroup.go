@@ -7,10 +7,11 @@ import (
 )
 
 type ELBv2TargetGroup struct {
-	svc  *elbv2.ELBV2
-	name *string
-	arn  *string
-	tags []*elbv2.Tag
+	svc        *elbv2.ELBV2
+	name       *string
+	arn        *string
+	hasTargets bool
+	tags       []*elbv2.Tag
 }
 
 func init() {
@@ -62,6 +63,18 @@ func ListELBv2TargetGroups(sess *session.Session) ([]Resource, error) {
 		// Remove the elements that were queried
 		tagReqELBv2TargetGroupARNs = tagReqELBv2TargetGroupARNs[requestElements:]
 	}
+
+	// determine if each target group has registered targets
+	for _, tg := range resources {
+		healthOut, err := svc.DescribeTargetHealth(
+			&elbv2.DescribeTargetHealthInput{TargetGroupArn: tg.(*ELBv2TargetGroup).arn},
+		)
+		if err != nil {
+			return nil, err
+		}
+		tg.(*ELBv2TargetGroup).hasTargets = len(healthOut.TargetHealthDescriptions) > 0
+	}
+
 	return resources, nil
 }
 
@@ -82,6 +95,7 @@ func (e *ELBv2TargetGroup) Properties() types.Properties {
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+	properties.Set("HasTargets", e.hasTargets)
 	return properties
 }
 
