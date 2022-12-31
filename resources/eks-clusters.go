@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -51,6 +52,18 @@ func ListEKSClusters(sess *session.Session) ([]Resource, error) {
 		params.NextToken = resp.NextToken
 	}
 	return resources, nil
+}
+
+func mapEKSClusters(sess *session.Session) (map[string]bool, error) {
+	eksClusters, err := ListEKSClusters(sess)
+	if err != nil {
+		return nil, err
+	}
+	eksClustersMap := make(map[string]bool)
+	for _, cl := range eksClusters {
+		eksClustersMap[fmt.Sprintf("%v", cl)] = true
+	}
+	return eksClustersMap, nil
 }
 
 func (f *EKSCluster) Remove() error {

@@ -2,6 +2,10 @@ package resources
 
 import "github.com/aws/aws-sdk-go/aws/awserr"
 
+const (
+	EKSClusterTag = "elbv2.k8s.aws/cluster"
+)
+
 func UnPtrBool(ptr *bool, def bool) bool {
 	if ptr == nil {
 		return def
