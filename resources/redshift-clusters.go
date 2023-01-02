@@ -4,11 +4,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/redshift"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type RedshiftCluster struct {
-	svc               *redshift.Redshift
-	clusterIdentifier *string
+	svc     *redshift.Redshift
+	cluster *redshift.Cluster
 }
 
 func init() {
@@ -31,8 +32,8 @@ func ListRedshiftClusters(sess *session.Session) ([]Resource, error) {
 
 		for _, cluster := range output.Clusters {
 			resources = append(resources, &RedshiftCluster{
-				svc:               svc,
-				clusterIdentifier: cluster.ClusterIdentifier,
+				svc:     svc,
+				cluster: cluster,
 			})
 		}
 
@@ -46,10 +47,21 @@ func ListRedshiftClusters(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func (f *RedshiftCluster) Properties() types.Properties {
+	properties := types.NewProperties().
+		Set("CreatedTime", f.cluster.ClusterCreateTime)
+
+	for _, tag := range f.cluster.Tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
+}
+
 func (f *RedshiftCluster) Remove() error {
 
 	_, err := f.svc.DeleteCluster(&redshift.DeleteClusterInput{
-		ClusterIdentifier:        f.clusterIdentifier,
+		ClusterIdentifier:        f.cluster.ClusterIdentifier,
 		SkipFinalClusterSnapshot: aws.Bool(true),
 	})
 
@@ -57,5 +69,5 @@ func (f *RedshiftCluster) Remove() error {
 }
 
 func (f *RedshiftCluster) String() string {
-	return *f.clusterIdentifier
+	return *f.cluster.ClusterIdentifier
 }
