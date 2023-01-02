@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -57,7 +58,12 @@ func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 		for _, elbTagInfo := range tagResp.TagDescriptions {
 			var isEKSManaged bool
 			for _, tag := range elbTagInfo.Tags {
-				if *tag.Key == EKSClusterTag {
+				if strings.HasPrefix(*tag.Key, "kubernetes.io/cluster/") {
+					parts := strings.Split(*tag.Key, "/")
+					eksName := parts[len(parts)-1]
+					isEKSManaged = eksClusters[eksName]
+					break
+				} else if *tag.Key == EKSClusterTag {
 					isEKSManaged = eksClusters[*tag.Value]
 					break
 				}
