@@ -40,43 +40,54 @@ func ListIAMRolePolicies(sess *session.Session) ([]Resource, error) {
 				continue
 			}
 
-			polParams := &iam.ListRolePoliciesInput{
-				RoleName: role.RoleName,
+			policies, err := listSingleIAMRolePolicy(role, svc)
+			if err != nil {
+				logrus.
+					WithError(err).
+					WithField("roleName", *role.RoleName).
+					Error("Failed to list policies")
+				break
 			}
-
-			for {
-				policies, err := svc.ListRolePolicies(polParams)
-				if err != nil {
-					logrus.
-						WithError(err).
-						WithField("roleName", *role.RoleName).
-						Error("Failed to list policies")
-					break
-				}
-
-				for _, policyName := range policies.PolicyNames {
-					resources = append(resources, &IAMRolePolicy{
-						svc:        svc,
-						role:       *role,
-						policyName: *policyName,
-					})
-				}
-
-				if *policies.IsTruncated == false {
-					break
-				}
-
-				polParams.Marker = policies.Marker
-			}
+			resources = append(resources, policies...)
 		}
 
-		if *roles.IsTruncated == false {
+		if !*roles.IsTruncated {
 			break
 		}
 
 		roleParams.Marker = roles.Marker
 	}
 
+	return resources, nil
+}
+
+func listSingleIAMRolePolicy(role *iam.Role, svc *iam.IAM) ([]Resource, error) {
+	resources := make([]Resource, 0)
+
+	params := &iam.ListRolePoliciesInput{
+		RoleName: role.RoleName,
+	}
+
+	for {
+		resp, err := svc.ListRolePolicies(params)
+		if err != nil {
+			return resources, err
+		}
+
+		for _, policyName := range resp.PolicyNames {
+			resources = append(resources, &IAMRolePolicy{
+				svc:        svc,
+				role:       *role,
+				policyName: *policyName,
+			})
+		}
+
+		if !*resp.IsTruncated {
+			break
+		}
+
+		params.Marker = resp.Marker
+	}
 	return resources, nil
 }
 

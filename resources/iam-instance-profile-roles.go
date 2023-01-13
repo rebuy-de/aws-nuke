@@ -59,6 +59,35 @@ func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func listSingleIAMInstanceProfileRoles(role *iam.Role, svc *iam.IAM) ([]Resource, error) {
+	resources := make([]Resource, 0)
+
+	params := &iam.ListInstanceProfilesForRoleInput{
+		RoleName: role.RoleName,
+	}
+
+	for {
+		resp, err := svc.ListInstanceProfilesForRole(params)
+		if err != nil {
+			return resources, err
+		}
+		for _, instProfile := range resp.InstanceProfiles {
+			resources = append(resources, &IAMInstanceProfileRole{
+				svc:     svc,
+				role:    *role.RoleName,
+				profile: instProfile,
+			})
+		}
+
+		if !*resp.IsTruncated {
+			break
+		}
+
+		params.Marker = resp.Marker
+	}
+	return resources, nil
+}
+
 func (e *IAMInstanceProfileRole) Remove() error {
 	_, err := e.svc.RemoveRoleFromInstanceProfile(
 		&iam.RemoveRoleFromInstanceProfileInput{
