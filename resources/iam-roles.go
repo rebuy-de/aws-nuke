@@ -107,7 +107,7 @@ func (e *IAMRole) String() string {
 
 func getLastUsedDate(role *iam.Role, format string) string {
 	var lastUsedDate *time.Time
-	if role.RoleLastUsed.LastUsedDate == nil {
+	if role.RoleLastUsed == nil || role.RoleLastUsed.LastUsedDate == nil {
 		lastUsedDate = role.CreateDate
 	} else {
 		lastUsedDate = role.RoleLastUsed.LastUsedDate
