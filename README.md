@@ -606,3 +606,5 @@ You can contribute to *aws-nuke* by forking this repository, making your
 changes and creating a Pull Request against our repository. If you are unsure
 how to solve a problem or have other questions about a contributions, please
 create a GitHub issue.
+
+## End
