@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/backup"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type BackupVault struct {
@@ -61,4 +61,11 @@ func (b *BackupVault) Remove() error {
 
 func (b *BackupVault) String() string {
 	return b.arn
+}
+
+func (b *BackupVault) Filter() error {
+	if b.name == "aws/efs/automatic-backup-vault" {
+		return fmt.Errorf("cannot delete EFS automatic backups vault")
+	}
+	return nil
 }

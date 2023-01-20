@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/wafv2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type WAFv2RuleGroup struct {
@@ -16,7 +16,8 @@ type WAFv2RuleGroup struct {
 }
 
 func init() {
-	register("WAFv2RuleGroup", ListWAFv2RuleGroups)
+	register("WAFv2RuleGroup", ListWAFv2RuleGroups,
+		mapCloudControl("AWS::WAFv2::RuleGroup"))
 }
 
 func ListWAFv2RuleGroups(sess *session.Session) ([]Resource, error) {

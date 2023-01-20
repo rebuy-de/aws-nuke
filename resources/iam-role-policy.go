@@ -2,13 +2,14 @@ package resources
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type IAMRolePolicy struct {
@@ -32,7 +33,13 @@ func ListIAMRolePolicies(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		for _, role := range roles.Roles {
+		for _, listedRole := range roles.Roles {
+			role, err := GetIAMRole(svc, listedRole.RoleName)
+			if err != nil {
+				logrus.Errorf("Failed to get listed role %s: %v", *listedRole.RoleName, err)
+				continue
+			}
+
 			polParams := &iam.ListRolePoliciesInput{
 				RoleName: role.RoleName,
 			}

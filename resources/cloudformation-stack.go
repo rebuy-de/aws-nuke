@@ -3,14 +3,15 @@ package resources
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -32,6 +33,9 @@ func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 		for _, stack := range resp.Stacks {
+			if aws.StringValue(stack.ParentId) != "" {
+				continue
+			}
 			resources = append(resources, &CloudFormationStack{
 				svc:               svc,
 				stack:             stack,
@@ -67,10 +71,11 @@ func (cfs *CloudFormationStack) Remove() error {
 func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
 	if err := cfs.doRemove(); err != nil {
 		logrus.Errorf("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d delete failed: %s", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts, err.Error())
-		if cfs.featureFlags.DisableDeletionProtection.CloudformationStack {
-			awsErr, ok := err.(awserr.Error)
-			if ok && awsErr.Code() == "ValidationError" &&
-				awsErr.Message() == "Stack ["+*cfs.stack.StackName+"] cannot be deleted while TerminationProtection is enabled" {
+		awsErr, ok := err.(awserr.Error)
+		if ok && awsErr.Code() == "ValidationError" &&
+			awsErr.Message() == "Stack ["+*cfs.stack.StackName+"] cannot be deleted while TerminationProtection is enabled" {
+			if cfs.featureFlags.DisableDeletionProtection.CloudformationStack {
+				logrus.Infof("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d updating termination protection", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts)
 				_, err = cfs.svc.UpdateTerminationProtection(&cloudformation.UpdateTerminationProtectionInput{
 					EnableTerminationProtection: aws.Bool(false),
 					StackName:                   cfs.stack.StackName,
@@ -78,6 +83,9 @@ func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
 				if err != nil {
 					return err
 				}
+			} else {
+				logrus.Warnf("CloudFormationStack stackName=%s attempt=%d maxAttempts=%d set feature flag to disable deletion protection", *cfs.stack.StackName, attempt, cfs.maxDeleteAttempts)
+				return err
 			}
 		}
 		if attempt >= cfs.maxDeleteAttempts {
@@ -143,7 +151,7 @@ func (cfs *CloudFormationStack) doRemove() error {
 			StackName: cfs.stack.StackName,
 		})
 	} else {
-		if err := cfs.waitForStackToStabalize(*stack.StackStatus); err != nil {
+		if err := cfs.waitForStackToStabilize(*stack.StackStatus); err != nil {
 			return err
 		} else if _, err := cfs.svc.DeleteStack(&cloudformation.DeleteStackInput{
 			StackName: cfs.stack.StackName,
@@ -158,7 +166,7 @@ func (cfs *CloudFormationStack) doRemove() error {
 		}
 	}
 }
-func (cfs *CloudFormationStack) waitForStackToStabalize(currentStatus string) error {
+func (cfs *CloudFormationStack) waitForStackToStabilize(currentStatus string) error {
 	switch currentStatus {
 	case cloudformation.StackStatusUpdateInProgress:
 		fallthrough
@@ -184,6 +192,13 @@ func (cfs *CloudFormationStack) waitForStackToStabalize(currentStatus string) er
 func (cfs *CloudFormationStack) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Name", cfs.stack.StackName)
+	properties.Set("CreationTime", cfs.stack.CreationTime.Format(time.RFC3339))
+	if cfs.stack.LastUpdatedTime == nil {
+		properties.Set("LastUpdatedTime", cfs.stack.CreationTime.Format(time.RFC3339))
+	} else {
+		properties.Set("LastUpdatedTime", cfs.stack.LastUpdatedTime.Format(time.RFC3339))
+	}
+
 	for _, tagValue := range cfs.stack.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}

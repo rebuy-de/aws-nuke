@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/comprehend"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
@@ -22,6 +22,11 @@ func ListComprehendEntitiesDetectionJobs(sess *session.Session) ([]Resource, err
 			return nil, err
 		}
 		for _, entitiesDetectionJob := range resp.EntitiesDetectionJobPropertiesList {
+			if *entitiesDetectionJob.JobStatus == "STOPPED" ||
+				*entitiesDetectionJob.JobStatus == "FAILED" {
+				// if the job has already been stopped, do not try to delete it again
+				continue
+			}
 			resources = append(resources, &ComprehendEntitiesDetectionJob{
 				svc:                  svc,
 				entitiesDetectionJob: entitiesDetectionJob,
@@ -59,5 +64,9 @@ func (ce *ComprehendEntitiesDetectionJob) Properties() types.Properties {
 }
 
 func (ce *ComprehendEntitiesDetectionJob) String() string {
-	return *ce.entitiesDetectionJob.JobName
+	if ce.entitiesDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.entitiesDetectionJob.JobName
+	}
 }

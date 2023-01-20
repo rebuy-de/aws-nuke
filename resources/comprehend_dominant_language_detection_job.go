@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/comprehend"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
@@ -59,5 +59,9 @@ func (ce *ComprehendDominantLanguageDetectionJob) Properties() types.Properties 
 }
 
 func (ce *ComprehendDominantLanguageDetectionJob) String() string {
-	return *ce.dominantLanguageDetectionJob.JobName
+	if ce.dominantLanguageDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.dominantLanguageDetectionJob.JobName
+	}
 }

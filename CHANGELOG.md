@@ -1,3 +1,6 @@
+## v1.4.0
+- Get latest version of rebuy-de/aws-nuke v2.21.2
+
 ## v1.3.0
 - Merge in latest version of rebuy-de/aws-nuke from master:
   * Add Athena WorkGroups and NameQueries resource

@@ -2,16 +2,19 @@ package resources
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2Snapshot struct {
-	svc  *ec2.EC2
-	id   string
-	tags []*ec2.Tag
+	svc       *ec2.EC2
+	id        string
+	startTime *time.Time
+	tags      []*ec2.Tag
 }
 
 func init() {
@@ -33,9 +36,10 @@ func ListEC2Snapshots(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.Snapshots {
 		resources = append(resources, &EC2Snapshot{
-			svc:  svc,
-			id:   *out.SnapshotId,
-			tags: out.Tags,
+			svc:       svc,
+			id:        *out.SnapshotId,
+			startTime: out.StartTime,
+			tags:      out.Tags,
 		})
 	}
 
@@ -44,6 +48,8 @@ func ListEC2Snapshots(sess *session.Session) ([]Resource, error) {
 
 func (e *EC2Snapshot) Properties() types.Properties {
 	properties := types.NewProperties()
+	properties.Set("StartTime", e.startTime.Format(time.RFC3339))
+
 	for _, tagValue := range e.tags {
 		properties.Set(fmt.Sprintf("tag:%v", *tagValue.Key), tagValue.Value)
 	}

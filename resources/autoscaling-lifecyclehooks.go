@@ -6,7 +6,8 @@ import (
 )
 
 func init() {
-	register("LifecycleHook", ListLifecycleHooks)
+	register("LifecycleHook", ListLifecycleHooks,
+		mapCloudControl("AWS::AutoScaling::LifecycleHook"))
 }
 
 func ListLifecycleHooks(s *session.Session) ([]Resource, error) {

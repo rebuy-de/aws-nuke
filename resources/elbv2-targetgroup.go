@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elbv2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ELBv2TargetGroup struct {
@@ -19,17 +19,19 @@ func init() {
 
 func ListELBv2TargetGroups(sess *session.Session) ([]Resource, error) {
 	svc := elbv2.New(sess)
-
-	resourceResp, err := svc.DescribeTargetGroups(nil)
-	if err != nil {
-		return nil, err
-	}
-
 	var tagReqELBv2TargetGroupARNs []*string
 	targetGroupArnToName := make(map[string]*string)
-	for _, targetGroup := range resourceResp.TargetGroups {
-		tagReqELBv2TargetGroupARNs = append(tagReqELBv2TargetGroupARNs, targetGroup.TargetGroupArn)
-		targetGroupArnToName[*targetGroup.TargetGroupArn] = targetGroup.TargetGroupName
+
+	err := svc.DescribeTargetGroupsPages(nil,
+		func(page *elbv2.DescribeTargetGroupsOutput, lastPage bool) bool {
+			for _, targetGroup := range page.TargetGroups {
+				tagReqELBv2TargetGroupARNs = append(tagReqELBv2TargetGroupARNs, targetGroup.TargetGroupArn)
+				targetGroupArnToName[*targetGroup.TargetGroupArn] = targetGroup.TargetGroupName
+			}
+			return !lastPage
+		})
+	if err != nil {
+		return nil, err
 	}
 
 	// Tags for ELBv2 target groups need to be fetched separately

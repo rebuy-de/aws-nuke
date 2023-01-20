@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/backup"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"strings"
 )
 
 type BackupPlan struct {
@@ -75,4 +76,11 @@ func (b *BackupPlan) Remove() error {
 
 func (b *BackupPlan) String() string {
 	return b.arn
+}
+
+func (b *BackupPlan) Filter() error {
+	if strings.HasPrefix(b.name, "aws/efs/") {
+		return fmt.Errorf("cannot delete EFS automatic backups backup plan")
+	}
+	return nil
 }

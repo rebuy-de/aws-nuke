@@ -12,7 +12,8 @@ type APIGatewayAPIKey struct {
 }
 
 func init() {
-	register("APIGatewayAPIKey", ListAPIGatewayAPIKeys)
+	register("APIGatewayAPIKey", ListAPIGatewayAPIKeys,
+		mapCloudControl("AWS::ApiGateway::ApiKey"))
 }
 
 func ListAPIGatewayAPIKeys(sess *session.Session) ([]Resource, error) {

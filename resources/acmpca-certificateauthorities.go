@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/acmpca"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ACMPCACertificateAuthority struct {
@@ -17,7 +17,8 @@ type ACMPCACertificateAuthority struct {
 }
 
 func init() {
-	register("ACMPCACertificateAuthority", ListACMPCACertificateAuthorities)
+	register("ACMPCACertificateAuthority", ListACMPCACertificateAuthorities,
+		mapCloudControl("AWS::ACMPCA::CertificateAuthority"))
 }
 
 func ListACMPCACertificateAuthorities(sess *session.Session) ([]Resource, error) {

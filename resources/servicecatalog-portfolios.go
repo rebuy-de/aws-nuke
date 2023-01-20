@@ -4,11 +4,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ServiceCatalogPortfolio struct {
-	svc *servicecatalog.ServiceCatalog
-	ID  *string
+	svc          *servicecatalog.ServiceCatalog
+	ID           *string
+	displayName  *string
+	providerName *string
 }
 
 func init() {
@@ -31,8 +34,10 @@ func ListServiceCatalogPortfolios(sess *session.Session) ([]Resource, error) {
 
 		for _, portfolioDetail := range resp.PortfolioDetails {
 			resources = append(resources, &ServiceCatalogPortfolio{
-				svc: svc,
-				ID:  portfolioDetail.Id,
+				svc:          svc,
+				ID:           portfolioDetail.Id,
+				displayName:  portfolioDetail.DisplayName,
+				providerName: portfolioDetail.ProviderName,
 			})
 		}
 
@@ -53,6 +58,14 @@ func (f *ServiceCatalogPortfolio) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogPortfolio) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("ID", f.ID)
+	properties.Set("DisplayName", f.displayName)
+	properties.Set("ProviderName", f.providerName)
+	return properties
 }
 
 func (f *ServiceCatalogPortfolio) String() string {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,6 +15,7 @@ type IAMRolePolicyAttachment struct {
 	policyArn  string
 	policyName string
 	roleName   string
+	roleTags   []*iam.Tag
 }
 
 func init() {
@@ -32,7 +33,13 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		for _, role := range roleResp.Roles {
+		for _, listedRole := range roleResp.Roles {
+			role, err := GetIAMRole(svc, listedRole.RoleName)
+			if err != nil {
+				logrus.Errorf("Failed to get listed role %s: %v", *listedRole.RoleName, err)
+				continue
+			}
+
 			polParams := &iam.ListAttachedRolePoliciesInput{
 				RoleName: role.RoleName,
 			}
@@ -50,6 +57,7 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 						policyArn:  *pol.PolicyArn,
 						policyName: *pol.PolicyName,
 						roleName:   *role.RoleName,
+						roleTags:   role.Tags,
 					})
 				}
 
@@ -72,7 +80,7 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 }
 
 func (e *IAMRolePolicyAttachment) Filter() error {
-	if strings.HasPrefix(e.policyArn, "arn:aws:iam::aws:policy/aws-service-role/") {
+	if strings.Contains(e.policyArn, ":iam::aws:policy/aws-service-role/") {
 		return fmt.Errorf("cannot detach from service roles")
 	}
 	return nil
@@ -92,9 +100,14 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 }
 
 func (e *IAMRolePolicyAttachment) Properties() types.Properties {
-	return types.NewProperties().
+	properties := types.NewProperties().
 		Set("RoleName", e.roleName).
-		Set("PolicyName", e.policyName)
+		Set("PolicyName", e.policyName).
+		Set("PolicyArn", e.policyArn)
+	for _, tag := range e.roleTags {
+		properties.SetTagWithPrefix("role", tag.Key, tag.Value)
+	}
+	return properties
 }
 
 func (e *IAMRolePolicyAttachment) String() string {

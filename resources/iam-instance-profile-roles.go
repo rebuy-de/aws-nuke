@@ -5,12 +5,14 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMInstanceProfileRole struct {
 	svc     *iam.IAM
 	role    string
-	profile string
+	profile *iam.InstanceProfile
 }
 
 func init() {
@@ -29,11 +31,20 @@ func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.InstanceProfiles {
-			for _, role := range out.Roles {
+			for _, outRole := range out.Roles {
+				profile, err := GetIAMInstanceProfile(svc, out.InstanceProfileName)
+				if err != nil {
+					logrus.
+						WithError(err).
+						WithField("instanceProfileName", *out.InstanceProfileName).
+						Error("Failed to get listed instance profile")
+					continue
+				}
+
 				resources = append(resources, &IAMInstanceProfileRole{
 					svc:     svc,
-					profile: *out.InstanceProfileName,
-					role:    *role.RoleName,
+					role:    *outRole.RoleName,
+					profile: profile,
 				})
 			}
 		}
@@ -51,7 +62,7 @@ func ListIAMInstanceProfileRoles(sess *session.Session) ([]Resource, error) {
 func (e *IAMInstanceProfileRole) Remove() error {
 	_, err := e.svc.RemoveRoleFromInstanceProfile(
 		&iam.RemoveRoleFromInstanceProfileInput{
-			InstanceProfileName: &e.profile,
+			InstanceProfileName: e.profile.InstanceProfileName,
 			RoleName:            &e.role,
 		})
 	if err != nil {
@@ -62,5 +73,19 @@ func (e *IAMInstanceProfileRole) Remove() error {
 }
 
 func (e *IAMInstanceProfileRole) String() string {
-	return fmt.Sprintf("%s -> %s", e.profile, e.role)
+	return fmt.Sprintf("%s -> %s", *e.profile.InstanceProfileName, e.role)
+}
+
+func (e *IAMInstanceProfileRole) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	for _, tagValue := range e.profile.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+
+	properties.
+		Set("InstanceProfile", e.profile.InstanceProfileName).
+		Set("InstanceRole", e.role)
+
+	return properties
 }

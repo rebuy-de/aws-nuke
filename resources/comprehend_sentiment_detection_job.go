@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/comprehend"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
@@ -22,6 +22,11 @@ func ListComprehendSentimentDetectionJobs(sess *session.Session) ([]Resource, er
 			return nil, err
 		}
 		for _, sentimentDetectionJob := range resp.SentimentDetectionJobPropertiesList {
+			if *sentimentDetectionJob.JobStatus == "STOPPED" ||
+				*sentimentDetectionJob.JobStatus == "FAILED" {
+				// if the job has already been stopped, do not try to delete it again
+				continue
+			}
 			resources = append(resources, &ComprehendSentimentDetectionJob{
 				svc:                   svc,
 				sentimentDetectionJob: sentimentDetectionJob,
@@ -59,5 +64,9 @@ func (ce *ComprehendSentimentDetectionJob) Properties() types.Properties {
 }
 
 func (ce *ComprehendSentimentDetectionJob) String() string {
-	return *ce.sentimentDetectionJob.JobName
+	if ce.sentimentDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.sentimentDetectionJob.JobName
+	}
 }

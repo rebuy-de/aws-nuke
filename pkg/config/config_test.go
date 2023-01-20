@@ -6,42 +6,42 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
-func TestConfigBlacklist(t *testing.T) {
+func TestConfigBlocklist(t *testing.T) {
 	config := new(Nuke)
 
-	if config.HasBlacklist() {
-		t.Errorf("HasBlacklist() returned true on a nil backlist.")
+	if config.HasBlocklist() {
+		t.Errorf("HasBlocklist() returned true on a nil backlist.")
 	}
 
-	if config.InBlacklist("blubber") {
-		t.Errorf("InBlacklist() returned true on a nil backlist.")
+	if config.InBlocklist("blubber") {
+		t.Errorf("InBlocklist() returned true on a nil backlist.")
 	}
 
-	config.AccountBlacklist = []string{}
+	config.AccountBlocklist = []string{}
 
-	if config.HasBlacklist() {
-		t.Errorf("HasBlacklist() returned true on a empty backlist.")
+	if config.HasBlocklist() {
+		t.Errorf("HasBlocklist() returned true on a empty backlist.")
 	}
 
-	if config.InBlacklist("foobar") {
-		t.Errorf("InBlacklist() returned true on a empty backlist.")
+	if config.InBlocklist("foobar") {
+		t.Errorf("InBlocklist() returned true on a empty backlist.")
 	}
 
-	config.AccountBlacklist = append(config.AccountBlacklist, "bim")
+	config.AccountBlocklist = append(config.AccountBlocklist, "bim")
 
-	if !config.HasBlacklist() {
-		t.Errorf("HasBlacklist() returned false on a backlist with one element.")
+	if !config.HasBlocklist() {
+		t.Errorf("HasBlocklist() returned false on a backlist with one element.")
 	}
 
-	if !config.InBlacklist("bim") {
-		t.Errorf("InBlacklist() returned false on looking up an existing value.")
+	if !config.InBlocklist("bim") {
+		t.Errorf("InBlocklist() returned false on looking up an existing value.")
 	}
 
-	if config.InBlacklist("baz") {
-		t.Errorf("InBlacklist() returned true on looking up an non existing value.")
+	if config.InBlocklist("baz") {
+		t.Errorf("InBlocklist() returned true on looking up an non existing value.")
 	}
 }
 
@@ -52,10 +52,10 @@ func TestLoadExampleConfig(t *testing.T) {
 	}
 
 	expect := Nuke{
-		AccountBlacklist: []string{"1234567890"},
+		AccountBlocklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1", "stratoscale"},
 		Accounts: map[string]Account{
-			"555133742": Account{
+			"555133742": {
 				Presets: []string{"terraform"},
 				Filters: Filters{
 					"IAMRole": {
@@ -66,8 +66,7 @@ func TestLoadExampleConfig(t *testing.T) {
 					},
 				},
 				ResourceTypes: ResourceTypes{
-					types.Collection{"S3Bucket"},
-					nil,
+					Targets: types.Collection{"S3Bucket"},
 				},
 			},
 		},
@@ -76,7 +75,7 @@ func TestLoadExampleConfig(t *testing.T) {
 			Excludes: types.Collection{"IAMRole"},
 		},
 		Presets: map[string]PresetDefinitions{
-			"terraform": PresetDefinitions{
+			"terraform": {
 				Filters: Filters{
 					"S3Bucket": {
 						Filter{
@@ -88,7 +87,7 @@ func TestLoadExampleConfig(t *testing.T) {
 			},
 		},
 		CustomEndpoints: []*CustomRegion{
-			&CustomRegion{
+			{
 				Region:                "stratoscale",
 				TLSInsecureSkipVerify: true,
 				Services: CustomServices{
@@ -115,7 +114,7 @@ func TestLoadExampleConfig(t *testing.T) {
 
 func TestResolveDeprecations(t *testing.T) {
 	config := Nuke{
-		AccountBlacklist: []string{"1234567890"},
+		AccountBlocklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": {
@@ -179,7 +178,7 @@ func TestResolveDeprecations(t *testing.T) {
 	}
 
 	invalidConfig := Nuke{
-		AccountBlacklist: []string{"1234567890"},
+		AccountBlocklist: []string{"1234567890"},
 		Regions:          []string{"eu-west-1"},
 		Accounts: map[string]Account{
 			"555133742": {
@@ -232,6 +231,17 @@ func TestConfigValidation(t *testing.T) {
 	}
 }
 
+func TestDeprecatedConfigKeys(t *testing.T) {
+	config, err := Load("test-fixtures/deprecated-keys-config.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !config.InBlocklist("1234567890") {
+		t.Errorf("Loading the config did not resolve the deprecated key 'account-blacklist' correctly")
+	}
+}
+
 func TestFilterMerge(t *testing.T) {
 	config, err := Load("test-fixtures/example.yaml")
 	if err != nil {
@@ -245,18 +255,18 @@ func TestFilterMerge(t *testing.T) {
 
 	expect := Filters{
 		"S3Bucket": []Filter{
-			Filter{
+			{
 				Type: "glob", Value: "my-statebucket-*",
 			},
 		},
 		"IAMRole": []Filter{
-			Filter{
+			{
 				Type:  "exact",
 				Value: "uber.admin",
 			},
 		},
 		"IAMRolePolicyAttachment": []Filter{
-			Filter{
+			{
 				Type:  "exact",
 				Value: "uber.admin -> AdministratorAccess",
 			},

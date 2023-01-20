@@ -5,9 +5,10 @@ import (
 	"os"
 	"sort"
 
-	"github.com/rebuy-de/aws-nuke/pkg/awsutil"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
-	"github.com/rebuy-de/aws-nuke/resources"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/awsutil"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
+	"github.com/rebuy-de/aws-nuke/v2/resources"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -63,10 +64,17 @@ func NewRootCommand() *cobra.Command {
 
 		if defaultRegion != "" {
 			awsutil.DefaultRegionID = defaultRegion
-			if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
-				err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)
-				log.Error(err.Error())
-				return err
+			switch defaultRegion {
+			case endpoints.UsEast1RegionID, endpoints.UsEast2RegionID, endpoints.UsWest1RegionID, endpoints.UsWest2RegionID:
+				awsutil.DefaultAWSPartitionID = endpoints.AwsPartitionID
+			case endpoints.UsGovEast1RegionID, endpoints.UsGovWest1RegionID:
+				awsutil.DefaultAWSPartitionID = endpoints.AwsUsGovPartitionID
+			default:
+				if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
+					err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)
+					log.Error(err.Error())
+					return err
+				}
 			}
 		}
 
@@ -110,6 +118,11 @@ func NewRootCommand() *cobra.Command {
 			"Must be used together with --access-key-id and --secret-access-key. "+
 			"Cannot be used together with --profile.")
 	command.PersistentFlags().StringVar(
+		&creds.AssumeRoleArn, "assume-role-arn", "",
+		"AWS IAM role arn to assume. "+
+			"The credentials provided via --access-key-id or --profile must "+
+			"be allowed to assume this role. ")
+	command.PersistentFlags().StringVar(
 		&defaultRegion, "default-region", "",
 		"Custom default region name.")
 
@@ -120,6 +133,12 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().StringSliceVarP(
 		&params.Excludes, "exclude", "e", []string{},
 		"Prevent nuking of certain resource types (eg IAMServerCertificate). "+
+			"This flag can be used multiple times.")
+	command.PersistentFlags().StringSliceVar(
+		&params.CloudControl, "cloud-control", []string{},
+		"Nuke given resource via Cloud Control API. "+
+			"If there is an old-style method for the same resource, the old-style one will not be executed. "+
+			"Note that old-style and cloud-control filters are not compatible! "+
 			"This flag can be used multiple times.")
 	command.PersistentFlags().BoolVar(
 		&params.NoDryRun, "no-dry-run", false,

@@ -6,12 +6,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/servicecatalog"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ServiceCatalogPortfolioProductAttachment struct {
-	svc         *servicecatalog.ServiceCatalog
-	productID   *string
-	portfolioID *string
+	svc           *servicecatalog.ServiceCatalog
+	productID     *string
+	portfolioID   *string
+	portfolioName *string
+	productName   *string
 }
 
 func init() {
@@ -21,7 +24,7 @@ func init() {
 func ListServiceCatalogPortfolioProductAttachments(sess *session.Session) ([]Resource, error) {
 	svc := servicecatalog.New(sess)
 	resources := []Resource{}
-	products := []*string{}
+	products := make(map[*string]*string)
 
 	params := &servicecatalog.SearchProductsAsAdminInput{
 		PageSize: aws.Int64(20),
@@ -35,7 +38,7 @@ func ListServiceCatalogPortfolioProductAttachments(sess *session.Session) ([]Res
 		}
 
 		for _, productViewDetail := range resp.ProductViewDetails {
-			products = append(products, productViewDetail.ProductViewSummary.ProductId)
+			products[productViewDetail.ProductViewSummary.ProductId] = productViewDetail.ProductViewSummary.Name
 		}
 
 		if resp.NextPageToken == nil {
@@ -49,9 +52,9 @@ func ListServiceCatalogPortfolioProductAttachments(sess *session.Session) ([]Res
 		PageSize: aws.Int64(20),
 	}
 
-	for _, product := range products {
+	for productID, productName := range products {
 
-		portfolioParams.ProductId = product
+		portfolioParams.ProductId = productID
 
 		resp, err := svc.ListPortfoliosForProduct(portfolioParams)
 		if err != nil {
@@ -60,9 +63,11 @@ func ListServiceCatalogPortfolioProductAttachments(sess *session.Session) ([]Res
 
 		for _, portfolioDetail := range resp.PortfolioDetails {
 			resources = append(resources, &ServiceCatalogPortfolioProductAttachment{
-				svc:         svc,
-				productID:   product,
-				portfolioID: portfolioDetail.Id,
+				svc:           svc,
+				productID:     productID,
+				portfolioID:   portfolioDetail.Id,
+				portfolioName: portfolioDetail.DisplayName,
+				productName:   productName,
 			})
 		}
 
@@ -84,6 +89,15 @@ func (f *ServiceCatalogPortfolioProductAttachment) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ServiceCatalogPortfolioProductAttachment) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("PortfolioID", f.portfolioID)
+	properties.Set("PortfolioName", f.portfolioName)
+	properties.Set("ProductID", f.productID)
+	properties.Set("ProductName", f.productName)
+	return properties
 }
 
 func (f *ServiceCatalogPortfolioProductAttachment) String() string {

@@ -13,7 +13,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
+	"github.com/aws/aws-sdk-go/service/s3control"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -24,6 +25,9 @@ const (
 var (
 	// DefaultRegionID The default region. Can be customized for non AWS implementations
 	DefaultRegionID = endpoints.UsEast1RegionID
+
+	// DefaultAWSPartitionID The default aws partition. Can be customized for non AWS implementations
+	DefaultAWSPartitionID = endpoints.AwsPartitionID
 )
 
 type Credentials struct {
@@ -32,6 +36,7 @@ type Credentials struct {
 	AccessKeyID     string
 	SecretAccessKey string
 	SessionToken    string
+	AssumeRoleArn   string
 
 	Credentials *credentials.Credentials
 
@@ -105,6 +110,11 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 		sess, err := session.NewSessionWithOptions(opts)
 		if err != nil {
 			return nil, err
+		}
+
+		// if given a role to assume, overwrite the session credentials with assume role credentials
+		if c.AssumeRoleArn != "" {
+			sess.Config.Credentials = stscreds.NewCredentials(sess, c.AssumeRoleArn)
 		}
 
 		c.session = sess
@@ -193,7 +203,7 @@ func skipMissingServiceInRegionHandler(r *request.Request) {
 	region := *r.Config.Region
 	service := r.ClientInfo.ServiceName
 
-	rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), endpoints.AwsPartitionID, service)
+	rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), DefaultAWSPartitionID, service)
 	if !ok {
 		// This means that the service does not exist and this shouldn't be handled here.
 		return
@@ -215,8 +225,12 @@ func skipMissingServiceInRegionHandler(r *request.Request) {
 func skipGlobalHandler(global bool) func(r *request.Request) {
 	return func(r *request.Request) {
 		service := r.ClientInfo.ServiceName
-
-		rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), endpoints.AwsPartitionID, service)
+		if service == s3control.ServiceName {
+			service = s3control.EndpointsID
+			// Rewrite S3 Control ServiceName to proper EndpointsID
+			// https://github.com/rebuy-de/aws-nuke/issues/708
+		}
+		rs, ok := endpoints.RegionsForService(endpoints.DefaultPartitions(), DefaultAWSPartitionID, service)
 		if !ok {
 			// This means that the service does not exist in the endpoints list.
 			if global {
@@ -237,7 +251,7 @@ func skipGlobalHandler(global bool) func(r *request.Request) {
 			return
 		}
 
-		if len(rs) > 0 && global {
+		if (len(rs) > 0 && global) && service != "sts" {
 			r.Error = ErrSkipRequest(fmt.Sprintf("service '%s' is not global, but the session is", service))
 			return
 		}

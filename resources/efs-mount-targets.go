@@ -5,12 +5,14 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/efs"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EFSMountTarget struct {
-	svc  *efs.EFS
-	id   string
-	fsid string
+	svc    *efs.EFS
+	id     string
+	fsid   string
+	fsTags []*efs.Tag
 }
 
 func init() {
@@ -30,16 +32,21 @@ func ListEFSMountTargets(sess *session.Session) ([]Resource, error) {
 		mt, err := svc.DescribeMountTargets(&efs.DescribeMountTargetsInput{
 			FileSystemId: fs.FileSystemId,
 		})
+		if err != nil {
+			return nil, err
+		}
 
+		lto, err := svc.ListTagsForResource(&efs.ListTagsForResourceInput{ResourceId: fs.FileSystemId})
 		if err != nil {
 			return nil, err
 		}
 
 		for _, t := range mt.MountTargets {
 			resources = append(resources, &EFSMountTarget{
-				svc:  svc,
-				id:   *t.MountTargetId,
-				fsid: *t.FileSystemId,
+				svc:    svc,
+				id:     *t.MountTargetId,
+				fsid:   *t.FileSystemId,
+				fsTags: lto.Tags,
 			})
 
 		}
@@ -54,6 +61,16 @@ func (e *EFSMountTarget) Remove() error {
 	})
 
 	return err
+}
+
+func (e *EFSMountTarget) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range e.fsTags {
+		properties.SetTagWithPrefix("efs", tagValue.Key, tagValue.Value)
+	}
+	properties.Set("Name", e.id)
+	properties.Set("ID", e.fsid)
+	return properties
 }
 
 func (e *EFSMountTarget) String() string {

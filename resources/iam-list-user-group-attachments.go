@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -62,4 +63,10 @@ func (e *IAMUserGroupAttachment) Remove() error {
 
 func (e *IAMUserGroupAttachment) String() string {
 	return fmt.Sprintf("%s -> %s", e.userName, e.groupName)
+}
+
+func (e *IAMUserGroupAttachment) Properties() types.Properties {
+	return types.NewProperties().
+		Set("GroupName", e.groupName).
+		Set("UserName", e.userName)
 }

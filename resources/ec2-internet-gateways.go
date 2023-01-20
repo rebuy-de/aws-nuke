@@ -3,12 +3,13 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2InternetGateway struct {
-	svc *ec2.EC2
-	igw *ec2.InternetGateway
+	svc        *ec2.EC2
+	igw        *ec2.InternetGateway
+	defaultVPC bool
 }
 
 func init() {
@@ -23,15 +24,34 @@ func ListEC2InternetGateways(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
+	defVpcId := ""
+	if defVpc := DefaultVpc(svc); defVpc != nil {
+		defVpcId = *defVpc.VpcId
+	}
+
 	resources := make([]Resource, 0)
 	for _, igw := range resp.InternetGateways {
 		resources = append(resources, &EC2InternetGateway{
-			svc: svc,
-			igw: igw,
+			svc:        svc,
+			igw:        igw,
+			defaultVPC: HasVpcAttachment(&defVpcId, igw.Attachments),
 		})
 	}
 
 	return resources, nil
+}
+
+func HasVpcAttachment(vpcId *string, attachments []*ec2.InternetGatewayAttachment) bool {
+	if *vpcId == "" {
+		return false
+	}
+
+	for _, attach := range attachments {
+		if *vpcId == *attach.VpcId {
+			return true
+		}
+	}
+	return false
 }
 
 func (e *EC2InternetGateway) Remove() error {
@@ -52,6 +72,8 @@ func (e *EC2InternetGateway) Properties() types.Properties {
 	for _, tagValue := range e.igw.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.igw.OwnerId)
 	return properties
 }
 

@@ -3,10 +3,11 @@ package resources
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,6 +22,14 @@ func init() {
 	register("IAMRole", ListIAMRoles)
 }
 
+func GetIAMRole(svc *iam.IAM, roleName *string) (*iam.Role, error) {
+	params := &iam.GetRoleInput{
+		RoleName: roleName,
+	}
+	resp, err := svc.GetRole(params)
+	return resp.Role, err
+}
+
 func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
 	params := &iam.ListRolesInput{}
@@ -33,10 +42,7 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, out := range resp.Roles {
-			getroleParams := &iam.GetRoleInput{
-				RoleName: out.RoleName,
-			}
-			getroleOutput, err := svc.GetRole(getroleParams)
+			role, err := GetIAMRole(svc, out.RoleName)
 			if err != nil {
 				logrus.
 					WithError(err).
@@ -47,9 +53,9 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 
 			resources = append(resources, &IAMRole{
 				svc:  svc,
-				role: getroleOutput.Role,
-				name: *getroleOutput.Role.RoleName,
-				path: *getroleOutput.Role.Path,
+				role: role,
+				name: *role.RoleName,
+				path: *role.Path,
 			})
 		}
 
@@ -85,6 +91,12 @@ func (role *IAMRole) Properties() types.Properties {
 	properties := types.NewProperties()
 	for _, tagValue := range role.role.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("CreateDate", role.role.CreateDate.Format(time.RFC3339))
+	if role.role.RoleLastUsed.LastUsedDate == nil {
+		properties.Set("LastUsedDate", role.role.CreateDate.Format(time.RFC3339))
+	} else {
+		properties.Set("LastUsedDate", role.role.RoleLastUsed.LastUsedDate.Format(time.RFC3339))
 	}
 	properties.
 		Set("Name", role.name).

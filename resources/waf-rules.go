@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/waf"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type WAFRule struct {
-	svc *waf.WAF
-	ID  *string
+	svc  *waf.WAF
+	ID   *string
+	rule *waf.Rule
 }
 
 func init() {
@@ -30,9 +32,13 @@ func ListWAFRules(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, rule := range resp.Rules {
+			ruleResp, _ := svc.GetRule(&waf.GetRuleInput{
+				RuleId: rule.RuleId,
+			})
 			resources = append(resources, &WAFRule{
-				svc: svc,
-				ID:  rule.RuleId,
+				svc:  svc,
+				ID:   rule.RuleId,
+				rule: ruleResp.Rule,
 			})
 		}
 
@@ -53,6 +59,29 @@ func (f *WAFRule) Remove() error {
 		return err
 	}
 
+	ruleUpdates := []*waf.RuleUpdate{}
+	for _, predicate := range f.rule.Predicates {
+		ruleUpdates = append(ruleUpdates, &waf.RuleUpdate{
+			Action:    aws.String(waf.ChangeActionDelete),
+			Predicate: predicate,
+		})
+	}
+
+	_, err = f.svc.UpdateRule(&waf.UpdateRuleInput{
+		ChangeToken: tokenOutput.ChangeToken,
+		RuleId:      f.ID,
+		Updates:     ruleUpdates,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	tokenOutput, err = f.svc.GetChangeToken(&waf.GetChangeTokenInput{})
+	if err != nil {
+		return err
+	}
+
 	_, err = f.svc.DeleteRule(&waf.DeleteRuleInput{
 		RuleId:      f.ID,
 		ChangeToken: tokenOutput.ChangeToken,
@@ -63,4 +92,14 @@ func (f *WAFRule) Remove() error {
 
 func (f *WAFRule) String() string {
 	return *f.ID
+}
+
+func (f *WAFRule) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.
+		Set("ID", f.ID).
+		Set("Name", f.rule.Name)
+
+	return properties
 }

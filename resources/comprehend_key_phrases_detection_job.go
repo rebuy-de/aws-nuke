@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/comprehend"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
@@ -59,5 +59,9 @@ func (ce *ComprehendKeyPhrasesDetectionJob) Properties() types.Properties {
 }
 
 func (ce *ComprehendKeyPhrasesDetectionJob) String() string {
-	return *ce.keyPhrasesDetectionJob.JobName
+	if ce.keyPhrasesDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.keyPhrasesDetectionJob.JobName
+	}
 }

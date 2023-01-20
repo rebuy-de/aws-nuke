@@ -3,7 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type LambdaFunction struct {
@@ -19,14 +19,23 @@ func init() {
 func ListLambdaFunctions(sess *session.Session) ([]Resource, error) {
 	svc := lambda.New(sess)
 
+	functions := make([]*lambda.FunctionConfiguration, 0)
+
 	params := &lambda.ListFunctionsInput{}
-	resp, err := svc.ListFunctions(params)
+
+	err := svc.ListFunctionsPages(params, func(page *lambda.ListFunctionsOutput, lastPage bool) bool {
+		for _, out := range page.Functions {
+			functions = append(functions, out)
+		}
+		return true
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
 	resources := make([]Resource, 0)
-	for _, function := range resp.Functions {
+	for _, function := range functions {
 		tags, err := svc.ListTags(&lambda.ListTagsInput{
 			Resource: function.FunctionArn,
 		})

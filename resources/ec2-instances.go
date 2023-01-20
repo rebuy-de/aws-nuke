@@ -2,13 +2,14 @@ package resources
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/config"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2Instance struct {
@@ -108,9 +109,16 @@ func (i *EC2Instance) DisableProtection() error {
 
 func (i *EC2Instance) Properties() types.Properties {
 	properties := types.NewProperties()
+	properties.Set("Identifier", i.instance.InstanceId)
+	properties.Set("ImageIdentifier", i.instance.ImageId)
+	properties.Set("InstanceState", i.instance.State.Name)
+	properties.Set("InstanceType", i.instance.InstanceType)
+	properties.Set("LaunchTime", i.instance.LaunchTime.Format(time.RFC3339))
+
 	for _, tagValue := range i.instance.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+
 	return properties
 }
 

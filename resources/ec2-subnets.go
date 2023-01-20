@@ -3,12 +3,13 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/rebuy-de/aws-nuke/pkg/types"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2Subnet struct {
-	svc    *ec2.EC2
-	subnet *ec2.Subnet
+	svc        *ec2.EC2
+	subnet     *ec2.Subnet
+	defaultVPC bool
 }
 
 func init() {
@@ -24,11 +25,17 @@ func ListEC2Subnets(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
+	defVpcId := ""
+	if defVpc := DefaultVpc(svc); defVpc != nil {
+		defVpcId = *defVpc.VpcId
+	}
+
 	resources := make([]Resource, 0)
 	for _, out := range resp.Subnets {
 		resources = append(resources, &EC2Subnet{
-			svc:    svc,
-			subnet: out,
+			svc:        svc,
+			subnet:     out,
+			defaultVPC: defVpcId == *out.VpcId,
 		})
 	}
 
@@ -54,6 +61,8 @@ func (e *EC2Subnet) Properties() types.Properties {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.Set("DefaultForAz", e.subnet.DefaultForAz)
+	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.subnet.OwnerId)
 	return properties
 }
 
