@@ -3,13 +3,13 @@ module github.com/rebuy-de/aws-nuke/v2
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go v1.44.180
+	github.com/aws/aws-sdk-go v1.44.195
 	github.com/fatih/color v1.14.1
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/mb0/glob v0.0.0-20160210091149-1eb79d2de6c4
 	github.com/pkg/errors v0.9.1
-	github.com/rebuy-de/rebuy-go-sdk/v4 v4.2.0
+	github.com/rebuy-de/rebuy-go-sdk/v4 v4.3.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
