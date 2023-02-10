@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ElasticacheReplicationGroup struct {
 	svc     *elasticache.ElastiCache
 	groupID *string
+	tags    []*elasticache.Tag
 }
 
 func init() {
@@ -28,9 +30,18 @@ func ListElasticacheReplicationGroups(sess *session.Session) ([]Resource, error)
 		}
 
 		for _, replicationGroup := range resp.ReplicationGroups {
+			tags, err := svc.ListTagsForResource(&elasticache.ListTagsForResourceInput{
+				ResourceName: replicationGroup.ARN,
+			})
+
+			if err != nil {
+				continue
+			}
+
 			resources = append(resources, &ElasticacheReplicationGroup{
 				svc:     svc,
 				groupID: replicationGroup.ReplicationGroupId,
+				tags:    tags.TagList,
 			})
 		}
 
@@ -55,6 +66,17 @@ func (i *ElasticacheReplicationGroup) Remove() error {
 	}
 
 	return nil
+}
+
+func (i *ElasticacheReplicationGroup) Properties() types.Properties {
+	properties := types.NewProperties().
+		Set("GroupID", i.groupID)
+
+	for _, tagValue := range i.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+
+	return properties
 }
 
 func (i *ElasticacheReplicationGroup) String() string {

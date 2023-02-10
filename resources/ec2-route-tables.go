@@ -56,6 +56,8 @@ func (e *EC2RouteTable) Remove() error {
 
 func (e *EC2RouteTable) Properties() types.Properties {
 	properties := types.NewProperties()
+	properties.Set("Identifier", e.routeTable.RouteTableId)
+
 	for _, tagValue := range e.routeTable.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}

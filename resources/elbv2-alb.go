@@ -121,10 +121,12 @@ func (e *ELBv2LoadBalancer) DisableProtection() error {
 
 func (e *ELBv2LoadBalancer) Properties() types.Properties {
 	properties := types.NewProperties().
-		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339))
+		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339)).
+		Set("Name", e.elb.LoadBalancerName)
 
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
+		properties.SetTag(tagValue.Value, tagValue.Key)
 	}
 
 	return properties
