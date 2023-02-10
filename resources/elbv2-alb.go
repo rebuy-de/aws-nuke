@@ -126,6 +126,7 @@ func (e *ELBv2LoadBalancer) Properties() types.Properties {
 
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
+		properties.SetTag(tagValue.Value, tagValue.Key)
 	}
 
 	return properties

@@ -85,6 +85,7 @@ func (e *ELBLoadBalancer) Properties() types.Properties {
 
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
+		properties.SetTag(tagValue.Value, tagValue.Key)
 	}
 
 	return properties
