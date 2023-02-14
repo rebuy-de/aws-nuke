@@ -12,6 +12,7 @@ type EC2DefaultSecurityGroupRule struct {
 	id       *string
 	groupId  *string
 	isEgress *bool
+	tags     []*ec2.Tag
 }
 
 func init() {
@@ -62,6 +63,7 @@ func ListEC2SecurityGroupRules(sess *session.Session) ([]Resource, error) {
 					id:       rule.SecurityGroupRuleId,
 					groupId:  rule.GroupId,
 					isEgress: rule.IsEgress,
+					tags:     rule.Tags,
 				})
 			}
 			return !lastPage
@@ -103,6 +105,9 @@ func (r *EC2DefaultSecurityGroupRule) Remove() error {
 
 func (r *EC2DefaultSecurityGroupRule) Properties() types.Properties {
 	properties := types.NewProperties()
+	for _, tagValue := range r.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
 	properties.Set("SecurityGroupId", r.groupId)
 	return properties
 }
