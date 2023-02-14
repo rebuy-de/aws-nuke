@@ -9,6 +9,7 @@ import (
 
 type EC2DefaultSecurityGroupRule struct {
 	svc      *ec2.EC2
+	rule     *ec2.SecurityGroupRule
 	id       *string
 	groupId  *string
 	isEgress *bool
@@ -59,6 +60,7 @@ func ListEC2SecurityGroupRules(sess *session.Session) ([]Resource, error) {
 			for _, rule := range page.SecurityGroupRules {
 				resources = append(resources, &EC2DefaultSecurityGroupRule{
 					svc:      svc,
+					rule:     rule,
 					id:       rule.SecurityGroupRuleId,
 					groupId:  rule.GroupId,
 					isEgress: rule.IsEgress,
@@ -104,6 +106,9 @@ func (r *EC2DefaultSecurityGroupRule) Remove() error {
 func (r *EC2DefaultSecurityGroupRule) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("SecurityGroupId", r.groupId)
+	for _, tagValue := range r.rule.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
 	return properties
 }
 
