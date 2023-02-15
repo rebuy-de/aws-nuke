@@ -601,6 +601,9 @@ presets:
 
 ## Install
 
+### For Mac
+`brew install aws-nuke`
+
 ### Use Released Binaries
 
 The easiest way of installing it, is to download the latest
