@@ -81,18 +81,19 @@ func (i *RDSInstance) Remove() error {
 }
 
 func (i *RDSInstance) Properties() types.Properties {
-	properties := types.NewProperties()
-	properties.Set("Identifier", i.instance.DBInstanceIdentifier)
-	properties.Set("DeletionProtection", i.instance.DeletionProtection)
-	properties.Set("AvailabilityZone", i.instance.AvailabilityZone)
-	properties.Set("InstanceClass", i.instance.DBInstanceClass)
+	properties := types.NewProperties().
+		Set("Identifier", i.instance.DBInstanceIdentifier).
+		Set("DeletionProtection", i.instance.DeletionProtection).
+		Set("AvailabilityZone", i.instance.AvailabilityZone).
+		Set("InstanceClass", i.instance.DBInstanceClass).
+		Set("Engine", i.instance.Engine).
+		Set("EngineVersion", i.instance.EngineVersion).
+		Set("MultiAZ", i.instance.MultiAZ).
+		Set("PubliclyAccessible", i.instance.PubliclyAccessible)
+
 	if i.instance.InstanceCreateTime != nil {
 		properties.Set("InstanceCreateTime", i.instance.InstanceCreateTime.Format(time.RFC3339))
 	}
-	properties.Set("Engine", i.instance.Engine)
-	properties.Set("EngineVersion", i.instance.EngineVersion)
-	properties.Set("MultiAZ", i.instance.MultiAZ)
-	properties.Set("PubliclyAccessible", i.instance.PubliclyAccessible)
 
 	for _, tag := range i.tags {
 		properties.SetTag(tag.Key, tag.Value)

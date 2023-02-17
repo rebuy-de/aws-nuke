@@ -144,7 +144,7 @@ func (e *S3Bucket) RemoveAllObjects() error {
 func (e *S3Bucket) Properties() types.Properties {
 	properties := types.NewProperties().
 		Set("Name", e.name).
-		Set("CreationDate", e.creationDate)
+		Set("CreationDate", e.creationDate.Format(time.RFC3339))
 
 	for _, tag := range e.tags {
 		properties.SetTag(tag.Key, tag.Value)

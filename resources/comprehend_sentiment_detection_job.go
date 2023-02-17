@@ -64,5 +64,9 @@ func (ce *ComprehendSentimentDetectionJob) Properties() types.Properties {
 }
 
 func (ce *ComprehendSentimentDetectionJob) String() string {
-	return *ce.sentimentDetectionJob.JobName
+	if ce.sentimentDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.sentimentDetectionJob.JobName
+	}
 }

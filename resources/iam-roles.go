@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -58,7 +59,7 @@ func ListIAMRoles(sess *session.Session) ([]Resource, error) {
 			})
 		}
 
-		if *resp.IsTruncated == false {
+		if !*resp.IsTruncated {
 			break
 		}
 
@@ -87,16 +88,30 @@ func (e *IAMRole) Remove() error {
 }
 
 func (role *IAMRole) Properties() types.Properties {
-	properties := types.NewProperties()
+	properties := types.NewProperties().
+		Set("CreateDate", role.role.CreateDate.Format(time.RFC3339)).
+		Set("LastUsedDate", getLastUsedDate(role.role, time.RFC3339)).
+		Set("Name", role.name).
+		Set("Path", role.path)
+
 	for _, tagValue := range role.role.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
-	properties.
-		Set("Name", role.name).
-		Set("Path", role.path)
+
 	return properties
 }
 
 func (e *IAMRole) String() string {
 	return e.name
+}
+
+func getLastUsedDate(role *iam.Role, format string) string {
+	var lastUsedDate *time.Time
+	if role.RoleLastUsed == nil || role.RoleLastUsed.LastUsedDate == nil {
+		lastUsedDate = role.CreateDate
+	} else {
+		lastUsedDate = role.RoleLastUsed.LastUsedDate
+	}
+
+	return lastUsedDate.Format(format)
 }

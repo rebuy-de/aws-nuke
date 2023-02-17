@@ -59,5 +59,9 @@ func (ce *ComprehendDominantLanguageDetectionJob) Properties() types.Properties 
 }
 
 func (ce *ComprehendDominantLanguageDetectionJob) String() string {
-	return *ce.dominantLanguageDetectionJob.JobName
+	if ce.dominantLanguageDetectionJob.JobName == nil {
+		return "Unnamed job"
+	} else {
+		return *ce.dominantLanguageDetectionJob.JobName
+	}
 }

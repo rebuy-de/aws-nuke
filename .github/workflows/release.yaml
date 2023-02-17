@@ -5,6 +5,23 @@ on:
     types: [created]
 
 jobs:
+  update_readme:
+    name: Update Readme
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: main
+    - run: |
+        sed -r -i "s/aws-nuke:v[0-9]+\.[0-9]+\.[0-9]+/aws-nuke:${GITHUB_REF#refs/tags/}/" README.md
+        sed -r -i "s/aws-nuke-v[0-9]+\.[0-9]+\.[0-9]+/aws-nuke-${GITHUB_REF#refs/tags/}/" README.md
+        sed -r -i "s/\/v[0-9]+\.[0-9]+\.[0-9]+\//\/${GITHUB_REF#refs/tags/}\//" README.md
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Update readme for ${GITHUB_REF#refs/tags/}
+
   release:
     name: Publish binaries
     runs-on: ubuntu-22.04
@@ -42,7 +59,7 @@ jobs:
 
     - name: Generate image tags
       shell: bash
-      run: echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:${GITHUB_REF#refs/tags/},docker.io/rebuy/aws-nuke:${GITHUB_REF#refs/tags/}"
+      run: echo "tags=quay.io/rebuy/aws-nuke:${GITHUB_REF#refs/tags/},docker.io/rebuy/aws-nuke:${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       id: generate_tags
 
     - name: Set up QEMU

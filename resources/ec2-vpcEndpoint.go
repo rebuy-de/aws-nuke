@@ -1,16 +1,16 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
-	"github.com/aws/aws-sdk-go/aws"
 )
 
 type EC2VPCEndpoint struct {
-	svc     *ec2.EC2
-	id      *string
-	vpcTags []*ec2.Tag
+	svc  *ec2.EC2
+	id   *string
+	tags []*ec2.Tag
 }
 
 func init() {
@@ -45,7 +45,7 @@ func ListEC2VPCEndpoints(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &EC2VPCEndpoint{
 				svc:  svc,
 				id:   vpcEndpoint.VpcEndpointId,
-				vpcTags: vpc.Tags,
+				tags: vpcEndpoint.Tags,
 			})
 		}
 	}
@@ -68,7 +68,7 @@ func (endpoint *EC2VPCEndpoint) Remove() error {
 
 func (e *EC2VPCEndpoint) Properties() types.Properties {
 	properties := types.NewProperties()
-	for _, tagValue := range e.vpcTags {
+	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	return properties
