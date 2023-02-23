@@ -11,7 +11,8 @@ type LightsailStaticIP struct {
 }
 
 func init() {
-	register("LightsailStaticIP", ListLightsailStaticIPs)
+	register("LightsailStaticIP", ListLightsailStaticIPs,
+		mapCloudControl("AWS::Lightsail::StaticIp"))
 }
 
 func ListLightsailStaticIPs(sess *session.Session) ([]Resource, error) {

@@ -17,7 +17,8 @@ type LightsailInstance struct {
 }
 
 func init() {
-	register("LightsailInstance", ListLightsailInstances)
+	register("LightsailInstance", ListLightsailInstances,
+		mapCloudControl("AWS::Lightsail::Instance"))
 }
 
 func ListLightsailInstances(sess *session.Session) ([]Resource, error) {

@@ -11,7 +11,8 @@ type LightsailLoadBalancer struct {
 }
 
 func init() {
-	register("LightsailLoadBalancer", ListLightsailLoadBalancers)
+	register("LightsailLoadBalancer", ListLightsailLoadBalancers,
+		mapCloudControl("AWS::Lightsail::LoadBalancer"))
 }
 
 func ListLightsailLoadBalancers(sess *session.Session) ([]Resource, error) {

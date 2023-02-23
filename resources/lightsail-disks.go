@@ -11,7 +11,8 @@ type LightsailDisk struct {
 }
 
 func init() {
-	register("LightsailDisk", ListLightsailDisks)
+	register("LightsailDisk", ListLightsailDisks,
+		mapCloudControl("AWS::Lightsail::Disk"))
 }
 
 func ListLightsailDisks(sess *session.Session) ([]Resource, error) {
