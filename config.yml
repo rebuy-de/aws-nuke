@@ -1,0 +1,38 @@
+regions:
+- us-west-2
+- ap-southeast-2
+
+account-blocklist:
+- "566772445654" # production
+
+resource-types:
+  # only nuke these three resources
+  targets:
+    - EC2SecurityGroup
+    - RDSInstance
+    - RDSSnapshot
+    - ElasticBeanstalkApplication
+    - ElasticBeanstalkEnvironment
+    - EC2InternetGateway
+    - EC2KeyPair
+    - S3Bucket
+    - EC2NetworkInterface
+    - EC2RouteTable
+    - CloudFormationStack
+    - EC2Instance
+    - EC2NetworkACL
+    - EC2Address
+    - ElasticacheCacheCluster
+    - ElasticacheSubnetGroup
+    - ElasticacheReplicationGroup
+    - EC2Subnet
+    - ECSTaskDefinition
+    - EC2NATGateway
+    - EC2InternetGateway
+    - EC2InternetGatewayAttachment
+    - EC2VPC
+    - EC2Image
+    - EC2Snapshot
+
+accounts:
+  "254287884188": {} # dev
