@@ -80,6 +80,7 @@ func (hz *Route53HostedZone) Properties() types.Properties {
 		properties.SetTag(tag.Key, tag.Value)
 	}
 	properties.Set("Name", hz.name)
+	properties.Set("ID", hz.id)
 	return properties
 }
 
