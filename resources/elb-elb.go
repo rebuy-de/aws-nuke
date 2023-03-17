@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -9,9 +10,10 @@ import (
 )
 
 type ELBLoadBalancer struct {
-	svc  *elb.ELB
-	elb  *elb.LoadBalancerDescription
-	tags []*elb.Tag
+	svc          *elb.ELB
+	elb          *elb.LoadBalancerDescription
+	isEKSManaged bool
+	tags         []*elb.Tag
 }
 
 func init() {
@@ -32,7 +34,11 @@ func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 			}
 			return !lastPage
 		})
+	if err != nil {
+		return nil, err
+	}
 
+	eksClusters, err := mapEKSClusters(sess)
 	if err != nil {
 		return nil, err
 	}
@@ -50,11 +56,23 @@ func ListELBLoadBalancers(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 		for _, elbTagInfo := range tagResp.TagDescriptions {
-			elb := elbNameToRsc[*elbTagInfo.LoadBalancerName]
+			var isEKSManaged bool
+			for _, tag := range elbTagInfo.Tags {
+				if strings.HasPrefix(*tag.Key, "kubernetes.io/cluster/") {
+					parts := strings.Split(*tag.Key, "/")
+					eksName := parts[len(parts)-1]
+					isEKSManaged = eksClusters[eksName]
+					break
+				} else if *tag.Key == EKSClusterTag {
+					isEKSManaged = eksClusters[*tag.Value]
+					break
+				}
+			}
 			resources = append(resources, &ELBLoadBalancer{
-				svc:  svc,
-				elb:  elb,
-				tags: elbTagInfo.Tags,
+				svc:          svc,
+				elb:          elbNameToRsc[*elbTagInfo.LoadBalancerName],
+				isEKSManaged: isEKSManaged,
+				tags:         elbTagInfo.Tags,
 			})
 		}
 
@@ -80,12 +98,12 @@ func (e *ELBLoadBalancer) Remove() error {
 
 func (e *ELBLoadBalancer) Properties() types.Properties {
 	properties := types.NewProperties().
-		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339))
+		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339)).
+		Set("IsEKSManaged", e.isEKSManaged)
 
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
-
 	return properties
 }
 

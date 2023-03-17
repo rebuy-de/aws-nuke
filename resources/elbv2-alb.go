@@ -13,8 +13,9 @@ import (
 
 type ELBv2LoadBalancer struct {
 	svc          *elbv2.ELBV2
-	tags         []*elbv2.Tag
 	elb          *elbv2.LoadBalancer
+	isEKSManaged bool
+	tags         []*elbv2.Tag
 	featureFlags config.FeatureFlags
 }
 
@@ -40,6 +41,11 @@ func ListELBv2LoadBalancers(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
+	eksClusters, err := mapEKSClusters(sess)
+	if err != nil {
+		return nil, err
+	}
+
 	// Tags for ELBv2s need to be fetched separately
 	// We can only specify up to 20 in a single call
 	// See: https://github.com/aws/aws-sdk-go/blob/0e8c61841163762f870f6976775800ded4a789b0/service/elbv2/api.go#L5398
@@ -57,11 +63,18 @@ func ListELBv2LoadBalancers(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 		for _, elbv2TagInfo := range tagResp.TagDescriptions {
-			elb := elbv2ARNToRsc[*elbv2TagInfo.ResourceArn]
+			var isEKSManaged bool
+			for _, tag := range elbv2TagInfo.Tags {
+				if *tag.Key == EKSClusterTag {
+					isEKSManaged = eksClusters[*tag.Value]
+					break
+				}
+			}
 			resources = append(resources, &ELBv2LoadBalancer{
-				svc:  svc,
-				elb:  elb,
-				tags: elbv2TagInfo.Tags,
+				svc:          svc,
+				elb:          elbv2ARNToRsc[*elbv2TagInfo.ResourceArn],
+				isEKSManaged: isEKSManaged,
+				tags:         elbv2TagInfo.Tags,
 			})
 		}
 
@@ -121,7 +134,8 @@ func (e *ELBv2LoadBalancer) DisableProtection() error {
 
 func (e *ELBv2LoadBalancer) Properties() types.Properties {
 	properties := types.NewProperties().
-		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339))
+		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339)).
+		Set("IsEKSManaged", e.isEKSManaged)
 
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
