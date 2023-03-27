@@ -76,7 +76,8 @@ func (e *ELBv2TargetGroup) Remove() error {
 }
 
 func (e *ELBv2TargetGroup) Properties() types.Properties {
-	properties := types.NewProperties()
+	properties := types.NewProperties().
+		Set("ARN", e.tg.TargetGroupArn)
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
