@@ -2,7 +2,7 @@ name: Golang CI
 
 on:
   push:
-    branches: [main]
+    branches: [oreilly-main]
   pull_request:
     types: [opened, reopened, synchronize]
   schedule:
