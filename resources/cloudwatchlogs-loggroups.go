@@ -56,8 +56,10 @@ func ListCloudWatchLogsLogGroups(sess *session.Session) ([]Resource, error) {
 				return nil, err
 			}
 			var lastEvent time.Time
-			if len(lsResp.LogStreams) > 0 {
+			if len(lsResp.LogStreams) > 0 && lsResp.LogStreams[0].LastIngestionTime != nil {
 				lastEvent = time.Unix(*lsResp.LogStreams[0].LastIngestionTime/1000, 0)
+			} else {
+				lastEvent = time.Unix(*logGroup.CreationTime/1000, 0)
 			}
 
 			resources = append(resources, &CloudWatchLogsLogGroup{
