@@ -1,10 +1,11 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
-	log "github.com/sirupsen/logrus"
 )
 
 type EC2RouteTable struct {
@@ -32,14 +33,6 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, out := range resp.RouteTables {
-
-		if IsMain(out) {
-			log.WithFields(log.Fields{
-				"routetable": *out.RouteTableId,
-			}).Debug("Main RouteTables cannot be deleted, skipping RouteTable: routetable")
-			continue
-		}
-
 		resources = append(resources, &EC2RouteTable{
 			svc:        svc,
 			routeTable: out,
@@ -50,13 +43,14 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func IsMain(e *ec2.RouteTable) bool {
-	for _, association := range e.Associations {
+func (i *EC2RouteTable) Filter() error {
+
+	for _, association := range i.routeTable.Associations {
 		if *association.Main {
-			return true
+			return fmt.Errorf("Main RouteTables cannot be deleted")
 		}
 	}
-	return false
+	return nil
 }
 
 func (e *EC2RouteTable) Remove() error {
