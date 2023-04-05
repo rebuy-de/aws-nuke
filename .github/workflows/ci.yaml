@@ -32,7 +32,7 @@ jobs:
   docker_build:
     runs-on: ubuntu-22.04
     name: Docker Build
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'rebuy-de/aws-nuke' }}
+    if: github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == 'rebuy-de/aws-nuke' && github.event.pull_request.user.login != 'dependabot[bot]')
 
     steps:
     - uses: actions/checkout@v3
