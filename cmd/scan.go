@@ -12,7 +12,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-const ScannerParallelQueries = 16
+const ScannerParallelQueries = 2
 
 func Scan(region *Region, resourceTypes []string) <-chan *Item {
 	s := &scanner{
