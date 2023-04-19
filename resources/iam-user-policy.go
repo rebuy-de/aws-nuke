@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type IAMUserPolicy struct {
@@ -57,6 +58,15 @@ func (e *IAMUserPolicy) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *IAMUserPolicy) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("UserName", e.userName)
+	properties.Set("PolicyName", e.policyName)
+
+	return properties
 }
 
 func (e *IAMUserPolicy) String() string {

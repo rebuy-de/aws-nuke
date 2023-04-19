@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchevents"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
@@ -37,6 +38,10 @@ func ListCloudWatchEventsTargets(sess *session.Session) ([]Resource, error) {
 				return nil, err
 			}
 			for _, target := range targetResp.Targets {
+				if err != nil {
+					return nil, err
+				}
+
 				resources = append(resources, &CloudWatchEventsTarget{
 					svc:      svc,
 					ruleName: rule.Name,
@@ -66,6 +71,16 @@ func (target *CloudWatchEventsTarget) Remove() error {
 		Force:        aws.Bool(true),
 	})
 	return err
+}
+
+func (target *CloudWatchEventsTarget) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("TargetId", target.targetId)
+	properties.Set("RuleName", target.ruleName)
+	properties.Set("BusName", target.busName)
+
+	return properties
 }
 
 func (target *CloudWatchEventsTarget) String() string {

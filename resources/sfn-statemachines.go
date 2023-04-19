@@ -4,11 +4,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sfn"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type SFNStateMachine struct {
-	svc *sfn.SFN
-	ARN *string
+	svc  *sfn.SFN
+	ARN  *string
+	name *string
+	tags []*sfn.Tag
 }
 
 func init() {
@@ -30,9 +33,19 @@ func ListSFNStateMachines(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, stateMachine := range output.StateMachines {
+			tagsOutput, err := svc.ListTagsForResource(&sfn.ListTagsForResourceInput{
+				ResourceArn: stateMachine.StateMachineArn,
+			})
+
+			if err != nil {
+				return nil, err
+			}
+
 			resources = append(resources, &SFNStateMachine{
-				svc: svc,
-				ARN: stateMachine.StateMachineArn,
+				svc:  svc,
+				ARN:  stateMachine.StateMachineArn,
+				name: stateMachine.Name,
+				tags: tagsOutput.Tags,
 			})
 		}
 
@@ -53,6 +66,17 @@ func (f *SFNStateMachine) Remove() error {
 	})
 
 	return err
+}
+
+func (s *SFNStateMachine) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("Name", s.name)
+
+	for _, tagValue := range s.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	return properties
 }
 
 func (f *SFNStateMachine) String() string {
