@@ -72,28 +72,53 @@ func (i *EC2Instance) Remove() error {
 
 	_, err := i.svc.TerminateInstances(params)
 	if err != nil {
-		if i.featureFlags.DisableDeletionProtection.EC2Instance {
-			awsErr, ok := err.(awserr.Error)
-			if ok && awsErr.Code() == "OperationNotPermitted" &&
-				awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be terminated. "+
-					"Modify its 'disableApiTermination' instance attribute and try again." {
-				err = i.DisableProtection()
-				if err != nil {
-					return err
-				}
-				_, err := i.svc.TerminateInstances(params)
-				if err != nil {
-					return err
-				}
-				return nil
+		awsErr, ok := err.(awserr.Error)
+		if ok && awsErr.Code() == "OperationNotPermitted" &&
+			awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be terminated. "+
+				"Modify its 'disableApiTermination' instance attribute and try again." &&
+			i.featureFlags.DisableDeletionProtection.EC2Instance {
+			termErr := i.DisableTerminationProtection()
+			if termErr != nil {
+				return termErr
+			}
+			_, err = i.svc.TerminateInstances(params)
+			if err != nil {
+				awsErr, ok = err.(awserr.Error)
 			}
 		}
+
+		if ok && awsErr.Code() == "OperationNotPermitted" &&
+			awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be terminated. "+
+				"Modify its 'disableApiStop' instance attribute and try again." &&
+			i.featureFlags.DisableEC2InstanceStopProtection {
+			stopErr := i.DisableStopProtection()
+			if stopErr != nil {
+				return stopErr
+			}
+			_, err = i.svc.TerminateInstances(params)
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (i *EC2Instance) DisableStopProtection() error {
+	params := &ec2.ModifyInstanceAttributeInput{
+		InstanceId: i.instance.InstanceId,
+		DisableApiStop: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(false),
+		},
+	}
+	_, err := i.svc.ModifyInstanceAttribute(params)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (i *EC2Instance) DisableProtection() error {
+func (i *EC2Instance) DisableTerminationProtection() error {
 	params := &ec2.ModifyInstanceAttributeInput{
 		InstanceId: i.instance.InstanceId,
 		DisableApiTermination: &ec2.AttributeBooleanValue{
