@@ -73,30 +73,36 @@ func (i *EC2Instance) Remove() error {
 	_, err := i.svc.TerminateInstances(params)
 	if err != nil {
 		awsErr, ok := err.(awserr.Error)
+		// Check for Termination Protection, disable it, and try termination again.
 		if ok && awsErr.Code() == "OperationNotPermitted" &&
-			awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be terminated. "+
-				"Modify its 'disableApiTermination' instance attribute and try again." &&
-			i.featureFlags.DisableDeletionProtection.EC2Instance {
+			awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be "+
+				"terminated. Modify its 'disableApiTermination' instance attribute and "+
+				"try again." && i.featureFlags.DisableDeletionProtection.EC2Instance {
 			termErr := i.DisableTerminationProtection()
 			if termErr != nil {
 				return termErr
 			}
 			_, err = i.svc.TerminateInstances(params)
+			// If we still get an error, we'll check for type and let the next routine
+			// handle it.
 			if err != nil {
 				awsErr, ok = err.(awserr.Error)
 			}
 		}
 
+		// Check for Stop Protection, disable it, and try termination again.
 		if ok && awsErr.Code() == "OperationNotPermitted" &&
-			awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be terminated. "+
-				"Modify its 'disableApiStop' instance attribute and try again." &&
-			i.featureFlags.DisableEC2InstanceStopProtection {
+			awsErr.Message() == "The instance '"+*i.instance.InstanceId+"' may not be "+
+				"terminated. Modify its 'disableApiStop' instance attribute and try "+
+				"again." && i.featureFlags.DisableEC2InstanceStopProtection {
 			stopErr := i.DisableStopProtection()
 			if stopErr != nil {
 				return stopErr
 			}
 			_, err = i.svc.TerminateInstances(params)
 		}
+
+		// If we still have an error at this point, we'll return it.
 		if err != nil {
 			return err
 		}
