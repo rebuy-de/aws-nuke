@@ -124,31 +124,48 @@ func (e *S3Bucket) Remove() error {
 	}
 
 	if objectsThreshold > 0 && objectsThreshold < totalObjects {
-		_, err := e.svc.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
+		lifecycleRuleID := "aws-nuke"
+		lifecycleResp, err := e.svc.GetBucketLifecycleConfiguration(&s3.GetBucketLifecycleConfigurationInput{
 			Bucket: &e.name,
-			LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
-				Rules: []*s3.LifecycleRule{
-					{
-						Expiration: &s3.LifecycleExpiration{
-							Days: aws.Int64(1),
-						},
-						Filter: &s3.LifecycleRuleFilter{
-							Prefix: aws.String(""),
-						},
-						ID:     aws.String("aws-nuke"),
-						Status: aws.String("Enabled"),
-						NoncurrentVersionExpiration: &s3.NoncurrentVersionExpiration{
-							NoncurrentDays: aws.Int64(1),
-						},
-						AbortIncompleteMultipartUpload: &s3.AbortIncompleteMultipartUpload{
-							DaysAfterInitiation: aws.Int64(1),
-						},
-					},
-				},
-			},
 		})
 		if err != nil {
 			return err
+		}
+
+		skipLifecycleConfiguration := false
+		for _, rule := range lifecycleResp.Rules {
+			if aws.StringValue(rule.ID) == lifecycleRuleID {
+				skipLifecycleConfiguration = true
+			}
+		}
+
+		if skipLifecycleConfiguration {
+			_, err := e.svc.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
+				Bucket: &e.name,
+				LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
+					Rules: []*s3.LifecycleRule{
+						{
+							Expiration: &s3.LifecycleExpiration{
+								Days: aws.Int64(1),
+							},
+							Filter: &s3.LifecycleRuleFilter{
+								Prefix: aws.String(""),
+							},
+							ID:     aws.String(lifecycleRuleID),
+							Status: aws.String("Enabled"),
+							NoncurrentVersionExpiration: &s3.NoncurrentVersionExpiration{
+								NoncurrentDays: aws.Int64(1),
+							},
+							AbortIncompleteMultipartUpload: &s3.AbortIncompleteMultipartUpload{
+								DaysAfterInitiation: aws.Int64(1),
+							},
+						},
+					},
+				},
+			})
+			if err != nil {
+				return err
+			}
 		}
 		return config.NewItemPostponedError(
 			fmt.Sprintf(
