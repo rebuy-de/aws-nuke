@@ -173,7 +173,6 @@ func (e *S3Bucket) Remove() error {
 		})
 		return err
 	}
-	return nil
 }
 
 func (e *S3Bucket) RemoveAllVersions() error {
