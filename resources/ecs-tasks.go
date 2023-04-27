@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
@@ -35,9 +33,7 @@ func ListECSTasks(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		for _, clusterArn := range output.ClusterArns {
-			clusters = append(clusters, clusterArn)
-		}
+		clusters = append(clusters, output.ClusterArns...)
 
 		if output.NextToken == nil {
 			break
@@ -102,8 +98,4 @@ func (t *ECSTask) Remove() error {
 	})
 
 	return err
-}
-
-func (t *ECSTask) String() string {
-	return fmt.Sprintf("%s -> %s", *t.taskARN, *t.clusterARN)
 }
