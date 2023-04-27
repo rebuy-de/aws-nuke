@@ -54,14 +54,14 @@ type FeatureFlags struct {
 	DisableDeletionProtection        DisableDeletionProtection `yaml:"disable-deletion-protection"`
 	DisableEC2InstanceStopProtection bool                      `yaml:"disable-ec2-instance-stop-protection"`
 	ForceDeleteLightsailAddOns       bool                      `yaml:"force-delete-lightsail-addons"`
-	PrepareOnlyIf                    PrepareOnlyIf             `yaml:"prepare-only-if"`
+	PostponeIf                       PostponeIf                `yaml:"postpone-if"`
 }
 
-type PrepareOnlyIf struct {
-	S3Bucket S3BucketPrepareOnlyIf `yaml:"S3Bucket"`
+type PostponeIf struct {
+	S3Bucket S3BucketPostponeIf `yaml:"S3Bucket"`
 }
 
-type S3BucketPrepareOnlyIf struct {
+type S3BucketPostponeIf struct {
 	ObjectsThreshold int `yaml:"objects-threshold"`
 }
 

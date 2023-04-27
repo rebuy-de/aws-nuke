@@ -93,7 +93,7 @@ func DescribeS3Buckets(svc *s3.S3) ([]s3.Bucket, error) {
 }
 
 func (e *S3Bucket) Remove() error {
-	objectsThreshold := e.featureFlags.PrepareOnlyIf.S3Bucket.ObjectsThreshold
+	objectsThreshold := e.featureFlags.PostponeIf.S3Bucket.ObjectsThreshold
 	_, err := e.svc.DeleteBucketPolicy(&s3.DeleteBucketPolicyInput{
 		Bucket: &e.name,
 	})
