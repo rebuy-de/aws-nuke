@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
@@ -25,6 +26,7 @@ type S3Bucket struct {
 	name         string
 	creationDate time.Time
 	tags         []*s3.Tag
+	featureFlags config.FeatureFlags
 }
 
 func ListS3Buckets(s *session.Session) ([]Resource, error) {
@@ -91,6 +93,7 @@ func DescribeS3Buckets(svc *s3.S3) ([]s3.Bucket, error) {
 }
 
 func (e *S3Bucket) Remove() error {
+	objectsThreshold := e.featureFlags.PrepareOnlyIf.S3Bucket.ObjectsThreshold
 	_, err := e.svc.DeleteBucketPolicy(&s3.DeleteBucketPolicyInput{
 		Bucket: &e.name,
 	})
@@ -106,21 +109,71 @@ func (e *S3Bucket) Remove() error {
 		return err
 	}
 
-	err = e.RemoveAllVersions()
-	if err != nil {
-		return err
-	}
-
-	err = e.RemoveAllObjects()
-	if err != nil {
-		return err
-	}
-
-	_, err = e.svc.DeleteBucket(&s3.DeleteBucketInput{
+	totalObjects := 0
+	err = e.svc.ListObjectsV2Pages(&s3.ListObjectsV2Input{
 		Bucket: &e.name,
+	}, func(output *s3.ListObjectsV2Output, lastPage bool) bool {
+		totalObjects += len(output.Contents)
+		if objectsThreshold > 0 && objectsThreshold < totalObjects {
+			return false
+		}
+		return !lastPage
 	})
+	if err != nil {
+		return err
+	}
 
-	return err
+	if objectsThreshold > 0 && objectsThreshold < totalObjects {
+		_, err := e.svc.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
+			Bucket: &e.name,
+			LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
+				Rules: []*s3.LifecycleRule{
+					{
+						Expiration: &s3.LifecycleExpiration{
+							Days: aws.Int64(1),
+						},
+						Filter: &s3.LifecycleRuleFilter{
+							Prefix: aws.String(""),
+						},
+						ID:     aws.String("aws-nuke"),
+						Status: aws.String("Enabled"),
+						NoncurrentVersionExpiration: &s3.NoncurrentVersionExpiration{
+							NoncurrentDays: aws.Int64(1),
+						},
+						AbortIncompleteMultipartUpload: &s3.AbortIncompleteMultipartUpload{
+							DaysAfterInitiation: aws.Int64(1),
+						},
+					},
+				},
+			},
+		})
+		if err != nil {
+			return err
+		}
+		return config.NewItemPostponedError(
+			fmt.Sprintf(
+				"bucket %q has more than %d objects, lifecycle was enabled and postponed for a later removal",
+				e.name,
+				objectsThreshold,
+			),
+		)
+	} else {
+		err = e.RemoveAllVersions()
+		if err != nil {
+			return err
+		}
+
+		err = e.RemoveAllObjects()
+		if err != nil {
+			return err
+		}
+
+		_, err = e.svc.DeleteBucket(&s3.DeleteBucketInput{
+			Bucket: &e.name,
+		})
+		return err
+	}
+	return nil
 }
 
 func (e *S3Bucket) RemoveAllVersions() error {
@@ -139,6 +192,10 @@ func (e *S3Bucket) RemoveAllObjects() error {
 
 	iterator := s3manager.NewDeleteListIterator(e.svc, params)
 	return s3manager.NewBatchDeleteWithClient(e.svc).Delete(aws.BackgroundContext(), iterator)
+}
+
+func (e *S3Bucket) FeatureFlags(ff config.FeatureFlags) {
+	e.featureFlags = ff
 }
 
 func (e *S3Bucket) Properties() types.Properties {

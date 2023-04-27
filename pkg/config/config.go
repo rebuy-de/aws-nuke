@@ -12,6 +12,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type ItemPostponedError struct {
+	msg string
+}
+
+func NewItemPostponedError(msg string) *ItemPostponedError {
+	return &ItemPostponedError{
+		msg: msg,
+	}
+}
+
+func (e *ItemPostponedError) Error() string {
+	return e.msg
+}
+
 type ResourceTypes struct {
 	Targets      types.Collection `yaml:"targets"`
 	Excludes     types.Collection `yaml:"excludes"`
@@ -40,6 +54,15 @@ type FeatureFlags struct {
 	DisableDeletionProtection        DisableDeletionProtection `yaml:"disable-deletion-protection"`
 	DisableEC2InstanceStopProtection bool                      `yaml:"disable-ec2-instance-stop-protection"`
 	ForceDeleteLightsailAddOns       bool                      `yaml:"force-delete-lightsail-addons"`
+	PrepareOnlyIf                    PrepareOnlyIf             `yaml:"prepare-only-if"`
+}
+
+type PrepareOnlyIf struct {
+	S3Bucket S3BucketPrepareOnlyIf `yaml:"S3Bucket"`
+}
+
+type S3BucketPrepareOnlyIf struct {
+	ObjectsThreshold int `yaml:"objects-threshold"`
 }
 
 type DisableDeletionProtection struct {

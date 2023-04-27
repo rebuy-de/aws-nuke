@@ -16,6 +16,7 @@ type NukeParameters struct {
 	Force      bool
 	ForceSleep int
 	Quiet      bool
+	Period     string
 
 	MaxWaitRetries int
 }
