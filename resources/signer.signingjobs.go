@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/signer"
@@ -8,9 +10,10 @@ import (
 )
 
 type SignerSigningJob struct {
-	svc    *signer.Signer
-	jobId  *string
-	reason string
+	svc       *signer.Signer
+	jobId     *string
+	reason    string
+	isRevoked *bool
 }
 
 func init() {
@@ -26,14 +29,12 @@ func ListSignerSigningJobs(sess *session.Session) ([]Resource, error) {
 
 	err := svc.ListSigningJobsPages(listJobsInput, func(page *signer.ListSigningJobsOutput, lastPage bool) bool {
 		for _, job := range page.Jobs {
-			// Consider all non-revoked jobs on this page
-			if job.IsRevoked == nil || !*job.IsRevoked {
-				resources = append(resources, &SignerSigningJob{
-					svc:    svc,
-					jobId:  job.JobId,
-					reason: reason,
-				})
-			}
+			resources = append(resources, &SignerSigningJob{
+				svc:       svc,
+				jobId:     job.JobId,
+				reason:    reason,
+				isRevoked: job.IsRevoked,
+			})
 		}
 		return true // continue iterating over pages
 	})
@@ -44,6 +45,10 @@ func ListSignerSigningJobs(sess *session.Session) ([]Resource, error) {
 }
 
 func (j *SignerSigningJob) Filter() error {
+	// Consider all non-revoked jobs
+	if *j.isRevoked {
+		return fmt.Errorf("job already revoked")
+	}
 	return nil
 }
 
