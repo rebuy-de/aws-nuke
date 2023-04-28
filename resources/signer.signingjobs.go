@@ -20,7 +20,7 @@ func init() {
 func ListSignerSigningJobs(sess *session.Session) ([]Resource, error) {
 	svc := signer.New(sess)
 	resources := []Resource{}
-	const reason string = "Ephemeral iam user"
+	const reason string = "Revoked by AWS Nuke"
 
 	listJobsInput := &signer.ListSigningJobsInput{}
 
