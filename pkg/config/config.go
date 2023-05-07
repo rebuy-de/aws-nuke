@@ -47,6 +47,7 @@ type DisableDeletionProtection struct {
 	CloudformationStack bool `yaml:"CloudformationStack"`
 	ELBv2               bool `yaml:"ELBv2"`
 	QLDBLedger          bool `yaml:"QLDBLedger"`
+	CognitoUserPool 	bool `yaml:"CognitoUserPool"`
 }
 
 type PresetDefinitions struct {
