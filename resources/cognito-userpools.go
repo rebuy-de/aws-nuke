@@ -11,7 +11,6 @@ type CognitoUserPool struct {
 	svc  *cognitoidentityprovider.CognitoIdentityProvider
 	name *string
 	id   *string
-
 	featureFlags config.FeatureFlags
 }
 
@@ -56,7 +55,6 @@ func (l *CognitoUserPool) FeatureFlags(ff config.FeatureFlags) {
 }
 
 func (f *CognitoUserPool) Remove() error {
-
 	_, err := f.svc.DeleteUserPool(&cognitoidentityprovider.DeleteUserPoolInput{
 		UserPoolId: f.id,
 	})
@@ -72,11 +70,9 @@ func (f *CognitoUserPool) Remove() error {
 			if err != nil {
 				return err
 			}
-			
 			return nil
 		}
 	}
-
 	return err
 }
 
@@ -94,7 +90,6 @@ func (e *CognitoUserPool) DisableProtection() error{
 		AutoVerifiedAttributes:userPool.AutoVerifiedAttributes,
 	}
 	_, err = e.svc.UpdateUserPool(params)
-
 	return err
 }
 
