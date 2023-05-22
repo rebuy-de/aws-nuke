@@ -18,7 +18,8 @@ type ECRRepository struct {
 }
 
 func init() {
-	register("ECRRepository", ListECRRepositories)
+	register("ECRRepository", ListECRRepositories,
+		mapCloudControl("AWS::ECR::Repository"))
 }
 
 func ListECRRepositories(sess *session.Session) ([]Resource, error) {
