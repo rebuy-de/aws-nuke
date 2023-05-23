@@ -12,7 +12,7 @@ require (
 	github.com/rebuy-de/rebuy-go-sdk/v4 v4.5.1
 	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/cobra v1.7.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	golang.org/x/sync v0.2.0
 	gopkg.in/yaml.v3 v3.0.1
 )
