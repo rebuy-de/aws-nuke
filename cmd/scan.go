@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/util"
 	"github.com/rebuy-de/aws-nuke/v2/resources"
@@ -69,6 +70,21 @@ func (s *scanner) list(region *Region, resourceType string) {
 		_, ok = err.(awsutil.ErrUnknownEndpoint)
 		if ok {
 			log.Warnf("skipping request: %v", err)
+			return
+		}
+
+		// check for this error "ThrottlingException: Rate exceeded"
+		// TODO: if there is a throttling exception call lister(sess) again 3 times with exponential backoff.
+		// or maybe try recursion and call s.list(region, resourceType)
+		awsErr, ok := err.(awserr.Error)
+		if ok && awsErr.Code() == "ThrottlingException" {
+			s.items <- &Item{
+				Region:   region,
+				Resource: nil,
+				State:    ItemStateFailed,
+				Reason:   err.Error(),
+				Type:     resourceType,
+			}
 			return
 		}
 
