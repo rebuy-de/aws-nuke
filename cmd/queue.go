@@ -15,6 +15,7 @@ const (
 	ItemStateWaiting
 	ItemStateFailed
 	ItemStateFiltered
+	ItemStateFilterFailed
 	ItemStateFinished
 )
 
@@ -42,6 +43,8 @@ func (i *Item) Print() {
 		Log(i.Region, i.Type, i.Resource, ReasonError, "failed")
 	case ItemStateFiltered:
 		Log(i.Region, i.Type, i.Resource, ReasonSkip, i.Reason)
+	case ItemStateFilterFailed:
+		Log(i.Region, i.Type, i.Resource, ReasonSkipFailed, i.Reason)
 	case ItemStateFinished:
 		Log(i.Region, i.Type, i.Resource, ReasonSuccess, "removed")
 	}

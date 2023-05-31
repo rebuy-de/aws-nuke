@@ -100,3 +100,73 @@ func TestUnmarshalFilter(t *testing.T) {
 	}
 
 }
+
+func TestFilterFailureErrorsOnInput(t *testing.T) {
+	cases := []struct {
+		yaml            string
+		fatal, nonfatal []string
+	}{
+		{
+			yaml: `{"type":"dateOlderThan","value":"0"}`,
+			fatal: []string{},
+			nonfatal: []string{"IamNotADate"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.yaml, func(t *testing.T) {
+			var filter config.Filter
+
+			err := yaml.Unmarshal([]byte(tc.yaml), &filter)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			for _, o := range tc.fatal {
+				match, err := filter.Match(o)
+
+				if err == nil {
+					t.Fatalf("'%v' should have returned an error", o)
+				}
+
+				if match {
+					//is there ever a situation where a filter will fail but also return a true value?
+					t.Fatalf("'%v' should not return true match", o) 
+				}
+
+				fferr, ok := err.(*config.FilterFailed)
+				if ok {
+					if !fferr.Fatal {
+						t.Fatalf("'%v' should have returned fatal error", o)
+					}
+				} else {
+					//even though returning a normal Error() is fatal enough, this test is about the FilterFailed object
+					t.Fatalf("'%v' should have returned a FilterFailed Object", o)
+				}
+			}
+
+			for _, o := range tc.nonfatal {
+				match, err := filter.Match(o)
+
+				if err == nil {
+					t.Fatalf("'%v' should have returned an error", o)
+				}
+
+				if match {
+					//is there ever a situation where a filter will fail but also return a true value?
+					t.Fatalf("'%v' should not return true match", o) 
+				}
+
+				fferr, ok := err.(*config.FilterFailed)
+				if ok {
+					if fferr.Fatal {
+						t.Fatalf("'%v' should have returned nonfatal error", o)
+					}
+				} else {
+					t.Fatalf("'%v' should have returned a FilterFailed Object", o)
+				}
+			}
+		})
+	}
+
+}

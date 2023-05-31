@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"errors"
 
 	"github.com/mb0/glob"
 )
@@ -28,6 +29,26 @@ func (f Filters) Merge(f2 Filters) {
 		f[resourceType] = append(f[resourceType], filter...)
 	}
 }
+
+type FilterFailed struct{
+	Filter string	//What Filter Failed?
+	Fatal bool		//Is this life threating?
+	Err error		//What caused it?
+}
+
+func (f *FilterFailed) Error() string {
+	return fmt.Sprintf("filter: %v isFatal?: %t err: %v", f.Filter, f.Fatal, f.Err)
+}
+
+//creates a FillterFailed with a custom message
+func createFilterFailed(filter string, fatal bool, msg string) error {
+	return &FilterFailed{
+		Filter: filter,
+		Fatal: fatal,
+		Err: errors.New(msg),
+	}
+}
+
 
 type Filter struct {
 	Property string
@@ -67,7 +88,13 @@ func (f Filter) Match(o string) (bool, error) {
 		}
 		fieldTime, err := parseDate(o)
 		if err != nil {
-			return false, err
+			var fferr = &FilterFailed{
+				Filter: FilterTypeDateOlderThan,
+				Fatal: false,
+				Err: err,
+			}
+
+			return false, fferr
 		}
 		fieldTimeWithOffset := fieldTime.Add(duration)
 

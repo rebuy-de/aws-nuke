@@ -11,6 +11,7 @@ import (
 
 var (
 	ReasonSkip            = *color.New(color.FgYellow)
+	ReasonSkipFailed      = *color.New(color.FgMagenta)
 	ReasonError           = *color.New(color.FgRed)
 	ReasonRemoveTriggered = *color.New(color.FgGreen)
 	ReasonWaitPending     = *color.New(color.FgBlue)
