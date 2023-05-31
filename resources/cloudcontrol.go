@@ -37,9 +37,11 @@ func init() {
 	registerCloudControl("AWS::NetworkFirewall::RuleGroup")
 }
 
+const CloudControlAPiMaxRetries = 5
+
 func NewListCloudControlResource(typeName string) func(*session.Session) ([]Resource, error) {
 	return func(sess *session.Session) ([]Resource, error) {
-		svc := cloudcontrolapi.New(sess)
+		svc := cloudcontrolapi.New(sess, &aws.Config{MaxRetries: aws.Int(CloudControlAPiMaxRetries)})
 
 		params := &cloudcontrolapi.ListResourcesInput{
 			TypeName: aws.String(typeName),
