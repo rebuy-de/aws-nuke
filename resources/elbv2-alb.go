@@ -1,16 +1,21 @@
 package resources
 
 import (
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elbv2"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ELBv2LoadBalancer struct {
-	svc  *elbv2.ELBV2
-	name *string
-	arn  *string
-	tags []*elbv2.Tag
+	svc          *elbv2.ELBV2
+	tags         []*elbv2.Tag
+	elb          *elbv2.LoadBalancer
+	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -20,13 +25,13 @@ func init() {
 func ListELBv2LoadBalancers(sess *session.Session) ([]Resource, error) {
 	svc := elbv2.New(sess)
 	var tagReqELBv2ARNs []*string
-	ELBv2ArnToName := make(map[string]*string)
+	elbv2ARNToRsc := make(map[string]*elbv2.LoadBalancer)
 
 	err := svc.DescribeLoadBalancersPages(nil,
 		func(page *elbv2.DescribeLoadBalancersOutput, lastPage bool) bool {
 			for _, elbv2 := range page.LoadBalancers {
 				tagReqELBv2ARNs = append(tagReqELBv2ARNs, elbv2.LoadBalancerArn)
-				ELBv2ArnToName[*elbv2.LoadBalancerArn] = elbv2.LoadBalancerName
+				elbv2ARNToRsc[*elbv2.LoadBalancerArn] = elbv2
 			}
 			return !lastPage
 		})
@@ -52,10 +57,10 @@ func ListELBv2LoadBalancers(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 		for _, elbv2TagInfo := range tagResp.TagDescriptions {
+			elb := elbv2ARNToRsc[*elbv2TagInfo.ResourceArn]
 			resources = append(resources, &ELBv2LoadBalancer{
 				svc:  svc,
-				name: ELBv2ArnToName[*elbv2TagInfo.ResourceArn],
-				arn:  elbv2TagInfo.ResourceArn,
+				elb:  elb,
 				tags: elbv2TagInfo.Tags,
 			})
 		}
@@ -66,27 +71,65 @@ func ListELBv2LoadBalancers(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
+func (e *ELBv2LoadBalancer) FeatureFlags(ff config.FeatureFlags) {
+	e.featureFlags = ff
+}
+
 func (e *ELBv2LoadBalancer) Remove() error {
 	params := &elbv2.DeleteLoadBalancerInput{
-		LoadBalancerArn: e.arn,
+		LoadBalancerArn: e.elb.LoadBalancerArn,
 	}
 
 	_, err := e.svc.DeleteLoadBalancer(params)
 	if err != nil {
+		if e.featureFlags.DisableDeletionProtection.ELBv2 {
+			awsErr, ok := err.(awserr.Error)
+			if ok && awsErr.Code() == "OperationNotPermitted" &&
+				awsErr.Message() == "Load balancer '"+*e.elb.LoadBalancerArn+"' cannot be deleted because deletion protection is enabled" {
+				err = e.DisableProtection()
+				if err != nil {
+					return err
+				}
+				_, err := e.svc.DeleteLoadBalancer(params)
+				if err != nil {
+					return err
+				}
+				return nil
+			}
+		}
 		return err
 	}
+	return nil
+}
 
+func (e *ELBv2LoadBalancer) DisableProtection() error {
+	params := &elbv2.ModifyLoadBalancerAttributesInput{
+		LoadBalancerArn: e.elb.LoadBalancerArn,
+		Attributes: []*elbv2.LoadBalancerAttribute{
+			{
+				Key:   aws.String("deletion_protection.enabled"),
+				Value: aws.String("false"),
+			},
+		},
+	}
+	_, err := e.svc.ModifyLoadBalancerAttributes(params)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (e *ELBv2LoadBalancer) Properties() types.Properties {
-	properties := types.NewProperties()
+	properties := types.NewProperties().
+		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339)).
+		Set("ARN", e.elb.LoadBalancerArn)
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+
 	return properties
 }
 
 func (e *ELBv2LoadBalancer) String() string {
-	return *e.name
+	return *e.elb.LoadBalancerName
 }

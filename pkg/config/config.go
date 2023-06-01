@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -8,7 +9,7 @@ import (
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type ResourceTypes struct {
@@ -44,6 +45,8 @@ type DisableDeletionProtection struct {
 	RDSInstance         bool `yaml:"RDSInstance"`
 	EC2Instance         bool `yaml:"EC2Instance"`
 	CloudformationStack bool `yaml:"CloudformationStack"`
+	ELBv2               bool `yaml:"ELBv2"`
+	QLDBLedger          bool `yaml:"QLDBLedger"`
 }
 
 type PresetDefinitions struct {
@@ -75,7 +78,9 @@ func Load(path string) (*Nuke, error) {
 	}
 
 	config := new(Nuke)
-	err = yaml.UnmarshalStrict(raw, config)
+	dec := yaml.NewDecoder(bytes.NewReader(raw))
+	dec.KnownFields(true)
+	err = dec.Decode(&config)
 	if err != nil {
 		return nil, err
 	}

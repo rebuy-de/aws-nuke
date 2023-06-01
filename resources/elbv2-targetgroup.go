@@ -8,8 +8,7 @@ import (
 
 type ELBv2TargetGroup struct {
 	svc  *elbv2.ELBV2
-	name *string
-	arn  *string
+	tg   *elbv2.TargetGroup
 	tags []*elbv2.Tag
 }
 
@@ -20,13 +19,13 @@ func init() {
 func ListELBv2TargetGroups(sess *session.Session) ([]Resource, error) {
 	svc := elbv2.New(sess)
 	var tagReqELBv2TargetGroupARNs []*string
-	targetGroupArnToName := make(map[string]*string)
+	targetGroupARNToRsc := make(map[string]*elbv2.TargetGroup)
 
 	err := svc.DescribeTargetGroupsPages(nil,
 		func(page *elbv2.DescribeTargetGroupsOutput, lastPage bool) bool {
 			for _, targetGroup := range page.TargetGroups {
 				tagReqELBv2TargetGroupARNs = append(tagReqELBv2TargetGroupARNs, targetGroup.TargetGroupArn)
-				targetGroupArnToName[*targetGroup.TargetGroupArn] = targetGroup.TargetGroupName
+				targetGroupARNToRsc[*targetGroup.TargetGroupArn] = targetGroup
 			}
 			return !lastPage
 		})
@@ -53,8 +52,7 @@ func ListELBv2TargetGroups(sess *session.Session) ([]Resource, error) {
 		for _, tagInfo := range tagResp.TagDescriptions {
 			resources = append(resources, &ELBv2TargetGroup{
 				svc:  svc,
-				name: targetGroupArnToName[*tagInfo.ResourceArn],
-				arn:  tagInfo.ResourceArn,
+				tg:   targetGroupARNToRsc[*tagInfo.ResourceArn],
 				tags: tagInfo.Tags,
 			})
 		}
@@ -67,7 +65,7 @@ func ListELBv2TargetGroups(sess *session.Session) ([]Resource, error) {
 
 func (e *ELBv2TargetGroup) Remove() error {
 	_, err := e.svc.DeleteTargetGroup(&elbv2.DeleteTargetGroupInput{
-		TargetGroupArn: e.arn,
+		TargetGroupArn: e.tg.TargetGroupArn,
 	})
 
 	if err != nil {
@@ -78,13 +76,15 @@ func (e *ELBv2TargetGroup) Remove() error {
 }
 
 func (e *ELBv2TargetGroup) Properties() types.Properties {
-	properties := types.NewProperties()
+	properties := types.NewProperties().
+		Set("ARN", e.tg.TargetGroupArn)
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
+	properties.Set("IsLoadBalanced", len(e.tg.LoadBalancerArns) > 0)
 	return properties
 }
 
 func (e *ELBv2TargetGroup) String() string {
-	return *e.name
+	return *e.tg.TargetGroupName
 }

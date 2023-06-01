@@ -3,11 +3,11 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/kinesisanalytics"
+	"github.com/aws/aws-sdk-go/service/kinesisanalyticsv2"
 )
 
 type KinesisAnalyticsApplication struct {
-	svc             *kinesisanalytics.KinesisAnalytics
+	svc             *kinesisanalyticsv2.KinesisAnalyticsV2
 	applicationName *string
 }
 
@@ -16,10 +16,9 @@ func init() {
 }
 
 func ListKinesisAnalyticsApplications(sess *session.Session) ([]Resource, error) {
-	svc := kinesisanalytics.New(sess)
+	svc := kinesisanalyticsv2.New(sess)
 	resources := []Resource{}
-	var lastApplicationName *string
-	params := &kinesisanalytics.ListApplicationsInput{
+	params := &kinesisanalyticsv2.ListApplicationsInput{
 		Limit: aws.Int64(25),
 	}
 
@@ -34,14 +33,13 @@ func ListKinesisAnalyticsApplications(sess *session.Session) ([]Resource, error)
 				svc:             svc,
 				applicationName: applicationSummary.ApplicationName,
 			})
-			lastApplicationName = applicationSummary.ApplicationName
 		}
 
-		if *output.HasMoreApplications == false {
+		if output.NextToken == nil {
 			break
 		}
 
-		params.ExclusiveStartApplicationName = lastApplicationName
+		params.NextToken = output.NextToken
 	}
 
 	return resources, nil
@@ -49,7 +47,7 @@ func ListKinesisAnalyticsApplications(sess *session.Session) ([]Resource, error)
 
 func (f *KinesisAnalyticsApplication) Remove() error {
 
-	output, err := f.svc.DescribeApplication(&kinesisanalytics.DescribeApplicationInput{
+	output, err := f.svc.DescribeApplication(&kinesisanalyticsv2.DescribeApplicationInput{
 		ApplicationName: f.applicationName,
 	})
 
@@ -58,7 +56,7 @@ func (f *KinesisAnalyticsApplication) Remove() error {
 	}
 	createTimestamp := output.ApplicationDetail.CreateTimestamp
 
-	_, err = f.svc.DeleteApplication(&kinesisanalytics.DeleteApplicationInput{
+	_, err = f.svc.DeleteApplication(&kinesisanalyticsv2.DeleteApplicationInput{
 		ApplicationName: f.applicationName,
 		CreateTimestamp: createTimestamp,
 	})
