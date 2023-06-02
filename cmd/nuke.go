@@ -63,6 +63,16 @@ func (n *Nuke) Run() error {
 		return err
 	}
 
+	if n.items.Count(ItemStateFailed) > 0 && n.items.Count(ItemStateNew) == 0 {
+		for _, item := range n.items {
+			if item.State != ItemStateFailed {
+				continue
+			}
+			logrus.Error(fmt.Sprintf("%s. %s.", item.Type, item.Reason))
+		}
+		return fmt.Errorf("failed")
+	}
+
 	if n.items.Count(ItemStateNew) == 0 {
 		fmt.Println("No resource to delete.")
 		return nil
@@ -249,9 +259,14 @@ func (n *Nuke) HandleQueue() {
 			n.HandleRemove(item)
 			item.Print()
 		case ItemStateFailed:
-			n.HandleRemove(item)
-			n.HandleWait(item, listCache)
-			item.Print()
+			// item.Resource will be nil if an exception was thrown while retrieving cloudControl
+			// resourceType's items (I.E resourceTypes lister()), however we still pass down the
+			// reason and state so we aren't ignoring these exceptions.
+			if item.Resource != nil {
+				n.HandleRemove(item)
+				n.HandleWait(item, listCache)
+				item.Print()
+			}
 		case ItemStatePending:
 			n.HandleWait(item, listCache)
 			item.State = ItemStateWaiting

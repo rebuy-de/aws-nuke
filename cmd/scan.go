@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/util"
 	"github.com/rebuy-de/aws-nuke/v2/resources"
@@ -12,7 +13,7 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-const ScannerParallelQueries = 2
+const ScannerParallelQueries = 16
 
 func Scan(region *Region, resourceTypes []string) <-chan *Item {
 	s := &scanner{
@@ -69,6 +70,20 @@ func (s *scanner) list(region *Region, resourceType string) {
 		_, ok = err.(awsutil.ErrUnknownEndpoint)
 		if ok {
 			log.Warnf("skipping request: %v", err)
+			return
+		}
+
+		awsErr, ok := err.(awserr.Error)
+		if ok && awsErr.Code() == "ThrottlingException" {
+			s.items <- &Item{
+				Region:   region,
+				Resource: nil,
+				State:    ItemStateFailed,
+				Reason:   err.Error(),
+				Type:     resourceType,
+			}
+			dump := util.Indent(fmt.Sprintf("%v", err), "    ")
+			log.Errorf("Listing %s failed:\n%s", resourceType, dump)
 			return
 		}
 
