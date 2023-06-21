@@ -45,16 +45,18 @@ func (n *Nuke) Run() error {
 		return err
 	}
 
-	fmt.Printf("Do you really want to nuke the account with "+
-		"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
-	if n.Parameters.Force {
-		fmt.Printf("Waiting %v before continuing.\n", forceSleep)
-		time.Sleep(forceSleep)
-	} else {
-		fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
-		err = Prompt(n.Account.Alias())
-		if err != nil {
-			return err
+	if !n.Config.FeatureFlags.DeleteAccountsWithoutAlias {
+		fmt.Printf("Do you really want to nuke the account with "+
+			"the ID %s and the alias '%s'?\n", n.Account.ID(), n.Account.Alias())
+		if n.Parameters.Force {
+			fmt.Printf("Waiting %v before continuing.\n", forceSleep)
+			time.Sleep(forceSleep)
+		} else {
+			fmt.Printf("Do you want to continue? Enter account alias to continue.\n")
+			err = Prompt(n.Account.Alias())
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -190,7 +192,6 @@ func (n *Nuke) Scan() error {
 }
 
 func (n *Nuke) Filter(item *Item) error {
-
 	checker, ok := item.Resource.(resources.Filter)
 	if ok {
 		err := checker.Filter()
@@ -260,7 +261,6 @@ func (n *Nuke) HandleQueue() {
 			n.HandleWait(item, listCache)
 			item.Print()
 		}
-
 	}
 
 	fmt.Println()

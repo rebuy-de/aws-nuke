@@ -12,11 +12,12 @@ import (
 type Account struct {
 	Credentials
 
-	id      string
-	aliases []string
+	id           string
+	aliases      []string
+	requireAlias bool
 }
 
-func NewAccount(creds Credentials, endpoints config.CustomEndpoints) (*Account, error) {
+func NewAccount(creds Credentials, endpoints config.CustomEndpoints, requireAlias bool) (*Account, error) {
 	creds.CustomEndpoints = endpoints
 	account := Account{
 		Credentials: creds,
@@ -51,15 +52,17 @@ func NewAccount(creds Credentials, endpoints config.CustomEndpoints) (*Account, 
 		return nil, errors.Wrapf(err, "failed to create global session in %s", GlobalRegionID)
 	}
 
-	aliasesOutput, err := iam.New(globalSession).ListAccountAliases(nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed get account alias")
-	}
-
 	aliases := []string{}
-	for _, alias := range aliasesOutput.AccountAliases {
-		if alias != nil {
-			aliases = append(aliases, *alias)
+	if requireAlias {
+		aliasesOutput, err := iam.New(globalSession).ListAccountAliases(nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed get account alias")
+		}
+
+		for _, alias := range aliasesOutput.AccountAliases {
+			if alias != nil {
+				aliases = append(aliases, *alias)
+			}
 		}
 	}
 
@@ -74,11 +77,17 @@ func (a *Account) ID() string {
 }
 
 func (a *Account) Alias() string {
-	return a.aliases[0]
+	if a.requireAlias {
+		return a.aliases[0]
+	}
+	return ""
 }
 
 func (a *Account) Aliases() []string {
-	return a.aliases
+	if a.requireAlias {
+		return a.aliases
+	}
+	return []string{}
 }
 
 func (a *Account) ResourceTypeToServiceType(regionName, resourceType string) string {
