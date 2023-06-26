@@ -19,9 +19,10 @@ func init() {
 func ListCloudFrontFunctions(sess *session.Session) ([]Resource, error) {
 	svc := cloudfront.New(sess)
 	resources := []Resource{}
+	params := &cloudfront.ListFunctionsInput{}
 
 	for {
-		resp, err := svc.ListFunctions(nil)
+		resp, err := svc.ListFunctions(params)
 		if err != nil {
 			return nil, err
 		}
@@ -33,8 +34,15 @@ func ListCloudFrontFunctions(sess *session.Session) ([]Resource, error) {
 				stage: item.FunctionMetadata.Stage,
 			})
 		}
-		return resources, nil
+
+		if resp.FunctionList.NextMarker == nil {
+			break
+		}
+
+		params.Marker = resp.FunctionList.NextMarker
+
 	}
+	return resources, nil
 }
 
 func (f *CloudFrontFunction) Remove() error {
