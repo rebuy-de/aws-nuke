@@ -4,18 +4,21 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/mgn"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
-type MgnJob struct {
-	svc *mgn.Mgn
-	id  *string
+type MGNJob struct {
+	svc   *mgn.Mgn
+	jobID *string
+	arn   *string
+	tags  map[string]*string
 }
 
 func init() {
-	register("MgnJob", ListMgnJobs)
+	register("MGNJob", ListMGNJobs)
 }
 
-func ListMgnJobs(sess *session.Session) ([]Resource, error) {
+func ListMGNJobs(sess *session.Session) ([]Resource, error) {
 	svc := mgn.New(sess)
 	resources := []Resource{}
 
@@ -30,9 +33,11 @@ func ListMgnJobs(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, job := range output.Items {
-			resources = append(resources, &MgnJob{
-				svc: svc,
-				id:  job.JobID,
+			resources = append(resources, &MGNJob{
+				svc:   svc,
+				jobID: job.JobID,
+				arn:   job.Arn,
+				tags:  job.Tags,
 			})
 		}
 
@@ -46,15 +51,26 @@ func ListMgnJobs(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (f *MgnJob) Remove() error {
+func (f *MGNJob) Remove() error {
 
 	_, err := f.svc.DeleteJob(&mgn.DeleteJobInput{
-		JobID: f.id,
+		JobID: f.jobID,
 	})
-	
+
 	return err
 }
 
-func (f *MgnJob) String() string {
-	return *f.id
+func (f *MGNJob) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("JobID", f.jobID)
+	properties.Set("Arn", f.arn)
+
+	for key, val := range f.tags {
+		properties.SetTag(&key, val)
+	}
+	return properties
+}
+
+func (f *MGNJob) String() string {
+	return *f.jobID
 }

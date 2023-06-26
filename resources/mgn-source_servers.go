@@ -4,18 +4,21 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/mgn"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
-type MgnSourceServer struct {
-	svc *mgn.Mgn
-	id  *string
+type MGNSourceServer struct {
+	svc            *mgn.Mgn
+	sourceServerID *string
+	arn            *string
+	tags           map[string]*string
 }
 
 func init() {
-	register("MgnSourceServer", ListMgnSourceServers)
+	register("MGNSourceServer", ListMGNSourceServers)
 }
 
-func ListMgnSourceServers(sess *session.Session) ([]Resource, error) {
+func ListMGNSourceServers(sess *session.Session) ([]Resource, error) {
 	svc := mgn.New(sess)
 	resources := []Resource{}
 
@@ -30,9 +33,11 @@ func ListMgnSourceServers(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, sourceServer := range output.Items {
-			resources = append(resources, &MgnSourceServer{
-				svc: svc,
-				id:  sourceServer.SourceServerID,
+			resources = append(resources, &MGNSourceServer{
+				svc:            svc,
+				sourceServerID: sourceServer.SourceServerID,
+				arn:            sourceServer.Arn,
+				tags:           sourceServer.Tags,
 			})
 		}
 
@@ -46,15 +51,26 @@ func ListMgnSourceServers(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (f *MgnSourceServer) Remove() error {
+func (f *MGNSourceServer) Remove() error {
 
 	_, err := f.svc.DeleteSourceServer(&mgn.DeleteSourceServerInput{
-		SourceServerID: f.id,
+		SourceServerID: f.sourceServerID,
 	})
 
 	return err
 }
 
-func (f *MgnSourceServer) String() string {
-	return *f.id
+func (f *MGNSourceServer) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("SourceServerID", f.sourceServerID)
+	properties.Set("Arn", f.arn)
+
+	for key, val := range f.tags {
+		properties.SetTag(&key, val)
+	}
+	return properties
+}
+
+func (f *MGNSourceServer) String() string {
+	return *f.sourceServerID
 }
