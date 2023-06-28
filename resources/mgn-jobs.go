@@ -63,7 +63,7 @@ func (f *MGNJob) Remove() error {
 func (f *MGNJob) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("JobID", f.jobID)
-	properties.Set("Arn", f.arn)
+	properties.Set("ARN", f.arn)
 
 	for key, val := range f.tags {
 		properties.SetTag(&key, val)

@@ -63,7 +63,7 @@ func (f *MGNSourceServer) Remove() error {
 func (f *MGNSourceServer) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("SourceServerID", f.sourceServerID)
-	properties.Set("Arn", f.arn)
+	properties.Set("ARN", f.arn)
 
 	for key, val := range f.tags {
 		properties.SetTag(&key, val)
