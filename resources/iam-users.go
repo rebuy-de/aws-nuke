@@ -27,24 +27,25 @@ func GetIAMUser(svc *iam.IAM, userName *string) (*iam.User, error) {
 
 func ListIAMUsers(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
+	resources := []Resource{}
 
-	resp, err := svc.ListUsers(nil)
+	err := svc.ListUsersPages(nil, func(page *iam.ListUsersOutput, lastPage bool) bool {
+		for _, out := range page.Users {
+			user, err := GetIAMUser(svc, out.UserName)
+			if err != nil {
+				logrus.Errorf("Failed to get user %s: %v", *out.UserName, err)
+				continue
+			}
+			resources = append(resources, &IAMUser{
+				svc:  svc,
+				name: *out.UserName,
+				tags: user.Tags,
+			})
+		}
+		return true
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	resources := make([]Resource, 0)
-	for _, out := range resp.Users {
-		user, err := GetIAMUser(svc, out.UserName)
-		if err != nil {
-			logrus.Errorf("Failed to get user %s: %v", *out.UserName, err)
-			continue
-		}
-		resources = append(resources, &IAMUser{
-			svc:  svc,
-			name: *out.UserName,
-			tags: user.Tags,
-		})
 	}
 
 	return resources, nil
