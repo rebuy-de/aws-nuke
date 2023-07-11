@@ -7,8 +7,9 @@ import (
 )
 
 type PollyLexicon struct {
-	svc  *polly.Polly
-	name *string
+	svc        *polly.Polly
+	name       *string
+	attributes *polly.LexiconAttributes
 }
 
 func init() {
@@ -27,8 +28,9 @@ func ListPollyLexicons(sess *session.Session) ([]Resource, error) {
 	}
 	for _, lexicon := range listOutput.Lexicons {
 		resources = append(resources, &PollyLexicon{
-			svc:  svc,
-			name: lexicon.Name,
+			svc:        svc,
+			name:       lexicon.Name,
+			attributes: lexicon.Attributes,
 		})
 	}
 	return resources, nil
@@ -45,5 +47,11 @@ func (lexicon *PollyLexicon) Remove() error {
 func (lexicon *PollyLexicon) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Name", lexicon.name)
+	properties.Set("Alphabet", lexicon.attributes.Alphabet)
+	properties.Set("LanguageCode", lexicon.attributes.LanguageCode)
+	properties.Set("LastModified", lexicon.attributes.LastModified)
+	properties.Set("LexemesCount", lexicon.attributes.LexemesCount)
+	properties.Set("LexiconArn", lexicon.attributes.LexiconArn)
+	properties.Set("Size", lexicon.attributes.Size)
 	return properties
 }
