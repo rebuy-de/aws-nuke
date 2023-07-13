@@ -18,8 +18,13 @@ func init() {
 func ListOSVPCEndpoints(sess *session.Session) ([]Resource, error) {
 	svc := opensearchservice.New(sess)
 
+	vpcEndpointIds, err := getOpenSearchVpcEndpointIds(svc)
+	if err != nil {
+		return nil, err
+	}
+
 	listResp, err := svc.DescribeVpcEndpoints(&opensearchservice.DescribeVpcEndpointsInput{
-		VpcEndpointIds: []*string{},
+		VpcEndpointIds: vpcEndpointIds,
 	})
 	if err != nil {
 		return nil, err
@@ -35,6 +40,21 @@ func ListOSVPCEndpoints(sess *session.Session) ([]Resource, error) {
 	}
 
 	return resources, nil
+}
+
+func getOpenSearchVpcEndpointIds(svc *opensearchservice.OpenSearchService) ([]*string, error) {
+	vpcEndpointIds := make([]*string, 0)
+
+	listResp, err := svc.ListVpcEndpoints(&opensearchservice.ListVpcEndpointsInput{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, vpcEndpoint := range listResp.VpcEndpointSummaryList {
+		vpcEndpointIds = append(vpcEndpointIds, vpcEndpoint.VpcEndpointId)
+	}
+
+	return vpcEndpointIds, nil
 }
 
 func (o *OSVPCEndpoint) Remove() error {
