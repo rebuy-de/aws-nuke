@@ -27,20 +27,10 @@ func ListOSPackages(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 
 	for _, pkg := range listResp.PackageDetailsList {
-		domainResp, err := svc.ListDomainsForPackage(&opensearchservice.ListDomainsForPackageInput{
-			PackageID: pkg.PackageID,
+		resources = append(resources, &OSPackage{
+			svc:       svc,
+			packageID: pkg.PackageID,
 		})
-		if err != nil {
-			return nil, err
-		}
-
-		for _, domain := range domainResp.DomainPackageDetailsList {
-			resources = append(resources, &OSPackage{
-				svc:        svc,
-				domainName: domain.DomainName,
-				packageID:  pkg.PackageID,
-			})
-		}
 	}
 
 	return resources, nil
