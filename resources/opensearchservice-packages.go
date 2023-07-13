@@ -7,9 +7,8 @@ import (
 )
 
 type OSPackage struct {
-	svc        *opensearchservice.OpenSearchService
-	domainName *string
-	packageID  *string
+	svc       *opensearchservice.OpenSearchService
+	packageID *string
 }
 
 func init() {
