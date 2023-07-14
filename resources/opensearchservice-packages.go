@@ -1,14 +1,18 @@
 package resources
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/opensearchservice"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type OSPackage struct {
-	svc       *opensearchservice.OpenSearchService
-	packageID *string
+	svc         *opensearchservice.OpenSearchService
+	packageID   *string
+	packageName *string
+	createdTime *time.Time
 }
 
 func init() {
@@ -27,8 +31,10 @@ func ListOSPackages(sess *session.Session) ([]Resource, error) {
 
 	for _, pkg := range listResp.PackageDetailsList {
 		resources = append(resources, &OSPackage{
-			svc:       svc,
-			packageID: pkg.PackageID,
+			svc:         svc,
+			packageID:   pkg.PackageID,
+			packageName: pkg.PackageName,
+			createdTime: pkg.CreatedAt,
 		})
 	}
 
@@ -45,6 +51,9 @@ func (o *OSPackage) Remove() error {
 
 func (o *OSPackage) Properties() types.Properties {
 	properties := types.NewProperties()
+	properties.Set("PackageID", o.packageID)
+	properties.Set("PackageName", o.packageName)
+	properties.Set("CreatedTime", o.createdTime.Format(time.RFC3339))
 	return properties
 }
 
