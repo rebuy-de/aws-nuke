@@ -67,6 +67,7 @@ func (o *OSVPCEndpoint) Remove() error {
 
 func (o *OSVPCEndpoint) Properties() types.Properties {
 	properties := types.NewProperties()
+	properties.Set("VpcEndpointId", o.vpcEndpointId)
 	return properties
 }
 
