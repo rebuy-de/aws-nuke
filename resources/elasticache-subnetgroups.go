@@ -1,6 +1,9 @@
 package resources
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
@@ -33,6 +36,13 @@ func ListElasticacheSubnetGroups(sess *session.Session) ([]Resource, error) {
 	}
 
 	return resources, nil
+}
+
+func (i *ElasticacheSubnetGroup) Filter() error {
+	if strings.HasPrefix(*i.name, "default") {
+		return fmt.Errorf("Cannot delete default subnet group")
+	}
+	return nil
 }
 
 func (i *ElasticacheSubnetGroup) Remove() error {
