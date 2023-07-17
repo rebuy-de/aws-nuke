@@ -12,7 +12,7 @@ type CloudFrontOriginRequestPolicy struct {
 }
 
 func init() {
-	register("OriginRequestPolicy", ListCloudFrontOriginRequestPolicies)
+	register("CloudFrontOriginRequestPolicy", ListCloudFrontOriginRequestPolicies)
 }
 
 func ListCloudFrontOriginRequestPolicies(sess *session.Session) ([]Resource, error) {
