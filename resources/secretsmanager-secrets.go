@@ -50,13 +50,25 @@ func ListSecretsManagerSecrets(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *SecretsManagerSecret) Remove() error {
+	// wanna do something about replicated secrets here
+	RemoveReplicaRegions := []*string{}
+	wildcard := "*"
 
-	_, err := f.svc.DeleteSecret(&secretsmanager.DeleteSecretInput{
+	_, RemoveRegionErr := f.svc.RemoveRegionsFromReplication(&secretsmanager.RemoveRegionsFromReplicationInput{
+		SecretId:             f.ARN,
+		RemoveReplicaRegions: append(RemoveReplicaRegions, &wildcard),
+	})
+
+	if RemoveRegionErr != nil {
+		return RemoveRegionErr
+	}
+
+	_, DeleteSecretErr := f.svc.DeleteSecret(&secretsmanager.DeleteSecretInput{
 		SecretId:                   f.ARN,
 		ForceDeleteWithoutRecovery: aws.Bool(true),
 	})
 
-	return err
+	return DeleteSecretErr
 }
 
 func (f *SecretsManagerSecret) Properties() types.Properties {
