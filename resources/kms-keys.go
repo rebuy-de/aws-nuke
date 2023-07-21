@@ -44,10 +44,6 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 				continue
 			}
 
-			if *resp.KeyMetadata.KeyState == kms.KeyStatePendingReplicaDeletion {
-				continue
-			}
-
 			kmsKey := &KMSKey{
 				svc:     svc,
 				id:      *resp.KeyMetadata.KeyId,
@@ -88,6 +84,10 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 func (e *KMSKey) Filter() error {
 	if e.state == "PendingDeletion" {
 		return fmt.Errorf("is already in PendingDeletion state")
+	}
+
+	if e.state == "PendingReplicaDeletion" {
+		return fmt.Errorf("is already in PendingReplicaDeletion state")
 	}
 
 	if e.manager != nil && *e.manager == kms.KeyManagerTypeAws {
