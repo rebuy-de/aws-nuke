@@ -44,6 +44,10 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 				continue
 			}
 
+			if *resp.KeyMetadata.KeyState == kms.KeyStatePendingReplicaDeletion {
+				continue
+			}
+
 			kmsKey := &KMSKey{
 				svc:     svc,
 				id:      *resp.KeyMetadata.KeyId,
