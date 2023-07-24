@@ -44,17 +44,6 @@ func ListRedshiftScheduledActions(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-// func (f *RedshiftScheduledAction) Properties() types.Properties {
-// 	properties := types.NewProperties().
-// 		Set("CreatedTime", f.snapshot.SnapshotCreateTime)
-
-// 	for _, tag := range f.snapshot.Tags {
-// 		properties.SetTag(tag.Key, tag.Value)
-// 	}
-
-// 	return properties
-// }
-
 func (f *RedshiftScheduledAction) Remove() error {
 
 	_, err := f.svc.DeleteScheduledAction(&redshift.DeleteScheduledActionInput{
