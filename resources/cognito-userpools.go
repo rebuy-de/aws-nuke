@@ -10,8 +10,6 @@ type CognitoUserPool struct {
 	svc  *cognitoidentityprovider.CognitoIdentityProvider
 	name *string
 	id   *string
-
-	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -48,10 +46,6 @@ func ListCognitoUserPools(sess *session.Session) ([]Resource, error) {
 	}
 
 	return resources, nil
-}
-
-func (l *CognitoUserPool) FeatureFlags(ff config.FeatureFlags) {
-	l.featureFlags = ff
 }
 
 func (f *CognitoUserPool) Remove() error {
