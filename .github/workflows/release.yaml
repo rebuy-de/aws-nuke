@@ -10,7 +10,7 @@ permissions:
 jobs:
   update_readme:
     name: Update Readme
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
 
   release:
     name: Publish binaries
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     steps:
       - name: Setup Go
         uses: actions/setup-go@v3
@@ -58,7 +58,7 @@ jobs:
           file_glob: true
 
   # docker_build:
-  #   runs-on: ubuntu-22.04
+  #   runs-on: self-hosted
   #   name: Docker Build
 
   #   steps:
