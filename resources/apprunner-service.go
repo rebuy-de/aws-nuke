@@ -7,7 +7,7 @@ import (
 )
 
 type AppRunnerService struct {
-	svc         *apprunner.Apprunner
+	svc         *apprunner.AppRunner
 	ServiceArn  *string
 	ServiceId   *string
 	ServiceName *string
