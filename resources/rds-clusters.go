@@ -30,12 +30,12 @@ func ListRDSClusters(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, instance := range resp.DBClusters {
 		tags, err := svc.ListTagsForResource(&rds.ListTagsForResourceInput{
-                        ResourceName: instance.DBClusterArn,
-                })
+			ResourceName: instance.DBClusterArn,
+		})
 
-                if err != nil {
-                        continue
-                }
+		if err != nil {
+			continue
+		}
 
 		resources = append(resources, &RDSDBCluster{
 			svc:                svc,
@@ -49,7 +49,7 @@ func ListRDSClusters(sess *session.Session) ([]Resource, error) {
 }
 
 func (i *RDSDBCluster) Remove() error {
-	if (i.deletionProtection) {
+	if i.deletionProtection {
 		modifyParams := &rds.ModifyDBClusterInput{
 			DBClusterIdentifier: &i.id,
 			DeletionProtection:  aws.Bool(false),
@@ -78,13 +78,13 @@ func (i *RDSDBCluster) String() string {
 }
 
 func (i *RDSDBCluster) Properties() types.Properties {
-        properties := types.NewProperties()
-        properties.Set("Identifier", i.id)
+	properties := types.NewProperties()
+	properties.Set("Identifier", i.id)
 	properties.Set("Deletion Protection", i.deletionProtection)
 
-        for _, tag := range i.tags {
-                properties.SetTag(tag.Key, tag.Value)
-        }
+	for _, tag := range i.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
 
-        return properties
+	return properties
 }

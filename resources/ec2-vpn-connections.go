@@ -9,8 +9,8 @@ import (
 )
 
 type EC2VPNConnection struct {
-	svc   *ec2.EC2
-	conn  *ec2.VpnConnection
+	svc  *ec2.EC2
+	conn *ec2.VpnConnection
 }
 
 func init() {
@@ -29,8 +29,8 @@ func ListEC2VPNConnections(sess *session.Session) ([]Resource, error) {
 	resources := make([]Resource, 0)
 	for _, out := range resp.VpnConnections {
 		resources = append(resources, &EC2VPNConnection{
-			svc:   svc,
-			conn:  out,
+			svc:  svc,
+			conn: out,
 		})
 	}
 
