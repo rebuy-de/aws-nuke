@@ -84,11 +84,12 @@ func parseDate(input string) (time.Time, error) {
 		return t, nil
 	}
 
-	formats := []string{"2006-01-02",
+	formats := []string{
+		"2006-01-02",
 		"2006/01/02",
 		"2006-01-02T15:04:05Z",
-		"2006-01-02 15:04:05.000 -0700 MST", // Date format used by AWS for CreateTime on ASGs
-		time.RFC3339Nano,                    // Format of t.MarshalText() and t.MarshalJSON()
+		"2006-01-02 15:04:05 -0700 MST", // Date format used by AWS for CreateTime on ASGs
+		time.RFC3339Nano,                // Format of t.MarshalText() and t.MarshalJSON()
 		time.RFC3339,
 	}
 	for _, f := range formats {
