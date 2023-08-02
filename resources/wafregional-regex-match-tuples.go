@@ -69,7 +69,7 @@ func (r *WAFRegionalRegexMatchTuple) Remove() error {
 		ChangeToken:     tokenOutput.ChangeToken,
 		RegexMatchSetId: r.matchSetid,
 		Updates: []*waf.RegexMatchSetUpdate{
-			&waf.RegexMatchSetUpdate{
+			{
 				Action:          aws.String("DELETE"),
 				RegexMatchTuple: r.tuple,
 			},
