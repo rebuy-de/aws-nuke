@@ -95,7 +95,7 @@ func (r *Route53ResourceRecordSet) Remove() error {
 		HostedZoneId: r.hostedZoneId,
 		ChangeBatch: &route53.ChangeBatch{
 			Changes: []*route53.Change{
-				&route53.Change{
+				{
 					Action:            aws.String("DELETE"),
 					ResourceRecordSet: r.data,
 				},
