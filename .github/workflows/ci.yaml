@@ -16,7 +16,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.19'
+        go-version: '1.20'
     - name: Setup tools
       run: |
         go install golang.org/x/lint/golint@latest
@@ -32,7 +32,7 @@ jobs:
   docker_build:
     runs-on: ubuntu-22.04
     name: Docker Build
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'rebuy-de/aws-nuke' }}
+    if: github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == 'rebuy-de/aws-nuke' && github.event.pull_request.user.login != 'dependabot[bot]')
 
     steps:
     - uses: actions/checkout@v3
@@ -44,10 +44,10 @@ jobs:
       run: |
         if [ "${GITHUB_EVENT_NAME}" == "pull_request" ]; then
           BRANCH="$(echo ${GITHUB_HEAD_REF} | tr '/' '_')"
-          echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:${BRANCH},docker.io/rebuy/aws-nuke:${BRANCH}"
+          echo "tags=quay.io/rebuy/aws-nuke:${BRANCH},docker.io/rebuy/aws-nuke:${BRANCH}" >> $GITHUB_OUTPUT
         else
-          echo "##[set-output name=tags;]quay.io/rebuy/aws-nuke:main,docker.io/rebuy/aws-nuke:main,\
-            quay.io/rebuy/aws-nuke:latest,docker.io/rebuy/aws-nuke:latest"
+          echo "tags=quay.io/rebuy/aws-nuke:main,docker.io/rebuy/aws-nuke:main,\
+            quay.io/rebuy/aws-nuke:latest,docker.io/rebuy/aws-nuke:latest" >> $GITHUB_OUTPUT
         fi
       id: generate_tags
 

@@ -73,6 +73,9 @@ func (e *IAMRole) Filter() error {
 	if strings.HasPrefix(e.path, "/aws-service-role/") {
 		return fmt.Errorf("cannot delete service roles")
 	}
+	if strings.HasPrefix(e.path, "/aws-reserved/sso.amazonaws.com/") {
+		return fmt.Errorf("cannot delete SSO roles")
+	}
 	return nil
 }
 
