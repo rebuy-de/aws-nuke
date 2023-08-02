@@ -31,7 +31,7 @@ func ListRedshiftSubnetGroups(sess *session.Session) ([]Resource, error) {
 
 		for _, subnetGroup := range output.ClusterSubnetGroups {
 			resources = append(resources, &RedshiftSubnetGroup{
-				svc: svc,
+				svc:                    svc,
 				clusterSubnetGroupName: subnetGroup.ClusterSubnetGroupName,
 			})
 		}
