@@ -70,7 +70,7 @@ func (r *WAFRegionalIPSetIP) Remove() error {
 		ChangeToken: tokenOutput.ChangeToken,
 		IPSetId:     r.ipSetid,
 		Updates: []*waf.IPSetUpdate{
-			&waf.IPSetUpdate{
+			{
 				Action:          aws.String("DELETE"),
 				IPSetDescriptor: r.descriptor,
 			},
