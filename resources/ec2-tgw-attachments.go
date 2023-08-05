@@ -52,6 +52,21 @@ func (e *EC2TGWAttachment) Remove() error {
 		// as part of TGW to delete VPN attachments.
 		return fmt.Errorf("VPN attachment")
 	}
+
+	// Execute different API calls depending on the resource type.
+	if *e.tgwa.ResourceType == "peering" {
+		params := &ec2.DeleteTransitGatewayPeeringAttachmentInput{
+			TransitGatewayAttachmentId: e.tgwa.TransitGatewayAttachmentId,
+		}
+
+		_, err := e.svc.DeleteTransitGatewayPeeringAttachment(params)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	params := &ec2.DeleteTransitGatewayVpcAttachmentInput{
 		TransitGatewayAttachmentId: e.tgwa.TransitGatewayAttachmentId,
 	}
