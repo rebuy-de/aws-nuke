@@ -50,9 +50,9 @@ func (f *SFNStateMachine) Remove() error {
 	params := &sfn.ListExecutionsInput{
 		StateMachineArn: f.ARN,
 	}
-	
-	for{
-		executions,execError := f.svc.ListExecutions(params)
+
+	for {
+		executions, execError := f.svc.ListExecutions(params)
 		if execError != nil {
 			break
 		}
@@ -62,13 +62,12 @@ func (f *SFNStateMachine) Remove() error {
 				ExecutionArn: execs.ExecutionArn,
 			})
 		}
-		
+
 		if executions.NextToken == nil {
 			break
 		}
 		params.NextToken = executions.NextToken
 	}
-	
 
 	_, err := f.svc.DeleteStateMachine(&sfn.DeleteStateMachineInput{
 		StateMachineArn: f.ARN,
