@@ -8,9 +8,9 @@ import (
 )
 
 type CognitoUserPool struct {
-	svc  *cognitoidentityprovider.CognitoIdentityProvider
-	name *string
-	id   *string
+	svc          *cognitoidentityprovider.CognitoIdentityProvider
+	name         *string
+	id           *string
 	featureFlags config.FeatureFlags
 }
 
@@ -59,9 +59,9 @@ func (f *CognitoUserPool) Remove() error {
 		UserPoolId: f.id,
 	})
 	if err != nil {
-		if f.featureFlags.DisableDeletionProtection.CognitoUserPool{
+		if f.featureFlags.DisableDeletionProtection.CognitoUserPool {
 			err = f.DisableProtection()
-			if err!=nil{
+			if err != nil {
 				return err
 			}
 			_, err = f.svc.DeleteUserPool(&cognitoidentityprovider.DeleteUserPoolInput{
@@ -76,18 +76,18 @@ func (f *CognitoUserPool) Remove() error {
 	return err
 }
 
-func (e *CognitoUserPool) DisableProtection() error{
-	userPoolOutput,err := e.svc.DescribeUserPool(&cognitoidentityprovider.DescribeUserPoolInput{
-		UserPoolId : e.id,
+func (e *CognitoUserPool) DisableProtection() error {
+	userPoolOutput, err := e.svc.DescribeUserPool(&cognitoidentityprovider.DescribeUserPoolInput{
+		UserPoolId: e.id,
 	})
-	if err!=nil{
+	if err != nil {
 		return err
 	}
 	userPool := userPoolOutput.UserPool
 	params := &cognitoidentityprovider.UpdateUserPoolInput{
-		DeletionProtection: &cognitoidentityprovider.DeletionProtectionType_Values()[1],
-		UserPoolId: e.id,
-		AutoVerifiedAttributes:userPool.AutoVerifiedAttributes,
+		DeletionProtection:     &cognitoidentityprovider.DeletionProtectionType_Values()[1],
+		UserPoolId:             e.id,
+		AutoVerifiedAttributes: userPool.AutoVerifiedAttributes,
 	}
 	_, err = e.svc.UpdateUserPool(params)
 	return err
