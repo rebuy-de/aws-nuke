@@ -34,7 +34,7 @@ func ListAppConfigEnvironments(sess *session.Session) ([]Resource, error) {
 		}
 		params := &appconfig.ListEnvironmentsInput{
 			ApplicationId: application.id,
-			MaxResults:    aws.Int64(100),
+			MaxResults:    aws.Int64(50),
 		}
 		err := svc.ListEnvironmentsPages(params, func(page *appconfig.ListEnvironmentsOutput, lastPage bool) bool {
 			for _, item := range page.Items {

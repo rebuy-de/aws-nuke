@@ -21,7 +21,7 @@ func ListAppConfigDeploymentStrategies(sess *session.Session) ([]Resource, error
 	svc := appconfig.New(sess)
 	resources := []Resource{}
 	params := &appconfig.ListDeploymentStrategiesInput{
-		MaxResults: aws.Int64(100),
+		MaxResults: aws.Int64(50),
 	}
 	err := svc.ListDeploymentStrategiesPages(params, func(page *appconfig.ListDeploymentStrategiesOutput, lastPage bool) bool {
 		for _, item := range page.Items {
