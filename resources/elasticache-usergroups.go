@@ -18,18 +18,34 @@ func init() {
 func ListElasticacheUserGroups(sess *session.Session) ([]Resource, error) {
 	svc := elasticache.New(sess)
 
-	params := &elasticache.DescribeUserGroupsInput{MaxRecords: aws.Int64(100)}
-	resp, err := svc.DescribeUserGroups(params)
-	if err != nil {
-		return nil, err
-	}
 	var resources []Resource
-	for _, userGroup := range resp.UserGroups {
-		resources = append(resources, &ElasticacheUserGroup{
-			svc:     svc,
-			groupId: userGroup.UserGroupId,
-		})
+	var marker *string // Marker for pagination
 
+	for {
+		params := &elasticache.DescribeUserGroupsInput{
+			MaxRecords: aws.Int64(100),
+			Marker:     marker,
+		}
+		resp, err := svc.DescribeUserGroups(params)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, userGroup := range resp.UserGroups {
+			resources = append(resources, &ElasticacheUserGroup{
+				svc:     svc,
+				groupId: userGroup.UserGroupId,
+			})
+		}
+
+		// If there are more results, the response will have a Marker.
+		// Set the marker for the next iteration.
+		if resp.Marker != nil {
+			marker = resp.Marker
+		} else {
+			// No more results, break the loop.
+			break
+		}
 	}
 
 	return resources, nil
