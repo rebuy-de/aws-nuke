@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
@@ -39,6 +41,16 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 	}
 
 	return resources, nil
+}
+
+func (i *EC2RouteTable) Filter() error {
+
+	for _, association := range i.routeTable.Associations {
+		if *association.Main {
+			return fmt.Errorf("Main RouteTables cannot be deleted")
+		}
+	}
+	return nil
 }
 
 func (e *EC2RouteTable) Remove() error {
