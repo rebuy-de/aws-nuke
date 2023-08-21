@@ -34,7 +34,7 @@ func ListAppConfigConfigurationProfiles(sess *session.Session) ([]Resource, erro
 		}
 		params := &appconfig.ListConfigurationProfilesInput{
 			ApplicationId: application.id,
-			MaxResults:    aws.Int64(100),
+			MaxResults:    aws.Int64(50),
 		}
 		err := svc.ListConfigurationProfilesPages(params, func(page *appconfig.ListConfigurationProfilesOutput, lastPage bool) bool {
 			for _, item := range page.Items {
