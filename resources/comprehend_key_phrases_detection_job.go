@@ -22,6 +22,11 @@ func ListComprehendKeyPhrasesDetectionJobs(sess *session.Session) ([]Resource, e
 			return nil, err
 		}
 		for _, keyPhrasesDetectionJob := range resp.KeyPhrasesDetectionJobPropertiesList {
+			switch *keyPhrasesDetectionJob.JobStatus {
+			case "STOPPED", "FAILED", "COMPLETED":
+				// if the job has already been stopped, failed, or completed; do not try to stop it again
+				continue
+			}
 			resources = append(resources, &ComprehendKeyPhrasesDetectionJob{
 				svc:                    svc,
 				keyPhrasesDetectionJob: keyPhrasesDetectionJob,
