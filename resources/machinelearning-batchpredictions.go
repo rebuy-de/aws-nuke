@@ -1,9 +1,13 @@
 package resources
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/machinelearning"
+	"github.com/sirupsen/logrus"
 )
 
 type MachineLearningBranchPrediction struct {
@@ -26,6 +30,12 @@ func ListMachineLearningBranchPredictions(sess *session.Session) ([]Resource, er
 	for {
 		output, err := svc.DescribeBatchPredictions(params)
 		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				if strings.Contains(aerr.Message(), "AmazonML is no longer available to new customers") {
+					logrus.Info("MachineLearningBranchPrediction: AmazonML is no longer available to new customers. Ignore if you haven't set it up.")
+					return nil, nil
+				}
+			}
 			return nil, err
 		}
 
