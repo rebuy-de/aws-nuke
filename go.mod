@@ -1,6 +1,6 @@
 module github.com/rebuy-de/aws-nuke/v2
 
-go 1.19
+go 1.21
 
 require (
 	github.com/aws/aws-sdk-go v1.44.328
