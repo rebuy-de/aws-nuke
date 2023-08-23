@@ -1,6 +1,9 @@
 package resources
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/appconfig"
@@ -21,7 +24,7 @@ func ListAppConfigDeploymentStrategies(sess *session.Session) ([]Resource, error
 	svc := appconfig.New(sess)
 	resources := []Resource{}
 	params := &appconfig.ListDeploymentStrategiesInput{
-		MaxResults: aws.Int64(100),
+		MaxResults: aws.Int64(50),
 	}
 	err := svc.ListDeploymentStrategiesPages(params, func(page *appconfig.ListDeploymentStrategiesOutput, lastPage bool) bool {
 		for _, item := range page.Items {
@@ -37,6 +40,13 @@ func ListAppConfigDeploymentStrategies(sess *session.Session) ([]Resource, error
 		return nil, err
 	}
 	return resources, nil
+}
+
+func (f *AppConfigDeploymentStrategy) Filter() error {
+	if strings.HasPrefix(*f.name, "AppConfig.") {
+		return fmt.Errorf("cannot delete predefined Deployment Strategy")
+	}
+	return nil
 }
 
 func (f *AppConfigDeploymentStrategy) Remove() error {

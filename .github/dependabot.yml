@@ -9,3 +9,7 @@ updates:
       day: "tuesday"
       time: "10:00"
       timezone: "Europe/Berlin"
+    groups:
+      golang:
+        patterns:
+          - "*"

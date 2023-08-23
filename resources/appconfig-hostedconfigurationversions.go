@@ -35,7 +35,7 @@ func ListAppConfigHostedConfigurationVersions(sess *session.Session) ([]Resource
 		params := &appconfig.ListHostedConfigurationVersionsInput{
 			ApplicationId:          configurationProfile.applicationId,
 			ConfigurationProfileId: configurationProfile.id,
-			MaxResults:             aws.Int64(100),
+			MaxResults:             aws.Int64(50),
 		}
 		err := svc.ListHostedConfigurationVersionsPages(params, func(page *appconfig.ListHostedConfigurationVersionsOutput, lastPage bool) bool {
 			for _, item := range page.Items {

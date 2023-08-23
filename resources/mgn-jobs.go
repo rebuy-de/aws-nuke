@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/mgn"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"github.com/sirupsen/logrus"
 )
 
 type MGNJob struct {
@@ -29,6 +30,10 @@ func ListMGNJobs(sess *session.Session) ([]Resource, error) {
 	for {
 		output, err := svc.DescribeJobs(params)
 		if err != nil {
+			if IsAWSError(err, mgn.ErrCodeUninitializedAccountException) {
+				logrus.Info("MGNJob: Account not initialized for Application Migration Service. Ignore if you haven't set it up.")
+				return nil, nil
+			}
 			return nil, err
 		}
 

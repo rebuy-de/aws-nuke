@@ -21,7 +21,7 @@ func ListAppConfigApplications(sess *session.Session) ([]Resource, error) {
 	svc := appconfig.New(sess)
 	resources := []Resource{}
 	params := &appconfig.ListApplicationsInput{
-		MaxResults: aws.Int64(100),
+		MaxResults: aws.Int64(50),
 	}
 	err := svc.ListApplicationsPages(params, func(page *appconfig.ListApplicationsOutput, lastPage bool) bool {
 		for _, item := range page.Items {
