@@ -21,14 +21,13 @@ func init() {
 
 func ListElasticacheUsers(sess *session.Session) ([]Resource, error) {
 	svc := elasticache.New(sess)
-
-	var resources []Resource
-	var marker *string // Marker for pagination
+	resources := []Resource{}
+	var nextToken *string
 
 	for {
 		params := &elasticache.DescribeUsersInput{
 			MaxRecords: aws.Int64(100),
-			Marker:     marker,
+			Marker:     nextToken,
 		}
 		resp, err := svc.DescribeUsers(params)
 		if err != nil {
@@ -43,14 +42,13 @@ func ListElasticacheUsers(sess *session.Session) ([]Resource, error) {
 			})
 		}
 
-		// If there are more results, the response will have a Marker.
-		// Set the marker for the next iteration.
-		if resp.Marker != nil {
-			marker = resp.Marker
-		} else {
-			// No more results, break the loop.
-			break
+		// Check if there are more results
+		if resp.Marker == nil {
+			break // No more results, exit the loop
 		}
+
+		// Set the nextToken for the next iteration
+		nextToken = resp.Marker
 	}
 
 	return resources, nil
