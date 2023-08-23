@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ElasticacheUser struct {
@@ -56,7 +57,7 @@ func ListElasticacheUsers(sess *session.Session) ([]Resource, error) {
 
 func (i *ElasticacheUser) Filter() error {
 	if strings.HasPrefix(*i.userName, "default") {
-		return fmt.Errorf("Cannot delete default user")
+		return fmt.Errorf("cannot delete default user")
 	}
 	return nil
 }
@@ -72,6 +73,13 @@ func (i *ElasticacheUser) Remove() error {
 	}
 
 	return nil
+}
+
+func (i *ElasticacheUser) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("ID", i.userId)
+	properties.Set("UserName", i.userName)
+	return properties
 }
 
 func (i *ElasticacheUser) String() string {

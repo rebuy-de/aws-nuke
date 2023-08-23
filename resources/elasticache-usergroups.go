@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ElasticacheUserGroup struct {
@@ -60,6 +61,12 @@ func (i *ElasticacheUserGroup) Remove() error {
 	}
 
 	return nil
+}
+
+func (i *ElasticacheUserGroup) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("ID", i.groupId)
+	return properties
 }
 
 func (i *ElasticacheUserGroup) String() string {
