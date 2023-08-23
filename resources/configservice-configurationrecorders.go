@@ -26,7 +26,7 @@ func ListConfigServiceConfigurationRecorders(sess *session.Session) ([]Resource,
 	resources := make([]Resource, 0)
 	for _, configurationRecorder := range resp.ConfigurationRecorders {
 		resources = append(resources, &ConfigServiceConfigurationRecorder{
-			svc: svc,
+			svc:                       svc,
 			configurationRecorderName: configurationRecorder.Name,
 		})
 	}
