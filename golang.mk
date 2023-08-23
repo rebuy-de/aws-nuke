@@ -81,6 +81,7 @@ xc: go_generate
 	GOOS=linux GOARCH=amd64 make compress
 	GOOS=linux GOARCH=arm64 make compress
 	GOOS=linux GOARCH=arm GOARM=7 make compress
+	GOOS=linux GOARCH=riscv64 make compress
 	GOOS=darwin GOARCH=amd64 make compress
 	GOOS=darwin GOARCH=arm64 make compress
 	GOOS=windows GOARCH=amd64 make compress
