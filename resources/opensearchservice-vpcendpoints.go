@@ -23,19 +23,12 @@ func ListOSVPCEndpoints(sess *session.Session) ([]Resource, error) {
 		return nil, err
 	}
 
-	listResp, err := svc.DescribeVpcEndpoints(&opensearchservice.DescribeVpcEndpointsInput{
-		VpcEndpointIds: vpcEndpointIds,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	resources := make([]Resource, 0)
 
-	for _, vpcEndpoint := range listResp.VpcEndpoints {
+	for _, vpcEndpointId := range vpcEndpointIds {
 		resources = append(resources, &OSVPCEndpoint{
 			svc:           svc,
-			vpcEndpointId: vpcEndpoint.VpcEndpointId,
+			vpcEndpointId: vpcEndpointId,
 		})
 	}
 
