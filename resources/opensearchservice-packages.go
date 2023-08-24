@@ -21,21 +21,34 @@ func init() {
 
 func ListOSPackages(sess *session.Session) ([]Resource, error) {
 	svc := opensearchservice.New(sess)
+	resources := []Resource{}
+	var nextToken *string
 
-	listResp, err := svc.DescribePackages(&opensearchservice.DescribePackagesInput{})
-	if err != nil {
-		return nil, err
-	}
+	for {
+		params := &opensearchservice.DescribePackagesInput{
+			NextToken: nextToken,
+		}
+		listResp, err := svc.DescribePackages(params)
+		if err != nil {
+			return nil, err
+		}
 
-	resources := make([]Resource, 0)
+		for _, pkg := range listResp.PackageDetailsList {
+			resources = append(resources, &OSPackage{
+				svc:         svc,
+				packageID:   pkg.PackageID,
+				packageName: pkg.PackageName,
+				createdTime: pkg.CreatedAt,
+			})
+		}
 
-	for _, pkg := range listResp.PackageDetailsList {
-		resources = append(resources, &OSPackage{
-			svc:         svc,
-			packageID:   pkg.PackageID,
-			packageName: pkg.PackageName,
-			createdTime: pkg.CreatedAt,
-		})
+		// Check if there are more results
+		if listResp.NextToken == nil {
+			break // No more results, exit the loop
+		}
+
+		// Set the nextToken for the next iteration
+		nextToken = listResp.NextToken
 	}
 
 	return resources, nil

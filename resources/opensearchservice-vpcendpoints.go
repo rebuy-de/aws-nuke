@@ -17,19 +17,32 @@ func init() {
 
 func ListOSVPCEndpoints(sess *session.Session) ([]Resource, error) {
 	svc := opensearchservice.New(sess)
+	resources := []Resource{}
+	var nextToken *string
 
-	listResp, err := svc.ListVpcEndpoints(&opensearchservice.ListVpcEndpointsInput{})
-	if err != nil {
-		return nil, err
-	}
+	for {
+		params := &opensearchservice.ListVpcEndpointsInput{
+			NextToken: nextToken,
+		}
+		listResp, err := svc.ListVpcEndpoints(params)
+		if err != nil {
+			return nil, err
+		}
 
-	resources := make([]Resource, 0)
+		for _, vpcEndpoint := range listResp.VpcEndpointSummaryList {
+			resources = append(resources, &OSVPCEndpoint{
+				svc:           svc,
+				vpcEndpointId: vpcEndpoint.VpcEndpointId,
+			})
+		}
 
-	for _, vpcEndpoint := range listResp.VpcEndpointSummaryList {
-		resources = append(resources, &OSVPCEndpoint{
-			svc:           svc,
-			vpcEndpointId: vpcEndpoint.VpcEndpointId,
-		})
+		// Check if there are more results
+		if listResp.NextToken == nil {
+			break // No more results, exit the loop
+		}
+
+		// Set the nextToken for the next iteration
+		nextToken = listResp.NextToken
 	}
 
 	return resources, nil
