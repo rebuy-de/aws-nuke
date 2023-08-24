@@ -45,7 +45,7 @@ func ListFirehoseDeliveryStreams(sess *session.Session) ([]Resource, error) {
 				}
 
 				tags = append(tags, tagResp.Tags...)
-				if *tagResp.HasMoreTags == false {
+				if !*tagResp.HasMoreTags {
 					break
 				}
 			}
@@ -59,7 +59,7 @@ func ListFirehoseDeliveryStreams(sess *session.Session) ([]Resource, error) {
 			lastDeliveryStreamName = deliveryStreamName
 		}
 
-		if *output.HasMoreDeliveryStreams == false {
+		if !*output.HasMoreDeliveryStreams {
 			break
 		}
 
