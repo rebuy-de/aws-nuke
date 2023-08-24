@@ -35,7 +35,7 @@ func ListFirehoseDeliveryStreams(sess *session.Session) ([]Resource, error) {
 		for _, deliveryStreamName := range output.DeliveryStreamNames {
 			tagParams := &firehose.ListTagsForDeliveryStreamInput{
 				DeliveryStreamName: deliveryStreamName,
-				Limit:              aws.Int64(100),
+				Limit:              aws.Int64(1), // todo put 100
 			}
 
 			for {
