@@ -9,6 +9,7 @@ import (
 type FirehoseDeliveryStream struct {
 	svc                *firehose.Firehose
 	deliveryStreamName *string
+	tags               []*firehose.Tag
 }
 
 func init() {
@@ -18,6 +19,7 @@ func init() {
 func ListFirehoseDeliveryStreams(sess *session.Session) ([]Resource, error) {
 	svc := firehose.New(sess)
 	resources := []Resource{}
+	tags := []*firehose.Tag{}
 	var lastDeliveryStreamName *string
 
 	params := &firehose.ListDeliveryStreamsInput{
@@ -31,10 +33,29 @@ func ListFirehoseDeliveryStreams(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, deliveryStreamName := range output.DeliveryStreamNames {
+			tagParams := &firehose.ListTagsForDeliveryStreamInput{
+				DeliveryStreamName: deliveryStreamName,
+				Limit:              aws.Int64(100),
+			}
+
+			for {
+				tagResp, tagErr := svc.ListTagsForDeliveryStream(tagParams)
+				if tagErr != nil {
+					return nil, tagErr
+				}
+
+				tags = append(tags, tagResp.Tags...)
+				if *tagResp.HasMoreTags == false {
+					break
+				}
+			}
+
 			resources = append(resources, &FirehoseDeliveryStream{
 				svc:                svc,
 				deliveryStreamName: deliveryStreamName,
+				tags:               tags,
 			})
+
 			lastDeliveryStreamName = deliveryStreamName
 		}
 
