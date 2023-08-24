@@ -1,10 +1,10 @@
 package resources
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dax"
-	"fmt"
 )
 
 type DAXSubnetGroup struct {
