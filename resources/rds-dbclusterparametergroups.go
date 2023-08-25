@@ -31,12 +31,12 @@ func ListRDSClusterParameterGroups(sess *session.Session) ([]Resource, error) {
 	var resources []Resource
 	for _, parametergroup := range resp.DBClusterParameterGroups {
 		tags, err := svc.ListTagsForResource(&rds.ListTagsForResourceInput{
-                        ResourceName: parametergroup.DBClusterParameterGroupArn,
-                })
+			ResourceName: parametergroup.DBClusterParameterGroupArn,
+		})
 
-                if err != nil {
-                        continue
-                }
+		if err != nil {
+			continue
+		}
 
 		resources = append(resources, &RDSDBClusterParameterGroup{
 			svc:  svc,

@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/firehose"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type FirehoseDeliveryStream struct {
 	svc                *firehose.Firehose
 	deliveryStreamName *string
+	tags               []*firehose.Tag
 }
 
 func init() {
@@ -18,6 +20,7 @@ func init() {
 func ListFirehoseDeliveryStreams(sess *session.Session) ([]Resource, error) {
 	svc := firehose.New(sess)
 	resources := []Resource{}
+	tags := []*firehose.Tag{}
 	var lastDeliveryStreamName *string
 
 	params := &firehose.ListDeliveryStreamsInput{
@@ -31,14 +34,35 @@ func ListFirehoseDeliveryStreams(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, deliveryStreamName := range output.DeliveryStreamNames {
+			tagParams := &firehose.ListTagsForDeliveryStreamInput{
+				DeliveryStreamName: deliveryStreamName,
+				Limit:              aws.Int64(50),
+			}
+
+			for {
+				tagResp, tagErr := svc.ListTagsForDeliveryStream(tagParams)
+				if tagErr != nil {
+					return nil, tagErr
+				}
+
+				tags = append(tags, tagResp.Tags...)
+				if !*tagResp.HasMoreTags {
+					break
+				}
+
+				tagParams.ExclusiveStartTagKey = tagResp.Tags[len(tagResp.Tags)-1].Key
+			}
+
 			resources = append(resources, &FirehoseDeliveryStream{
 				svc:                svc,
 				deliveryStreamName: deliveryStreamName,
+				tags:               tags,
 			})
+
 			lastDeliveryStreamName = deliveryStreamName
 		}
 
-		if *output.HasMoreDeliveryStreams == false {
+		if !*output.HasMoreDeliveryStreams {
 			break
 		}
 
@@ -59,4 +83,14 @@ func (f *FirehoseDeliveryStream) Remove() error {
 
 func (f *FirehoseDeliveryStream) String() string {
 	return *f.deliveryStreamName
+}
+
+func (f *FirehoseDeliveryStream) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	properties.Set("Name", f.deliveryStreamName)
+	return properties
 }

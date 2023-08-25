@@ -69,6 +69,8 @@ func NewRootCommand() *cobra.Command {
 				awsutil.DefaultAWSPartitionID = endpoints.AwsPartitionID
 			case endpoints.UsGovEast1RegionID, endpoints.UsGovWest1RegionID:
 				awsutil.DefaultAWSPartitionID = endpoints.AwsUsGovPartitionID
+			case endpoints.CnNorth1RegionID, endpoints.CnNorthwest1RegionID:
+				awsutil.DefaultAWSPartitionID = endpoints.AwsCnPartitionID
 			default:
 				if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
 					err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)

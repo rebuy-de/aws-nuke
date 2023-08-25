@@ -52,24 +52,19 @@ func ListECSServices(sess *session.Session) ([]Resource, error) {
 			Cluster:    clusterArn,
 			MaxResults: aws.Int64(10),
 		}
-		output, err := svc.ListServices(serviceParams)
+		err := svc.ListServicesPages(serviceParams, func(page *ecs.ListServicesOutput, lastPage bool) bool {
+			for _, serviceArn := range page.ServiceArns {
+				resources = append(resources, &ECSService{
+					svc:        svc,
+					serviceARN: serviceArn,
+					clusterARN: clusterArn,
+				})
+			}
+			return true
+		})
 		if err != nil {
 			return nil, err
 		}
-
-		for _, serviceArn := range output.ServiceArns {
-			resources = append(resources, &ECSService{
-				svc:        svc,
-				serviceARN: serviceArn,
-				clusterARN: clusterArn,
-			})
-		}
-
-		if output.NextToken == nil {
-			continue
-		}
-
-		serviceParams.NextToken = output.NextToken
 	}
 
 	return resources, nil
