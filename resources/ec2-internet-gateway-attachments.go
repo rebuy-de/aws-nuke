@@ -12,8 +12,10 @@ import (
 type EC2InternetGatewayAttachment struct {
 	svc        *ec2.EC2
 	vpcId      *string
+	vpcOwnerID *string
 	vpcTags    []*ec2.Tag
 	igwId      *string
+	igwOwnerID *string
 	igwTags    []*ec2.Tag
 	defaultVPC bool
 }
@@ -50,8 +52,10 @@ func ListEC2InternetGatewayAttachments(sess *session.Session) ([]Resource, error
 			resources = append(resources, &EC2InternetGatewayAttachment{
 				svc:        svc,
 				vpcId:      vpc.VpcId,
+				vpcOwnerID: vpc.OwnerId,
 				vpcTags:    vpc.Tags,
 				igwId:      igw.InternetGatewayId,
+				igwOwnerID: igw.OwnerId,
 				igwTags:    igw.Tags,
 				defaultVPC: *vpc.IsDefault,
 			})
@@ -84,6 +88,8 @@ func (e *EC2InternetGatewayAttachment) Properties() types.Properties {
 		properties.SetTagWithPrefix("vpc", tagValue.Key, tagValue.Value)
 	}
 	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.SetPropertyWithPrefix("vpc", "OwnerID", e.vpcOwnerID)
+	properties.SetPropertyWithPrefix("igw", "OwnerID", e.igwOwnerID)
 	return properties
 }
 
