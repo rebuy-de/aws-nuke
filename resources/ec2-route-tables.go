@@ -12,6 +12,7 @@ type EC2RouteTable struct {
 	svc        *ec2.EC2
 	routeTable *ec2.RouteTable
 	defaultVPC bool
+	ownerID    *string
 }
 
 func init() {
@@ -37,6 +38,7 @@ func ListEC2RouteTables(sess *session.Session) ([]Resource, error) {
 			svc:        svc,
 			routeTable: out,
 			defaultVPC: defVpcId == *out.VpcId,
+			ownerID:    out.OwnerId,
 		})
 	}
 
@@ -72,6 +74,7 @@ func (e *EC2RouteTable) Properties() types.Properties {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.ownerID)
 	return properties
 }
 
