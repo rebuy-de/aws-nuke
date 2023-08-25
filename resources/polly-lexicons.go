@@ -13,7 +13,7 @@ type PollyLexicon struct {
 }
 
 func init() {
-	register("PollyLexicons", ListPollyLexicons)
+	register("PollyLexicon", ListPollyLexicons)
 }
 
 func ListPollyLexicons(sess *session.Session) ([]Resource, error) {
