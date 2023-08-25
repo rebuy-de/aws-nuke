@@ -39,11 +39,11 @@ func ListBillingCostandUsageReports(sess *session.Session) ([]Resource, error) {
 	resources := []Resource{}
 	for _, report := range reports {
 		resources = append(resources, &BillingCostandUsageReport{
-			svc:         svc,
-			reportName:  report.ReportName,
-			s3Bucket:    report.S3Bucket,
-			s3Prefix:    report.S3Prefix,
-			s3Region:    report.S3Region,
+			svc:        svc,
+			reportName: report.ReportName,
+			s3Bucket:   report.S3Bucket,
+			s3Prefix:   report.S3Prefix,
+			s3Region:   report.S3Region,
 		})
 	}
 

@@ -48,18 +48,22 @@ func TestUnmarshalFilter(t *testing.T) {
 		},
 		{
 			yaml: `{"type":"dateOlderThan","value":"0"}`,
-			match: []string{strconv.Itoa(int(future.Unix())),
+			match: []string{
+				strconv.Itoa(int(future.Unix())),
 				future.Format("2006-01-02"),
 				future.Format("2006/01/02"),
 				future.Format("2006-01-02T15:04:05Z"),
+				future.Format("2006-01-02 15:04:05.000 +0000 UTC"),
 				future.Format(time.RFC3339Nano),
 				future.Format(time.RFC3339),
 			},
-			mismatch: []string{"",
+			mismatch: []string{
+				"",
 				strconv.Itoa(int(past.Unix())),
 				past.Format("2006-01-02"),
 				past.Format("2006/01/02"),
 				past.Format("2006-01-02T15:04:05Z"),
+				past.Format("2006-01-02 15:04:05.14 -0700 MST"),
 				past.Format(time.RFC3339Nano),
 				past.Format(time.RFC3339),
 			},
@@ -98,5 +102,4 @@ func TestUnmarshalFilter(t *testing.T) {
 			}
 		})
 	}
-
 }

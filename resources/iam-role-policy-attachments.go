@@ -82,6 +82,9 @@ func (e *IAMRolePolicyAttachment) Filter() error {
 	if strings.Contains(e.policyArn, ":iam::aws:policy/aws-service-role/") {
 		return fmt.Errorf("cannot detach from service roles")
 	}
+	if strings.HasPrefix(*e.role.Path, "/aws-reserved/sso.amazonaws.com/") {
+		return fmt.Errorf("cannot detach from SSO roles")
+	}
 	return nil
 }
 

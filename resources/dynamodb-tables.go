@@ -34,8 +34,8 @@ func ListDynamoDBTables(sess *session.Session) ([]Resource, error) {
 		}
 
 		resources = append(resources, &DynamoDBTable{
-			svc: svc,
-			id:  *tableName,
+			svc:  svc,
+			id:   *tableName,
 			tags: tags,
 		})
 	}
@@ -65,7 +65,7 @@ func GetTableTags(svc *dynamodb.DynamoDB, tableName *string) ([]*dynamodb.Tag, e
 		return make([]*dynamodb.Tag, 0), err
 	}
 
-	tags, err :=  svc.ListTagsOfResource(&dynamodb.ListTagsOfResourceInput{
+	tags, err := svc.ListTagsOfResource(&dynamodb.ListTagsOfResourceInput{
 		ResourceArn: result.Table.TableArn,
 	})
 
@@ -77,16 +77,15 @@ func GetTableTags(svc *dynamodb.DynamoDB, tableName *string) ([]*dynamodb.Tag, e
 }
 
 func (i *DynamoDBTable) Properties() types.Properties {
-        properties := types.NewProperties()
-        properties.Set("Identifier", i.id)
+	properties := types.NewProperties()
+	properties.Set("Identifier", i.id)
 
-        for _, tag := range i.tags {
-                properties.SetTag(tag.Key, tag.Value)
-        }
+	for _, tag := range i.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
 
-        return properties
+	return properties
 }
-
 
 func (i *DynamoDBTable) String() string {
 	return i.id

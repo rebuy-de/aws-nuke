@@ -19,20 +19,21 @@ func init() {
 
 func ListIAMGroups(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
+	resources := []Resource{}
 
-	resp, err := svc.ListGroups(nil)
+	err := svc.ListGroupsPages(nil, func(page *iam.ListGroupsOutput, lastPage bool) bool {
+		for _, out := range page.Groups {
+			resources = append(resources, &IAMGroup{
+				svc:  svc,
+				id:   *out.GroupId,
+				name: *out.GroupName,
+				path: *out.Path,
+			})
+		}
+		return true
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	resources := make([]Resource, 0)
-	for _, out := range resp.Groups {
-		resources = append(resources, &IAMGroup{
-			svc:  svc,
-			id:   *out.GroupId,
-			name: *out.GroupName,
-			path: *out.Path,
-		})
 	}
 
 	return resources, nil
