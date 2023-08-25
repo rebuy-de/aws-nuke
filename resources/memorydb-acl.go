@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/memorydb"
@@ -53,6 +55,14 @@ func ListMemoryDBACLs(sess *session.Session) ([]Resource, error) {
 	}
 
 	return resources, nil
+}
+
+func (i *MemoryDBACL) Filter() error {
+	if *i.name == "open-access" {
+		return fmt.Errorf("open-access ACL can't be deleted")
+	} else {
+		return nil
+	}
 }
 
 func (i *MemoryDBACL) Remove() error {
