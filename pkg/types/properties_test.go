@@ -173,7 +173,7 @@ func TestPropertiesSetPropertiesWithPrefix(t *testing.T) {
 		{
 			name:   "empty",
 			prefix: "",
-			key:    "OwnerID"
+			key:    "OwnerID",
 			value:  aws.String("123456789012"),
 			want:   `[OwnerID: "123456789012"]`,
 		},
