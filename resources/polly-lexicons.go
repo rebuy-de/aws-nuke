@@ -19,19 +19,32 @@ func init() {
 func ListPollyLexicons(sess *session.Session) ([]Resource, error) {
 	svc := polly.New(sess)
 	resources := []Resource{}
+	var nextToken *string
 
-	listLexiconsInput := &polly.ListLexiconsInput{}
+	for {
+		listLexiconsInput := &polly.ListLexiconsInput{
+			NextToken: nextToken,
+		}
 
-	listOutput, err := svc.ListLexicons(listLexiconsInput)
-	if err != nil {
-		return nil, err
-	}
-	for _, lexicon := range listOutput.Lexicons {
-		resources = append(resources, &PollyLexicon{
-			svc:        svc,
-			name:       lexicon.Name,
-			attributes: lexicon.Attributes,
-		})
+		listOutput, err := svc.ListLexicons(listLexiconsInput)
+		if err != nil {
+			return nil, err
+		}
+		for _, lexicon := range listOutput.Lexicons {
+			resources = append(resources, &PollyLexicon{
+				svc:        svc,
+				name:       lexicon.Name,
+				attributes: lexicon.Attributes,
+			})
+		}
+
+		// Check if there are more results
+		if listOutput.NextToken == nil {
+			break // No more results, exit the loop
+		}
+
+		// Set the nextToken for the next iteration
+		nextToken = listOutput.NextToken
 	}
 	return resources, nil
 }
