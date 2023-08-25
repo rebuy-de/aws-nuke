@@ -35,9 +35,9 @@ func ListBatchComputeEnvironmentStates(sess *session.Session) ([]Resource, error
 
 		for _, computeEnvironment := range output.ComputeEnvironments {
 			resources = append(resources, &BatchComputeEnvironmentState{
-				svc: svc,
+				svc:                    svc,
 				computeEnvironmentName: computeEnvironment.ComputeEnvironmentName,
-				state: computeEnvironment.State,
+				state:                  computeEnvironment.State,
 			})
 		}
 

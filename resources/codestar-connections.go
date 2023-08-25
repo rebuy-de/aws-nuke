@@ -8,10 +8,10 @@ import (
 )
 
 type CodeStarConnection struct {
-	svc              *codestarconnections.CodeStarConnections
-	connectionARN    *string
-	connectionName   *string
-	providerType     *string
+	svc            *codestarconnections.CodeStarConnections
+	connectionARN  *string
+	connectionName *string
+	providerType   *string
 }
 
 func init() {
@@ -34,10 +34,10 @@ func ListCodeStarConnections(sess *session.Session) ([]Resource, error) {
 
 		for _, connection := range output.Connections {
 			resources = append(resources, &CodeStarConnection{
-				svc:              svc,
-				connectionARN:    connection.ConnectionArn,
-				connectionName:   connection.ConnectionName,
-				providerType:     connection.ProviderType,
+				svc:            svc,
+				connectionARN:  connection.ConnectionArn,
+				connectionName: connection.ConnectionName,
+				providerType:   connection.ProviderType,
 			})
 		}
 
@@ -67,7 +67,6 @@ func (f *CodeStarConnection) Properties() types.Properties {
 		Set("ProviderType", f.providerType)
 	return properties
 }
-
 
 func (f *CodeStarConnection) String() string {
 	return *f.connectionName
