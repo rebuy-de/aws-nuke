@@ -11,7 +11,7 @@ type CloudWatchRumApp struct {
 }
 
 func init() {
-	register("CloudWatchRumApp", ListCloudWatchRumApp)
+	register("CloudWatchRUMApp", ListCloudWatchRumApp)
 }
 
 func ListCloudWatchRumApp(sess *session.Session) ([]Resource, error) {
