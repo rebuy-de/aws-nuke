@@ -85,6 +85,21 @@ func (p Properties) SetTagWithPrefix(prefix string, tagKey *string, tagValue int
 	return p.Set(keyStr, tagValue)
 }
 
+func (p Properties) SetPropertyWithPrefix(prefix string, propertyKey string, propertyValue interface{}) Properties {
+	keyStr := strings.TrimSpace(propertyKey)
+	prefix = strings.TrimSpace(prefix)
+
+	if keyStr == "" {
+		return p
+	}
+
+	if prefix != "" {
+		keyStr = fmt.Sprintf("%s:%s", prefix, keyStr)
+	}
+
+	return p.Set(keyStr, propertyValue)
+}
+
 func (p Properties) Get(key string) string {
 	value, ok := p[key]
 	if !ok {

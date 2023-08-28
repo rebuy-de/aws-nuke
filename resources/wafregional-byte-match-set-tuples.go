@@ -70,7 +70,7 @@ func (r *WAFRegionalByteMatchSetIP) Remove() error {
 		ChangeToken:    tokenOutput.ChangeToken,
 		ByteMatchSetId: r.matchSetid,
 		Updates: []*waf.ByteMatchSetUpdate{
-			&waf.ByteMatchSetUpdate{
+			{
 				Action:         aws.String("DELETE"),
 				ByteMatchTuple: r.tuple,
 			},

@@ -16,12 +16,19 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.19'
+        go-version: '1.21'
     - name: Setup tools
       run: |
         go install golang.org/x/lint/golint@latest
     - name: Checkout code
       uses: actions/checkout@v3
+    - name: Check Formatting
+      run: |
+        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+          echo "### Go formatting is off, please execute 'gofmt -w -s .' - see following diff: ###"
+          gofmt -s -d .
+          exit 1
+        fi
     - name: Test Project
       run: |
         make test
@@ -32,7 +39,7 @@ jobs:
   docker_build:
     runs-on: ubuntu-22.04
     name: Docker Build
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'rebuy-de/aws-nuke' }}
+    if: github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == 'rebuy-de/aws-nuke' && github.event.pull_request.user.login != 'dependabot[bot]')
 
     steps:
     - uses: actions/checkout@v3
@@ -52,6 +59,7 @@ jobs:
       id: generate_tags
 
     - name: Set up QEMU
+      if: github.event_name != 'pull_request'
       id: qemu
       uses: docker/setup-qemu-action@v2
       with:
@@ -81,4 +89,4 @@ jobs:
         context: .
         push: true
         tags: ${{ steps.generate_tags.outputs.tags }}
-        platforms: linux/amd64,linux/arm64
+        platforms: ${{ github.event_name != 'pull_request' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}

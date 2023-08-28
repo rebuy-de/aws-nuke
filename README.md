@@ -601,7 +601,7 @@ presets:
 
 ## Install
 
-### For Mac
+### For macOS
 `brew install aws-nuke`
 
 ### Use Released Binaries
@@ -612,10 +612,10 @@ The easiest way of installing it, is to download the latest
 #### Example for Linux Intel/AMD
 
 Download and extract
-`$ wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.16.0/aws-nuke-v2.16.0-linux-amd64.tar.gz -O - | sudo tar -xz -C $HOME/bin`
+`$ wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.24.2/aws-nuke-v2.24.2-linux-amd64.tar.gz -O - | tar -xz -C $HOME/bin`
 
 Run
-`$ aws-nuke-v2.16.0-linux-amd64`
+`$ aws-nuke-v2.24.2-linux-amd64`
 
 ### Compile from Source
 
@@ -623,8 +623,7 @@ To compile *aws-nuke* from source you need a working
 [Golang](https://golang.org/doc/install) development environment. The sources
 must be cloned to `$GOPATH/src/github.com/rebuy-de/aws-nuke`.
 
-Also you need to install [Glide](https://glide.sh/),
-[golint](https://github.com/golang/lint/) and [GNU
+Also you need to install [golint](https://github.com/golang/lint/) and [GNU
 Make](https://www.gnu.org/software/make/).
 
 Then you just need to run `make build` to compile a binary into the project
@@ -640,7 +639,7 @@ $ docker run \
     --rm -it \
     -v /full-path/to/nuke-config.yml:/home/aws-nuke/config.yml \
     -v /home/user/.aws:/home/aws-nuke/.aws \
-    quay.io/rebuy/aws-nuke:v2.11.0 \
+    quay.io/rebuy/aws-nuke:v2.24.2 \
     --profile default \
     --config /home/aws-nuke/config.yml
 ```
