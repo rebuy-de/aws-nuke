@@ -62,7 +62,7 @@ func (lexicon *PollyLexicon) Properties() types.Properties {
 	properties.Set("Name", lexicon.name)
 	properties.Set("Alphabet", lexicon.attributes.Alphabet)
 	properties.Set("LanguageCode", lexicon.attributes.LanguageCode)
-	properties.Set("LastModified", lexicon.attributes.LastModified)
+	properties.Set("LastModified", lexicon.attributes.LastModified.Format(time.RFC3339))
 	properties.Set("LexemesCount", lexicon.attributes.LexemesCount)
 	properties.Set("LexiconArn", lexicon.attributes.LexiconArn)
 	properties.Set("Size", lexicon.attributes.Size)
