@@ -161,3 +161,41 @@ func TestPropertiesSetTagWithPrefix(t *testing.T) {
 		})
 	}
 }
+
+func TestPropertiesSetPropertiesWithPrefix(t *testing.T) {
+	cases := []struct {
+		name   string
+		prefix string
+		key    string
+		value  interface{}
+		want   string
+	}{
+		{
+			name:   "empty",
+			prefix: "",
+			key:    "OwnerID",
+			value:  aws.String("123456789012"),
+			want:   `[OwnerID: "123456789012"]`,
+		},
+		{
+			name:   "nonempty",
+			prefix: "igw",
+			key:    "OwnerID",
+			value:  aws.String("123456789012"),
+			want:   `[igw:OwnerID: "123456789012"]`,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			p := types.NewProperties()
+
+			p.SetPropertyWithPrefix(tc.prefix, tc.key, tc.value)
+			have := p.String()
+
+			if tc.want != have {
+				t.Errorf("'%s' != '%s'", tc.want, have)
+			}
+		})
+	}
+}
