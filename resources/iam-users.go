@@ -76,8 +76,12 @@ func (e *IAMUser) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Name", e.name)
 
-	properties.Set("CreateDate", e.createDate.Format(time.RFC3339))
-	properties.Set("PasswordLastUsed", e.passwordLastUsed.Format(time.RFC3339))
+	if e.createDate != nil {
+		properties.Set("CreateDate", e.createDate.Format(time.RFC3339))
+	}
+	if e.passwordLastUsed != nil {
+		properties.Set("PasswordLastUsed", e.passwordLastUsed.Format(time.RFC3339))
+	}
 
 	for _, tag := range e.tags {
 		properties.SetTag(tag.Key, tag.Value)

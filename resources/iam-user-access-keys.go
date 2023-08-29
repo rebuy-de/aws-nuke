@@ -77,7 +77,10 @@ func (e *IAMUserAccessKey) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("UserName", e.userName)
 	properties.Set("AccessKeyID", e.accessKeyId)
-	properties.Set("CreateDate", e.createDate.Format(time.RFC3339))
+
+	if e.createDate != nil {
+		properties.Set("CreateDate", e.createDate.Format(time.RFC3339))
+	}
 
 	for _, tag := range e.userTags {
 		properties.SetTag(tag.Key, tag.Value)
