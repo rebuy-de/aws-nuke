@@ -3,11 +3,14 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchrum"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type CloudWatchRumApp struct {
 	svc            *cloudwatchrum.CloudWatchRUM
 	appmonitorname *string
+	id             *string
+	state          *string
 }
 
 func init() {
@@ -30,6 +33,8 @@ func ListCloudWatchRumApp(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &CloudWatchRumApp{
 				svc:            svc,
 				appmonitorname: appEntry.Name,
+				id:             appEntry.Id,
+				state:          appEntry.State,
 			})
 		}
 
@@ -50,6 +55,15 @@ func (f *CloudWatchRumApp) Remove() error {
 	})
 
 	return err
+}
+
+func (f *CloudWatchRumApp) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", *f.appmonitorname)
+	properties.Set("ID", *f.id)
+	properties.Set("State", *f.state)
+
+	return properties
 }
 
 func (f *CloudWatchRumApp) String() string {
