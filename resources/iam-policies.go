@@ -14,6 +14,7 @@ type IAMPolicy struct {
 	policyId string
 	arn      string
 	path     string
+	created	 string
 	tags     []*iam.Tag
 }
 
@@ -63,6 +64,7 @@ func ListIAMPolicies(sess *session.Session) ([]Resource, error) {
 			path:     *out.Path,
 			arn:      *out.Arn,
 			policyId: *out.PolicyId,
+			created:  *out.CreateDate,
 			tags:     out.Tags,
 		})
 	}
@@ -106,6 +108,7 @@ func (policy *IAMPolicy) Properties() types.Properties {
 	properties.Set("ARN", policy.arn)
 	properties.Set("Path", policy.path)
 	properties.Set("PolicyID", policy.policyId)
+	properties.Set("CreateDate", policy.created)
 	for _, tag := range policy.tags {
 		properties.SetTag(tag.Key, tag.Value)
 	}
