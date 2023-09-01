@@ -10,14 +10,14 @@ import (
 )
 
 type TranscribeTranscriptionJob struct {
-	svc                       *transcribeservice.TranscribeService
-	name                      *string
-	status                    *string
-	completionTime            *time.Time
-	creationTime              *time.Time
-	failureReason             *string
-	languageCode              *string
-	startTime                 *time.Time
+	svc            *transcribeservice.TranscribeService
+	name           *string
+	status         *string
+	completionTime *time.Time
+	creationTime   *time.Time
+	failureReason  *string
+	languageCode   *string
+	startTime      *time.Time
 }
 
 func init() {
@@ -41,14 +41,14 @@ func ListTranscribeTranscriptionJobs(sess *session.Session) ([]Resource, error) 
 		}
 		for _, job := range listOutput.TranscriptionJobSummaries {
 			resources = append(resources, &TranscribeTranscriptionJob{
-				svc:                       svc,
-				name:                      job.TranscriptionJobName,
-				status:                    job.TranscriptionJobStatus,
-				completionTime:            job.CompletionTime,
-				creationTime:              job.CreationTime,
-				failureReason:             job.FailureReason,
-				languageCode:              job.LanguageCode,
-				startTime:                 job.StartTime,
+				svc:            svc,
+				name:           job.TranscriptionJobName,
+				status:         job.TranscriptionJobStatus,
+				completionTime: job.CompletionTime,
+				creationTime:   job.CreationTime,
+				failureReason:  job.FailureReason,
+				languageCode:   job.LanguageCode,
+				startTime:      job.StartTime,
 			})
 		}
 

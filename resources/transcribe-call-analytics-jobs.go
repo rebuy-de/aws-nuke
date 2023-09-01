@@ -83,7 +83,7 @@ func (job *TranscribeCallAnalyticsJob) Properties() types.Properties {
 	}
 	properties.Set("FailureReason", job.failureReason)
 	properties.Set("LanguageCode", job.languageCode)
-	if job.startTime !=  nil {
+	if job.startTime != nil {
 		properties.Set("StartTime", job.startTime.Format(time.RFC3339))
 	}
 	return properties
