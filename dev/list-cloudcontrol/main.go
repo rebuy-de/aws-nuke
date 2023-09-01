@@ -34,67 +34,74 @@ func main() {
 	mapping := resources.GetCloudControlMapping()
 
 	in := &cloudformation.ListTypesInput{
-		Type:             aws.String(cloudformation.RegistryTypeResource),
-		Visibility:       aws.String(cloudformation.VisibilityPublic),
-		ProvisioningType: aws.String(cloudformation.ProvisioningTypeFullyMutable),
+		Type:       aws.String(cloudformation.RegistryTypeResource),
+		Visibility: aws.String(cloudformation.VisibilityPublic),
+
+		Filters: &cloudformation.TypeFilters{
+			TypeNamePrefix: aws.String("AWS::"),
+		},
 	}
 
-	err = cf.ListTypesPagesWithContext(ctx, in, func(out *cloudformation.ListTypesOutput, _ bool) bool {
-		if out == nil {
+	// Immutable objects don't have an `update` option, but can still be removed
+	for _, provisioningType := range []string{cloudformation.ProvisioningTypeFullyMutable, cloudformation.ProvisioningTypeImmutable} {
+		in.ProvisioningType = &provisioningType
+		err = cf.ListTypesPagesWithContext(ctx, in, func(out *cloudformation.ListTypesOutput, _ bool) bool {
+			if out == nil {
+				return true
+			}
+
+			for _, summary := range out.TypeSummaries {
+				if summary == nil {
+					continue
+				}
+
+				typeName := aws.StringValue(summary.TypeName)
+				color.New(color.Bold).Printf("%-55s", typeName)
+				if !strings.HasPrefix(typeName, "AWS::") {
+					color.HiBlack("does not have a valid prefix")
+					continue
+				}
+
+				describe, err := cf.DescribeType(&cloudformation.DescribeTypeInput{
+					Type:     aws.String(cloudformation.RegistryTypeResource),
+					TypeName: aws.String(typeName),
+				})
+				if err != nil {
+					color.New(color.FgRed).Println(err)
+					continue
+				}
+
+				var schema CFTypeSchema
+				err = json.Unmarshal([]byte(aws.StringValue(describe.Schema)), &schema)
+				if err != nil {
+					color.New(color.FgRed).Println(err)
+					continue
+				}
+
+				_, canList := schema.Handlers["list"]
+				if !canList {
+					color.New(color.FgHiBlack).Println("does not support list")
+					continue
+				}
+
+				resourceName, exists := mapping[typeName]
+				if exists && resourceName == typeName {
+					fmt.Print("is only covered by ")
+					color.New(color.FgGreen, color.Bold).Println(resourceName)
+					continue
+				} else if exists {
+					fmt.Print("is also covered by ")
+					color.New(color.FgBlue, color.Bold).Println(resourceName)
+					continue
+				}
+
+				color.New(color.FgYellow).Println("is not configured")
+			}
+
 			return true
+		})
+		if err != nil {
+			logrus.Fatal(err)
 		}
-
-		for _, summary := range out.TypeSummaries {
-			if summary == nil {
-				continue
-			}
-
-			typeName := aws.StringValue(summary.TypeName)
-			color.New(color.Bold).Printf("%-55s", typeName)
-			if !strings.HasPrefix(typeName, "AWS::") {
-				color.HiBlack("does not have a valid prefix")
-				continue
-			}
-
-			describe, err := cf.DescribeType(&cloudformation.DescribeTypeInput{
-				Type:     aws.String(cloudformation.RegistryTypeResource),
-				TypeName: aws.String(typeName),
-			})
-			if err != nil {
-				color.New(color.FgRed).Println(err)
-				continue
-			}
-
-			var schema CFTypeSchema
-			err = json.Unmarshal([]byte(aws.StringValue(describe.Schema)), &schema)
-			if err != nil {
-				color.New(color.FgRed).Println(err)
-				continue
-			}
-
-			_, canList := schema.Handlers["list"]
-			if !canList {
-				color.New(color.FgHiBlack).Println("does not support list")
-				continue
-			}
-
-			resourceName, exists := mapping[typeName]
-			if exists && resourceName == typeName {
-				fmt.Print("is only covered by ")
-				color.New(color.FgGreen, color.Bold).Println(resourceName)
-				continue
-			} else if exists {
-				fmt.Print("is also covered by ")
-				color.New(color.FgBlue, color.Bold).Println(resourceName)
-				continue
-			}
-
-			color.New(color.FgYellow).Println("is not configured")
-		}
-
-		return true
-	})
-	if err != nil {
-		logrus.Fatal(err)
 	}
 }
