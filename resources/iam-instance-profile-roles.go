@@ -74,7 +74,7 @@ func (e *IAMInstanceProfileRole) Remove() error {
 }
 
 func (e *IAMInstanceProfileRole) String() string {
-	return fmt.Sprintf("%s -> %s", *e.profile.InstanceProfileName, e.role)
+	return fmt.Sprintf("%s -> %s", *e.profile.InstanceProfileName, *e.role.RoleName)
 }
 
 func (e *IAMInstanceProfileRole) Properties() types.Properties {

@@ -17,44 +17,35 @@ func init() {
 
 func ListOSVPCEndpoints(sess *session.Session) ([]Resource, error) {
 	svc := opensearchservice.New(sess)
+	resources := []Resource{}
+	var nextToken *string
 
-	vpcEndpointIds, err := getOpenSearchVpcEndpointIds(svc)
-	if err != nil {
-		return nil, err
-	}
+	for {
+		params := &opensearchservice.ListVpcEndpointsInput{
+			NextToken: nextToken,
+		}
+		listResp, err := svc.ListVpcEndpoints(params)
+		if err != nil {
+			return nil, err
+		}
 
-	listResp, err := svc.DescribeVpcEndpoints(&opensearchservice.DescribeVpcEndpointsInput{
-		VpcEndpointIds: vpcEndpointIds,
-	})
-	if err != nil {
-		return nil, err
-	}
+		for _, vpcEndpoint := range listResp.VpcEndpointSummaryList {
+			resources = append(resources, &OSVPCEndpoint{
+				svc:           svc,
+				vpcEndpointId: vpcEndpoint.VpcEndpointId,
+			})
+		}
 
-	resources := make([]Resource, 0)
+		// Check if there are more results
+		if listResp.NextToken == nil {
+			break // No more results, exit the loop
+		}
 
-	for _, vpcEndpoint := range listResp.VpcEndpoints {
-		resources = append(resources, &OSVPCEndpoint{
-			svc:           svc,
-			vpcEndpointId: vpcEndpoint.VpcEndpointId,
-		})
+		// Set the nextToken for the next iteration
+		nextToken = listResp.NextToken
 	}
 
 	return resources, nil
-}
-
-func getOpenSearchVpcEndpointIds(svc *opensearchservice.OpenSearchService) ([]*string, error) {
-	vpcEndpointIds := make([]*string, 0)
-
-	listResp, err := svc.ListVpcEndpoints(&opensearchservice.ListVpcEndpointsInput{})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, vpcEndpoint := range listResp.VpcEndpointSummaryList {
-		vpcEndpointIds = append(vpcEndpointIds, vpcEndpoint.VpcEndpointId)
-	}
-
-	return vpcEndpointIds, nil
 }
 
 func (o *OSVPCEndpoint) Remove() error {
