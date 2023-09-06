@@ -612,10 +612,10 @@ The easiest way of installing it, is to download the latest
 #### Example for Linux Intel/AMD
 
 Download and extract
-`$ wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.24.2/aws-nuke-v2.24.2-linux-amd64.tar.gz -O - | tar -xz -C $HOME/bin`
+`$ wget -c https://github.com/rebuy-de/aws-nuke/releases/download/v2.25.0/aws-nuke-v2.25.0-linux-amd64.tar.gz -O - | tar -xz -C $HOME/bin`
 
 Run
-`$ aws-nuke-v2.24.2-linux-amd64`
+`$ aws-nuke-v2.25.0-linux-amd64`
 
 ### Compile from Source
 
@@ -639,7 +639,7 @@ $ docker run \
     --rm -it \
     -v /full-path/to/nuke-config.yml:/home/aws-nuke/config.yml \
     -v /home/user/.aws:/home/aws-nuke/.aws \
-    quay.io/rebuy/aws-nuke:v2.24.2 \
+    quay.io/rebuy/aws-nuke:v2.25.0 \
     --profile default \
     --config /home/aws-nuke/config.yml
 ```
