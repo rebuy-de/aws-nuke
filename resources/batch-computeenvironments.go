@@ -31,7 +31,7 @@ func ListBatchComputeEnvironments(sess *session.Session) ([]Resource, error) {
 
 		for _, computeEnvironment := range output.ComputeEnvironments {
 			resources = append(resources, &BatchComputeEnvironment{
-				svc: svc,
+				svc:                    svc,
 				computeEnvironmentName: computeEnvironment.ComputeEnvironmentName,
 			})
 		}
