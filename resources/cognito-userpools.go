@@ -1,7 +1,10 @@
 package resources
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
@@ -59,7 +62,8 @@ func (f *CognitoUserPool) Remove() error {
 		UserPoolId: f.id,
 	})
 	if err != nil {
-		if f.featureFlags.DisableDeletionProtection.CognitoUserPool {
+		awsErr, ok := err.(awserr.Error)
+		if ok && strings.Contains(awsErr.Message(), "Deletion protection must be inactivated first") && f.featureFlags.DisableDeletionProtection.CognitoUserPool {
 			err = f.DisableProtection()
 			if err != nil {
 				return err
@@ -85,7 +89,7 @@ func (e *CognitoUserPool) DisableProtection() error {
 	}
 	userPool := userPoolOutput.UserPool
 	params := &cognitoidentityprovider.UpdateUserPoolInput{
-		DeletionProtection:     &cognitoidentityprovider.DeletionProtectionType_Values()[1],
+		DeletionProtection:     aws.String(cognitoidentityprovider.DeletionProtectionTypeInactive),
 		UserPoolId:             e.id,
 		AutoVerifiedAttributes: userPool.AutoVerifiedAttributes,
 	}
