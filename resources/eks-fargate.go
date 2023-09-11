@@ -11,8 +11,7 @@ import (
 
 type EKSFargateProfile struct {
 	svc     *eks.EKS
-	cluster *string
-	name    *string
+	profile *eks.FargateProfile
 }
 
 func init() {
@@ -35,9 +34,7 @@ func ListEKSFargateProfiles(sess *session.Session) ([]Resource, error) {
 			return nil, err
 		}
 
-		for _, cluster := range resp.Clusters {
-			clusterNames = append(clusterNames, cluster)
-		}
+		clusterNames = append(clusterNames, resp.Clusters...)
 
 		if resp.NextToken == nil {
 			break
@@ -46,34 +43,40 @@ func ListEKSFargateProfiles(sess *session.Session) ([]Resource, error) {
 		clusterInputParams.NextToken = resp.NextToken
 	}
 
-	fargateInputParams := &eks.ListFargateProfilesInput{
+	listFargateInputParams := &eks.ListFargateProfilesInput{
 		MaxResults: aws.Int64(100),
 	}
+	describeFargateInputParams := &eks.DescribeFargateProfileInput{}
 
 	// fetch the associated eks fargate profiles
 	for _, clusterName := range clusterNames {
-		fargateInputParams.ClusterName = clusterName
+		listFargateInputParams.ClusterName = clusterName
+		describeFargateInputParams.ClusterName = clusterName
 
 		for {
-			resp, err := svc.ListFargateProfiles(fargateInputParams)
+			resp, err := svc.ListFargateProfiles(listFargateInputParams)
 			if err != nil {
 				return nil, err
 			}
 
 			for _, name := range resp.FargateProfileNames {
+				describeFargateInputParams.FargateProfileName = name
+				describeFargateResp, err := svc.DescribeFargateProfile(describeFargateInputParams)
+				if err != nil {
+					return nil, err
+				}
 				resources = append(resources, &EKSFargateProfile{
 					svc:     svc,
-					name:    name,
-					cluster: clusterName,
+					profile: describeFargateResp.FargateProfile,
 				})
 			}
 
 			if resp.NextToken == nil {
-				fargateInputParams.NextToken = nil
+				listFargateInputParams.NextToken = nil
 				break
 			}
 
-			fargateInputParams.NextToken = resp.NextToken
+			listFargateInputParams.NextToken = resp.NextToken
 		}
 
 	}
@@ -83,18 +86,22 @@ func ListEKSFargateProfiles(sess *session.Session) ([]Resource, error) {
 
 func (fp *EKSFargateProfile) Remove() error {
 	_, err := fp.svc.DeleteFargateProfile(&eks.DeleteFargateProfileInput{
-		ClusterName:        fp.cluster,
-		FargateProfileName: fp.name,
+		ClusterName:        fp.profile.ClusterName,
+		FargateProfileName: fp.profile.FargateProfileName,
 	})
 	return err
 }
 
 func (fp *EKSFargateProfile) Properties() types.Properties {
-	return types.NewProperties().
-		Set("Cluster", *fp.cluster).
-		Set("Profile", *fp.name)
+	properties := types.NewProperties()
+	properties.Set("Cluster", fp.profile.ClusterName)
+	properties.Set("Profile", fp.profile.FargateProfileName)
+	for k, v := range fp.profile.Tags {
+		properties.SetTag(&k, v)
+	}
+	return properties
 }
 
 func (fp *EKSFargateProfile) String() string {
-	return fmt.Sprintf("%s:%s", *fp.cluster, *fp.name)
+	return fmt.Sprintf("%s:%s", *fp.profile.ClusterName, *fp.profile.FargateProfileName)
 }
