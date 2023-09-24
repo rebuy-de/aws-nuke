@@ -3,11 +3,13 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/backup"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 type BackupVaultAccessPolicy struct {
 	svc             *backup.Backup
 	backupVaultName string
+	accountId       string
 }
 
 func init() {
@@ -15,6 +17,14 @@ func init() {
 }
 
 func ListBackupVaultAccessPolicies(sess *session.Session) ([]Resource, error) {
+	// Lookup current account ID, which is required for building a permissive vault policy
+	stsSvc := sts.New(sess)
+	identity, err := stsSvc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	if err != nil {
+		return nil, err
+	}
+	accountId := *identity.Account
+
 	svc := backup.New(sess)
 	maxVaultsLen := int64(100)
 	params := &backup.ListBackupVaultsInput{
@@ -50,6 +60,7 @@ func ListBackupVaultAccessPolicies(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &BackupVaultAccessPolicy{
 				svc:             svc,
 				backupVaultName: *out.BackupVaultName,
+				accountId:       accountId,
 			})
 		}
 	}
@@ -95,7 +106,7 @@ func (b *BackupVaultAccessPolicy) Remove() error {
         {
             "Effect": "Allow",
             "Principal": {
-                "AWS": "*"
+                "AWS": "arn:aws:iam::` + b.accountId + `:root"
             },
             "Action": "backup:DeleteBackupVaultAccessPolicy",
             "Resource": "*"
