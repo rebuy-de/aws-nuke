@@ -44,6 +44,9 @@ func ListConfigServiceConfigRules(sess *session.Session) ([]Resource, error) {
 }
 
 func (f *ConfigServiceConfigRule) Remove() error {
+	f.svc.DeleteRemediationConfiguration(&configservice.DeleteRemediationConfigurationInput{
+		ConfigRuleName: f.configRuleName,
+	})
 
 	_, err := f.svc.DeleteConfigRule(&configservice.DeleteConfigRuleInput{
 		ConfigRuleName: f.configRuleName,

@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
@@ -14,8 +15,7 @@ type IAMRolePolicyAttachment struct {
 	svc        *iam.IAM
 	policyArn  string
 	policyName string
-	roleName   string
-	roleTags   []*iam.Tag
+	role       *iam.Role
 }
 
 func init() {
@@ -56,12 +56,11 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 						svc:        svc,
 						policyArn:  *pol.PolicyArn,
 						policyName: *pol.PolicyName,
-						roleName:   *role.RoleName,
-						roleTags:   role.Tags,
+						role:       role,
 					})
 				}
 
-				if *polResp.IsTruncated == false {
+				if !*polResp.IsTruncated {
 					break
 				}
 
@@ -69,7 +68,7 @@ func ListIAMRolePolicyAttachments(sess *session.Session) ([]Resource, error) {
 			}
 		}
 
-		if *roleResp.IsTruncated == false {
+		if !*roleResp.IsTruncated {
 			break
 		}
 
@@ -83,6 +82,9 @@ func (e *IAMRolePolicyAttachment) Filter() error {
 	if strings.Contains(e.policyArn, ":iam::aws:policy/aws-service-role/") {
 		return fmt.Errorf("cannot detach from service roles")
 	}
+	if strings.HasPrefix(*e.role.Path, "/aws-reserved/sso.amazonaws.com/") {
+		return fmt.Errorf("cannot detach from SSO roles")
+	}
 	return nil
 }
 
@@ -90,7 +92,7 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 	_, err := e.svc.DetachRolePolicy(
 		&iam.DetachRolePolicyInput{
 			PolicyArn: &e.policyArn,
-			RoleName:  &e.roleName,
+			RoleName:  e.role.RoleName,
 		})
 	if err != nil {
 		return err
@@ -101,15 +103,19 @@ func (e *IAMRolePolicyAttachment) Remove() error {
 
 func (e *IAMRolePolicyAttachment) Properties() types.Properties {
 	properties := types.NewProperties().
-		Set("RoleName", e.roleName).
+		Set("RoleName", e.role.RoleName).
+		Set("RolePath", e.role.Path).
+		Set("RoleLastUsed", getLastUsedDate(e.role, time.RFC3339)).
+		Set("RoleCreateDate", e.role.CreateDate.Format(time.RFC3339)).
 		Set("PolicyName", e.policyName).
 		Set("PolicyArn", e.policyArn)
-	for _, tag := range e.roleTags {
+
+	for _, tag := range e.role.Tags {
 		properties.SetTagWithPrefix("role", tag.Key, tag.Value)
 	}
 	return properties
 }
 
 func (e *IAMRolePolicyAttachment) String() string {
-	return fmt.Sprintf("%s -> %s", e.roleName, e.policyName)
+	return fmt.Sprintf("%s -> %s", *e.role.RoleName, e.policyName)
 }

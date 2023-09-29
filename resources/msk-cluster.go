@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kafka"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
@@ -10,6 +11,7 @@ type MSKCluster struct {
 	svc  *kafka.Kafka
 	arn  string
 	name string
+	tags map[string]*string
 }
 
 func init() {
@@ -30,6 +32,7 @@ func ListMSKCluster(sess *session.Session) ([]Resource, error) {
 			svc:  svc,
 			arn:  *cluster.ClusterArn,
 			name: *cluster.ClusterName,
+			tags: cluster.Tags,
 		})
 
 	}
@@ -54,6 +57,9 @@ func (m *MSKCluster) String() string {
 
 func (m *MSKCluster) Properties() types.Properties {
 	properties := types.NewProperties()
+	for tagKey, tagValue := range m.tags {
+		properties.SetTag(aws.String(tagKey), tagValue)
+	}
 	properties.Set("ARN", m.arn)
 	properties.Set("Name", m.name)
 
