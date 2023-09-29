@@ -6,16 +6,16 @@ import (
 	"github.com/aws/aws-sdk-go/service/neptune"
 )
 
-type NetpuneSnapshot struct {
+type NeptuneSnapshot struct {
 	svc *neptune.Neptune
 	ID  *string
 }
 
 func init() {
-	register("NetpuneSnapshot", ListNetpuneSnapshots)
+	register("NeptuneSnapshot", ListNeptuneSnapshots)
 }
 
-func ListNetpuneSnapshots(sess *session.Session) ([]Resource, error) {
+func ListNeptuneSnapshots(sess *session.Session) ([]Resource, error) {
 	svc := neptune.New(sess)
 	resources := []Resource{}
 
@@ -30,7 +30,7 @@ func ListNetpuneSnapshots(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, dbClusterSnapshot := range output.DBClusterSnapshots {
-			resources = append(resources, &NetpuneSnapshot{
+			resources = append(resources, &NeptuneSnapshot{
 				svc: svc,
 				ID:  dbClusterSnapshot.DBClusterSnapshotIdentifier,
 			})
@@ -46,7 +46,7 @@ func ListNetpuneSnapshots(sess *session.Session) ([]Resource, error) {
 	return resources, nil
 }
 
-func (f *NetpuneSnapshot) Remove() error {
+func (f *NeptuneSnapshot) Remove() error {
 
 	_, err := f.svc.DeleteDBClusterSnapshot(&neptune.DeleteDBClusterSnapshotInput{
 		DBClusterSnapshotIdentifier: f.ID,
@@ -55,6 +55,6 @@ func (f *NetpuneSnapshot) Remove() error {
 	return err
 }
 
-func (f *NetpuneSnapshot) String() string {
+func (f *NeptuneSnapshot) String() string {
 	return *f.ID
 }
