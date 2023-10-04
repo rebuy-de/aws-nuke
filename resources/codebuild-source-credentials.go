@@ -24,12 +24,9 @@ func ListCodeBuildSourceCredential(sess *session.Session) ([]Resource, error) {
 	params := &codebuild.ListSourceCredentialsInput{}
 
 	resp, err := svc.ListSourceCredentials(params)
+
 	if err != nil {
 		return nil, err
-	}
-
-	if resp == nil {
-		return nil, nil
 	}
 
 	for _, credential := range resp.SourceCredentialsInfos {
