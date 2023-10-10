@@ -51,8 +51,18 @@ func (f *ECSTaskDefinition) Remove() error {
 	_, err := f.svc.DeregisterTaskDefinition(&ecs.DeregisterTaskDefinitionInput{
 		TaskDefinition: f.ARN,
 	})
-
-	return err
+	if err != nil {
+		return err
+	}
+	taskDefinitions := make([]*string, 0)
+	taskDefinitions = append(taskDefinitions, f.ARN)
+	_, err1 := f.svc.DeleteTaskDefinitions(&ecs.DeleteTaskDefinitionsInput{
+		TaskDefinitions: taskDefinitions,
+	})
+	if err1 != nil {
+		return err1
+	}
+	return nil
 }
 
 func (f *ECSTaskDefinition) String() string {
