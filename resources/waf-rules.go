@@ -32,9 +32,12 @@ func ListWAFRules(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, rule := range resp.Rules {
-			ruleResp, _ := svc.GetRule(&waf.GetRuleInput{
+			ruleResp, err := svc.GetRule(&waf.GetRuleInput{
 				RuleId: rule.RuleId,
 			})
+			if err != nil {
+				return nil, err
+			}
 			resources = append(resources, &WAFRule{
 				svc:  svc,
 				ID:   rule.RuleId,

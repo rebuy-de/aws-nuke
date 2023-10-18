@@ -15,6 +15,7 @@ type Route53ResourceRecordSet struct {
 	hostedZoneName *string
 	data           *route53.ResourceRecordSet
 	changeId       *string
+	tags           []*route53.Tag
 }
 
 func init() {
@@ -49,6 +50,15 @@ func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string, zoneName *
 		HostedZoneId: zoneId,
 	}
 
+	hostedZoneTags, err := svc.ListTagsForResource(&route53.ListTagsForResourceInput{
+		ResourceId:   zoneId,
+		ResourceType: aws.String("hostedzone"),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
 	resources := make([]Resource, 0)
 
 	for {
@@ -63,6 +73,7 @@ func ListResourceRecordsForZone(svc *route53.Route53, zoneId *string, zoneName *
 				hostedZoneId:   zoneId,
 				hostedZoneName: zoneName,
 				data:           rrs,
+				tags:           hostedZoneTags.ResourceTagSet.Tags,
 			})
 		}
 
@@ -114,9 +125,13 @@ func (r *Route53ResourceRecordSet) Remove() error {
 }
 
 func (r *Route53ResourceRecordSet) Properties() types.Properties {
-	return types.NewProperties().
-		Set("Name", r.data.Name).
-		Set("Type", r.data.Type)
+	properties := types.NewProperties()
+	for _, tag := range r.tags {
+		properties.SetTagWithPrefix("hz", tag.Key, tag.Value)
+	}
+	properties.Set("Name", r.data.Name)
+	properties.Set("Type", r.data.Type)
+	return properties
 }
 
 func (r *Route53ResourceRecordSet) String() string {
