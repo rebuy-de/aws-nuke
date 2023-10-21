@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/apigateway"
@@ -8,11 +10,12 @@ import (
 )
 
 type APIGatewayRestAPI struct {
-	svc       *apigateway.APIGateway
-	restAPIID *string
-	name      *string
-	version   *string
-	tags      map[string]*string
+	svc         *apigateway.APIGateway
+	restAPIID   *string
+	name        *string
+	version     *string
+	createdDate *time.Time
+	tags        map[string]*string
 }
 
 func init() {
@@ -35,11 +38,12 @@ func ListAPIGatewayRestApis(sess *session.Session) ([]Resource, error) {
 
 		for _, item := range output.Items {
 			resources = append(resources, &APIGatewayRestAPI{
-				svc:       svc,
-				restAPIID: item.Id,
-				name:      item.Name,
-				version:   item.Version,
-				tags:      item.Tags,
+				svc:         svc,
+				restAPIID:   item.Id,
+				name:        item.Name,
+				version:     item.Version,
+				createdDate: item.CreatedDate,
+				tags:        item.Tags,
 			})
 		}
 
@@ -74,6 +78,7 @@ func (f *APIGatewayRestAPI) Properties() types.Properties {
 	properties.
 		Set("APIID", f.restAPIID).
 		Set("Name", f.name).
-		Set("Version", f.version)
+		Set("Version", f.version).
+		Set("CreatedDate", f.createdDate)
 	return properties
 }
