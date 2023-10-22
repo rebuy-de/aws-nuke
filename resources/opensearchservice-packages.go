@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -52,6 +54,13 @@ func ListOSPackages(sess *session.Session) ([]Resource, error) {
 	}
 
 	return resources, nil
+}
+
+func (i *OSPackage) Filter() error {
+	if strings.HasPrefix(*i.packageName, "analysis-") || strings.HasPrefix(*i.packageName, "amazon-") {
+		return fmt.Errorf("Cannot delete default OpenSearch Service packages")
+	}
+	return nil
 }
 
 func (o *OSPackage) Remove() error {
