@@ -79,6 +79,6 @@ func (f *APIGatewayRestAPI) Properties() types.Properties {
 		Set("APIID", f.restAPIID).
 		Set("Name", f.name).
 		Set("Version", f.version).
-		Set("CreatedDate", f.createdDate)
+		Set("CreatedDate", f.createdDate.Format(time.RFC3339))
 	return properties
 }

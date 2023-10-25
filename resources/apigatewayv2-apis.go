@@ -82,6 +82,6 @@ func (f *APIGatewayV2API) Properties() types.Properties {
 		Set("Name", f.name).
 		Set("ProtocolType", f.protocolType).
 		Set("Version", f.version)
-		Set("CreatedDate", f.createdDate).
+		Set("CreatedDate", f.createdDate.Format(time.RFC3339)).
 	return properties
 }
