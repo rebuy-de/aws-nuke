@@ -59,6 +59,6 @@ func (f *EventBridgeSchedule) Remove() error {
 
 func (f *EventBridgeSchedule) Properties() types.Properties {
 	properties := types.NewProperties()
-	properties.Set("scheduleName", f.scheduleName)
+	properties.Set("ScheduleName", f.scheduleName)
 	return properties
 }
