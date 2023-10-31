@@ -16,7 +16,8 @@ type CodeGuruReviewerRepositoryAssociation struct {
 }
 
 func init() {
-	register("CodeGuruReviewerRepositoryAssociation", ListCodeGuruReviewerRepositoryAssociations)
+	register("CodeGuruReviewerRepositoryAssociation", ListCodeGuruReviewerRepositoryAssociations,
+		mapCloudControl("AWS::CodeGuruReviewer::RepositoryAssociation"))
 }
 
 func ListCodeGuruReviewerRepositoryAssociations(sess *session.Session) ([]Resource, error) {
