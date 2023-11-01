@@ -15,7 +15,7 @@ type CodeDeployDeploymentConfig struct {
 }
 
 func init() {
-	register("CodeDeployDeploymentConfig", ListCodeDeployDeploymentConfigs)
+	register("CodeDeployDeploymentConfig", ListCodeDeployDeploymentConfigs, mapCloudControl("AWS::CodeDeploy::DeploymentConfig"))
 }
 
 func ListCodeDeployDeploymentConfigs(sess *session.Session) ([]Resource, error) {
