@@ -14,6 +14,7 @@ type CodePipelineCustomActionType struct {
 	owner    *string
 	category *string
 	provider *string
+	version  *string
 }
 
 func init() {
@@ -38,6 +39,7 @@ func ListCodePipelineCustomActionTypes(sess *session.Session) ([]Resource, error
 				owner:    actionTypes.Id.Owner,
 				category: actionTypes.Id.Category,
 				provider: actionTypes.Id.Provider,
+				version:  actionTypes.Id.Version,
 			})
 		}
 
@@ -61,6 +63,8 @@ func (f *CodePipelineCustomActionType) Filter() error {
 func (f *CodePipelineCustomActionType) Remove() error {
 	_, err := f.svc.DeleteCustomActionType(&codepipeline.DeleteCustomActionTypeInput{
 		Category: f.category,
+		Provider: f.provider,
+		Version:  f.version,
 	})
 
 	return err
@@ -71,6 +75,7 @@ func (f *CodePipelineCustomActionType) Properties() types.Properties {
 	properties.Set("Category", f.category)
 	properties.Set("Owner", f.owner)
 	properties.Set("Provider", f.provider)
+	properties.Set("Version", f.version)
 	return properties
 }
 
