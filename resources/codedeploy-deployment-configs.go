@@ -55,7 +55,6 @@ func (f *CodeDeployDeploymentConfig) Filter() error {
 }
 
 func (f *CodeDeployDeploymentConfig) Remove() error {
-
 	_, err := f.svc.DeleteDeploymentConfig(&codedeploy.DeleteDeploymentConfigInput{
 		DeploymentConfigName: f.deploymentConfigName,
 	})

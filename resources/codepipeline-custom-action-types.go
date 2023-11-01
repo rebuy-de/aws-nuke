@@ -17,7 +17,7 @@ type CodePipelineCustomActionType struct {
 }
 
 func init() {
-	register("CodePipelineCustomActionType", ListCodePipelineCustomActionTypes)
+	register("CodePipelineCustomActionType", ListCodePipelineCustomActionTypes, mapCloudControl("AWS::CodePipeline::CustomActionType"))
 }
 
 func ListCodePipelineCustomActionTypes(sess *session.Session) ([]Resource, error) {
