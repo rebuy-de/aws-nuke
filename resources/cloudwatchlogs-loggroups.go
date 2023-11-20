@@ -11,6 +11,8 @@ type CloudWatchLogsLogGroup struct {
 	svc          *cloudwatchlogs.CloudWatchLogs
 	logGroupName *string
 	tags         map[string]*string
+	logGroup     *cloudwatchlogs.LogGroup
+	lastEvent    string
 }
 
 func init() {
@@ -61,22 +63,24 @@ func ListCloudWatchLogsLogGroups(sess *session.Session) ([]Resource, error) {
 func (f *CloudWatchLogsLogGroup) Remove() error {
 
 	_, err := f.svc.DeleteLogGroup(&cloudwatchlogs.DeleteLogGroupInput{
-		LogGroupName: f.logGroupName,
+		LogGroupName: f.logGroup.LogGroupName,
 	})
 
 	return err
 }
 
 func (f *CloudWatchLogsLogGroup) String() string {
-	return *f.logGroupName
+	return *f.logGroup.LogGroupName
 }
 
 func (f *CloudWatchLogsLogGroup) Properties() types.Properties {
-	properties := types.NewProperties()
+	properties := types.NewProperties().
+		Set("logGroupName", f.logGroup.LogGroupName).
+		Set("CreatedTime", f.logGroup.CreationTime).
+		Set("LastEvent", f.lastEvent)
+
 	for k, v := range f.tags {
 		properties.SetTag(&k, v)
 	}
-	properties.
-		Set("logGroupName", f.logGroupName)
 	return properties
 }

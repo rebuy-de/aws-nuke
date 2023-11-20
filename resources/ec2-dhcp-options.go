@@ -11,6 +11,7 @@ type EC2DHCPOption struct {
 	id         *string
 	tags       []*ec2.Tag
 	defaultVPC bool
+	ownerID    *string
 }
 
 func init() {
@@ -37,6 +38,7 @@ func ListEC2DHCPOptions(sess *session.Session) ([]Resource, error) {
 			id:         out.DhcpOptionsId,
 			tags:       out.Tags,
 			defaultVPC: defVpcDhcpOptsId == *out.DhcpOptionsId,
+			ownerID:    out.OwnerId,
 		})
 	}
 
@@ -62,6 +64,7 @@ func (e *EC2DHCPOption) Properties() types.Properties {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 	properties.Set("DefaultVPC", e.defaultVPC)
+	properties.Set("OwnerID", e.ownerID)
 	return properties
 }
 

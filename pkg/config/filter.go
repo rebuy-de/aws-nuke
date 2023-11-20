@@ -13,11 +13,11 @@ import (
 type FilterType string
 
 const (
-	FilterTypeEmpty              FilterType = ""
-	FilterTypeExact                         = "exact"
-	FilterTypeGlob                          = "glob"
-	FilterTypeRegex                         = "regex"
-	FilterTypeContains                      = "contains"
+	FilterTypeEmpty         FilterType = ""
+	FilterTypeExact                    = "exact"
+	FilterTypeGlob                     = "glob"
+	FilterTypeRegex                    = "regex"
+	FilterTypeContains                 = "contains"
 	FilterTypeDateOlderThan            = "dateOlderThan"
 )
 

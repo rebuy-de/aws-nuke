@@ -23,7 +23,7 @@ BUILD_FLAGS=-ldflags "\
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 GOPKGS=$(shell go list ./...)
 
-OUTPUT_FILE=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOARM)$(shell go env GOARM)$(shell go env GOEXE)
+OUTPUT_FILE=$(NAME)-$(BUILD_VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)$(shell go env GOARM)$(shell go env GOEXE)
 OUTPUT_LINK=$(NAME)$(shell go env GOEXE)
 WINDOWS_ZIP=$(shell echo $(OUTPUT_FILE) | sed 's/\.exe/\.zip/')
 
@@ -36,7 +36,7 @@ vendor: go.mod go.sum
 format:
 	gofmt -s -w $(GOFILES)
 
-vet: go_generate go_generate vendor
+vet: go_generate vendor
 	go vet $(GOPKGS)
 
 lint:
@@ -46,7 +46,7 @@ go_generate:
 	rm -rvf mocks
 	go generate ./...
 
-test_packages: go_generate go_generate vendor
+test_packages: go_generate vendor
 	go test $(GOPKGS)
 
 test_format:
@@ -66,7 +66,7 @@ _build: vendor
 		$(TARGET);\
 	)
 
-build: go_generate go_generate _build
+build: go_generate _build
 	$(foreach TARGET,$(TARGETS),ln -sf $(OUTPUT_FILE) dist/$(OUTPUT_LINK);)
 
 compress: _build
@@ -77,10 +77,8 @@ else
 endif
 	rm -f dist/$(OUTPUT_FILE)
 
-xc: go_generate go_generate
+xc: go_generate
 	GOOS=linux GOARCH=amd64 make compress
-	GOOS=linux GOARCH=arm64 make compress
-	GOOS=linux GOARCH=arm GOARM=7 make compress
 	GOOS=linux GOARCH=arm64 make compress
 	GOOS=linux GOARCH=arm GOARM=7 make compress
 	GOOS=darwin GOARCH=amd64 make compress

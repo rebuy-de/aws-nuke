@@ -86,6 +86,10 @@ func (e *KMSKey) Filter() error {
 		return fmt.Errorf("is already in PendingDeletion state")
 	}
 
+	if e.state == "PendingReplicaDeletion" {
+		return fmt.Errorf("is already in PendingReplicaDeletion state")
+	}
+
 	if e.manager != nil && *e.manager == kms.KeyManagerTypeAws {
 		return fmt.Errorf("cannot delete AWS managed key")
 	}

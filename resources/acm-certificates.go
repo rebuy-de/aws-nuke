@@ -24,6 +24,15 @@ func ListACMCertificates(sess *session.Session) ([]Resource, error) {
 
 	params := &acm.ListCertificatesInput{
 		MaxItems: aws.Int64(100),
+		Includes: &acm.Filters{
+			KeyTypes: aws.StringSlice([]string{
+				acm.KeyAlgorithmEcPrime256v1,
+				acm.KeyAlgorithmEcSecp384r1,
+				acm.KeyAlgorithmEcSecp521r1,
+				acm.KeyAlgorithmRsa1024,
+				acm.KeyAlgorithmRsa2048,
+				acm.KeyAlgorithmRsa4096,
+			})},
 	}
 
 	for {
