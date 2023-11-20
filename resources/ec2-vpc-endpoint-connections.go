@@ -55,7 +55,7 @@ func ListEC2VPCEndpointConnections(sess *session.Session) ([]Resource, error) {
 }
 
 func (c *EC2VPCEndpointConnection) Filter() error {
-	if *c.state == "deleting" || *c.state == "deleted" {
+	if *c.state == "deleting" || *c.state == "deleted" || *c.state == "rejected" {
 		return fmt.Errorf("already deleted")
 	}
 	return nil
