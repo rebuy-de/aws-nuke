@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMUserPolicy struct {
@@ -19,28 +20,31 @@ func init() {
 
 func ListIAMUserPolicies(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
+	resources := []Resource{}
 
-	users, err := svc.ListUsers(nil)
+	err := svc.ListUsersPages(nil, func(page *iam.ListUsersOutput, lastPage bool) bool {
+		for _, out := range page.Users {
+			policies, err := svc.ListUserPolicies(&iam.ListUserPoliciesInput{
+				UserName: out.UserName,
+			})
+			if err != nil {
+				logrus.Errorf("Failed to list policies for user %s: %v", *out.UserName, err)
+				continue
+			}
+
+			for _, policyName := range policies.PolicyNames {
+				resources = append(resources, &IAMUserPolicy{
+					svc:        svc,
+					policyName: *policyName,
+					userName:   *out.UserName,
+				})
+			}
+		}
+		return true
+	})
+
 	if err != nil {
 		return nil, err
-	}
-
-	resources := make([]Resource, 0)
-	for _, user := range users.Users {
-		policies, err := svc.ListUserPolicies(&iam.ListUserPoliciesInput{
-			UserName: user.UserName,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		for _, policyName := range policies.PolicyNames {
-			resources = append(resources, &IAMUserPolicy{
-				svc:        svc,
-				policyName: *policyName,
-				userName:   *user.UserName,
-			})
-		}
 	}
 
 	return resources, nil
