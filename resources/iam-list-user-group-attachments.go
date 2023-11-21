@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/sirupsen/logrus"
 )
 
 type IAMUserGroupAttachment struct {
@@ -20,29 +21,33 @@ func init() {
 
 func ListIAMUserGroupAttachments(sess *session.Session) ([]Resource, error) {
 	svc := iam.New(sess)
+	resources := []Resource{}
 
-	resp, err := svc.ListUsers(nil)
+	err := svc.ListUsersPages(nil, func(page *iam.ListUsersOutput, lastPage bool) bool {
+		for _, user := range page.Users {
+			err := svc.ListGroupsForUserPages(&iam.ListGroupsForUserInput{
+				UserName: user.UserName,
+			}, func(groupPage *iam.ListGroupsForUserOutput, lastGroupPage bool) bool {
+				for _, group := range groupPage.Groups {
+					resources = append(resources, &IAMUserGroupAttachment{
+						svc:       svc,
+						groupName: *group.GroupName,
+						userName:  *user.UserName,
+					})
+				}
+				return !lastGroupPage
+			})
+
+			if err != nil {
+				logrus.Errorf("failed to list groups for user %s: %v", *user.UserName, err)
+				return false
+			}
+		}
+		return true
+	})
+
 	if err != nil {
 		return nil, err
-	}
-
-	resources := make([]Resource, 0)
-	for _, role := range resp.Users {
-		resp, err := svc.ListGroupsForUser(
-			&iam.ListGroupsForUserInput{
-				UserName: role.UserName,
-			})
-		if err != nil {
-			return nil, err
-		}
-
-		for _, grp := range resp.Groups {
-			resources = append(resources, &IAMUserGroupAttachment{
-				svc:       svc,
-				groupName: *grp.GroupName,
-				userName:  *role.UserName,
-			})
-		}
 	}
 
 	return resources, nil
