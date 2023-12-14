@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"runtime/debug"
 
 	"github.com/spf13/cobra"
 )
@@ -24,10 +23,6 @@ func NewVersionCommand() *cobra.Command {
 			fmt.Printf("scm hash:    %s\n", BuildHash)
 			fmt.Printf("environment: %s\n", BuildEnvironment)
 
-			bi, ok := debug.ReadBuildInfo()
-			if ok && bi != nil {
-				fmt.Printf("go version:  %s\n", bi.GoVersion)
-			}
 		},
 	}
 
