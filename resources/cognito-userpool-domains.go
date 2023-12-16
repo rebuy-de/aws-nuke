@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -64,6 +65,15 @@ func (f *CognitoUserPoolDomain) Remove() error {
 	_, err := f.svc.DeleteUserPoolDomain(params)
 
 	return err
+}
+
+func (f *CognitoUserPoolDomain) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("Domain", f.name)
+	properties.Set("UserPoolName", f.userPoolName)
+	properties.Set("UserPoolId", f.userPoolId)
+	return properties
 }
 
 func (f *CognitoUserPoolDomain) String() string {
