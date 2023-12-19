@@ -21,7 +21,6 @@ func ListEC2TGWConnectPeer(sess *session.Session) ([]Resource, error) {
 	svc := ec2.New(sess)
 	resources := make([]Resource, 0)
 
-	// filter should be set as deleted vpc connections are returned
 	params := &ec2.DescribeTransitGatewayConnectPeersInput{}
 
 	resp, err := svc.DescribeTransitGatewayConnectPeers(params)
