@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type EC2TGWConnectPeer struct {
@@ -55,6 +56,15 @@ func (p *EC2TGWConnectPeer) Remove() error {
 		return err
 	}
 	return nil
+}
+
+func (p *EC2TGWConnectPeer) Properties() types.Properties {
+	properties := types.NewProperties()
+	for _, tagValue := range p.peer.Tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+	properties.Set("ID", p.peer.TransitGatewayConnectPeerId)
+	return properties
 }
 
 func (p *EC2TGWConnectPeer) String() string {
