@@ -85,6 +85,9 @@ func (e *IAMRolePolicy) Filter() error {
 	if strings.HasPrefix(aws.StringValue(e.role.Path), "/aws-service-role/") {
 		return fmt.Errorf("cannot alter service roles")
 	}
+	if strings.HasPrefix(aws.StringValue(e.role.Path), "/aws-reserved/sso.amazonaws.com/") {
+		return fmt.Errorf("cannot alter SSO roles")
+	}
 	return nil
 }
 
