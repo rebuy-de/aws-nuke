@@ -67,8 +67,11 @@ func (o *OSPackage) Remove() error {
 	_, err := o.svc.DeletePackage(&opensearchservice.DeletePackageInput{
 		PackageID: o.packageID,
 	})
+    if err != nil {
+        return err
+	}
 
-	return err
+	return nil
 }
 
 func (o *OSPackage) Properties() types.Properties {
