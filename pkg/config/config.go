@@ -26,14 +26,15 @@ type Account struct {
 
 type Nuke struct {
 	// Deprecated: Use AccountBlocklist instead.
-	AccountBlacklist []string                     `yaml:"account-blacklist"`
-	AccountBlocklist []string                     `yaml:"account-blocklist"`
-	Regions          []string                     `yaml:"regions"`
-	Accounts         map[string]Account           `yaml:"accounts"`
-	ResourceTypes    ResourceTypes                `yaml:"resource-types"`
-	Presets          map[string]PresetDefinitions `yaml:"presets"`
-	FeatureFlags     FeatureFlags                 `yaml:"feature-flags"`
-	CustomEndpoints  CustomEndpoints              `yaml:"endpoints"`
+	AccountBlacklist             []string                     `yaml:"account-blacklist"`
+	AccountBlocklist             []string                     `yaml:"account-blocklist"`
+	Regions                      []string                     `yaml:"regions"`
+	Accounts                     map[string]Account           `yaml:"accounts"`
+	ResourceTypes                ResourceTypes                `yaml:"resource-types"`
+	Presets                      map[string]PresetDefinitions `yaml:"presets"`
+	FeatureFlags                 FeatureFlags                 `yaml:"feature-flags"`
+	CustomEndpoints              CustomEndpoints              `yaml:"endpoints"`
+	DeniedAccountAliasSubStrings []string                     `yaml:"denied_account_alias_sub_strings"`
 }
 
 type FeatureFlags struct {
@@ -136,9 +137,11 @@ func (c *Nuke) ValidateAccount(accountID string, aliases []string) error {
 	}
 
 	for _, alias := range aliases {
-		if strings.Contains(strings.ToLower(alias), "prod") {
-			return fmt.Errorf("You are trying to nuke an account with the alias '%s', "+
-				"but it has the substring 'prod' in it. Aborting.", alias)
+		for _, subString := range c.DeniedAccountAliasSubStrings {
+			if strings.Contains(strings.ToLower(alias), subString) {
+				return fmt.Errorf("You are trying to nuke an account with the alias '%s', "+
+					"but it has the substring '%s' in it. Aborting.", alias, subString)
+			}
 		}
 	}
 
