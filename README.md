@@ -203,20 +203,24 @@ or until there are only resources with errors left.
 
 ### AWS Credentials
 
-There are two ways to authenticate *aws-nuke*. There are static credentials and
-profiles. The later one can be configured in the shared credentials file (ie
+There are three ways to authenticate *aws-nuke*. There are static credentials,
+assuming roles and profiles.  The first two methods are passed in at the 
+command line.  The third can be configured in the shared credentials file (ie
 `~/.aws/credentials`) or the shared config file (ie `~/.aws/config`).
 
 To use *static credentials* the command line flags `--access-key-id` and
 `--secret-access-key` are required. The flag `--session-token` is only required
 for temporary sessions.
 
+To use *assumed roles* the command line flag `--assume-role-arn` is required.
+If you rely on a secret 
+[external ID](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html) 
+field for your role assumption, you can supply it with the command line flag `--external-id`.
+
 To use *shared profiles* the command line flag `--profile` is required. The
-profile must be either defined with static credentials in the [shared
-credential
-file](https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html)
-or in [shared config
-file](https://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html) with an
+profile must be either defined with static credentials in the
+[shared credential file](https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html)
+or in [shared config file](https://docs.aws.amazon.com/cli/latest/userguide/cli-roles.html) with an
 assuming role.
 
 ### Using custom AWS endpoint

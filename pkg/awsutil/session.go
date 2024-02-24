@@ -37,6 +37,7 @@ type Credentials struct {
 	SecretAccessKey string
 	SessionToken    string
 	AssumeRoleArn   string
+	ExternalId      string
 
 	Credentials *credentials.Credentials
 
@@ -50,6 +51,10 @@ func (c *Credentials) HasProfile() bool {
 
 func (c *Credentials) HasAwsCredentials() bool {
 	return c.Credentials != nil
+}
+
+func (c *Credentials) HasExternalId() bool {
+	return strings.TrimSpace(c.ExternalId) != ""
 }
 
 func (c *Credentials) HasKeys() bool {
@@ -114,7 +119,15 @@ func (c *Credentials) rootSession() (*session.Session, error) {
 
 		// if given a role to assume, overwrite the session credentials with assume role credentials
 		if c.AssumeRoleArn != "" {
-			sess.Config.Credentials = stscreds.NewCredentials(sess, c.AssumeRoleArn)
+			if c.HasExternalId() {
+				log.Debugf("assuming role %s, externalID found", c.AssumeRoleArn)
+				sess.Config.Credentials = stscreds.NewCredentials(sess, c.AssumeRoleArn, func(p *stscreds.AssumeRoleProvider) {
+					p.ExternalID = &c.ExternalId
+				})
+			} else {
+				log.Debugf("assuming role %s with no externalID", c.AssumeRoleArn)
+				sess.Config.Credentials = stscreds.NewCredentials(sess, c.AssumeRoleArn)
+			}
 		}
 
 		c.session = sess
