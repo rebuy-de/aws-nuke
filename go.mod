@@ -3,7 +3,7 @@ module github.com/rebuy-de/aws-nuke/v2
 go 1.21
 
 require (
-	github.com/aws/aws-sdk-go v1.50.21
+	github.com/aws/aws-sdk-go v1.50.26
 	github.com/fatih/color v1.16.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
