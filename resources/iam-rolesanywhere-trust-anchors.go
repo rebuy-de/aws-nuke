@@ -7,8 +7,8 @@ import (
 )
 
 type TrustAnchor struct {
-	svc  *rolesanywhere.RolesAnywhere
-	TrustAnchorId   string
+	svc           *rolesanywhere.RolesAnywhere
+	TrustAnchorId string
 }
 
 func init() {
@@ -28,7 +28,7 @@ func ListTrustAnchors(sess *session.Session) ([]Resource, error) {
 		}
 		for _, trustAnchor := range resp.TrustAnchors {
 			resources = append(resources, &TrustAnchor{
-				svc:      svc,
+				svc:           svc,
 				TrustAnchorId: *trustAnchor.TrustAnchorId,
 			})
 		}

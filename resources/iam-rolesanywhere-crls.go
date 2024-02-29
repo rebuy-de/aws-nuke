@@ -7,8 +7,8 @@ import (
 )
 
 type Crl struct {
-	svc  *rolesanywhere.RolesAnywhere
-	CrlId   string
+	svc   *rolesanywhere.RolesAnywhere
+	CrlId string
 }
 
 func init() {
@@ -28,7 +28,7 @@ func ListCRLs(sess *session.Session) ([]Resource, error) {
 		}
 		for _, crl := range resp.Crls {
 			resources = append(resources, &Crl{
-				svc:      svc,
+				svc:   svc,
 				CrlId: *crl.CrlId,
 			})
 		}

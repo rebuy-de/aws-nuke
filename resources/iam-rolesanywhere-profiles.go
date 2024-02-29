@@ -7,8 +7,8 @@ import (
 )
 
 type Profile struct {
-	svc  *rolesanywhere.RolesAnywhere
-	ProfileId   string
+	svc       *rolesanywhere.RolesAnywhere
+	ProfileId string
 }
 
 func init() {
@@ -28,7 +28,7 @@ func ListProfiles(sess *session.Session) ([]Resource, error) {
 		}
 		for _, profile := range resp.Profiles {
 			resources = append(resources, &Profile{
-				svc:      svc,
+				svc:       svc,
 				ProfileId: *profile.ProfileId,
 			})
 		}
