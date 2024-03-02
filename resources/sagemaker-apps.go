@@ -15,6 +15,7 @@ type SageMakerApp struct {
 	appName         *string
 	appType         *string
 	userProfileName *string
+	spaceName       *string
 	status          *string
 }
 
@@ -43,6 +44,7 @@ func ListSageMakerApps(sess *session.Session) ([]Resource, error) {
 				appName:         app.AppName,
 				appType:         app.AppType,
 				userProfileName: app.UserProfileName,
+				spaceName:       app.SpaceName,
 				status:          app.Status,
 			})
 		}
@@ -63,6 +65,7 @@ func (f *SageMakerApp) Remove() error {
 		AppName:         f.appName,
 		AppType:         f.appType,
 		UserProfileName: f.userProfileName,
+		SpaceName:       f.spaceName,
 	})
 
 	return err
@@ -78,7 +81,8 @@ func (i *SageMakerApp) Properties() types.Properties {
 		Set("DomainID", i.domainID).
 		Set("AppName", i.appName).
 		Set("AppType", i.appType).
-		Set("UserProfileName", i.userProfileName)
+		Set("UserProfileName", i.userProfileName).
+		Set("SpaceName", i.spaceName)
 	return properties
 }
 
