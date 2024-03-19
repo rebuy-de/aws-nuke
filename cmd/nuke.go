@@ -159,7 +159,19 @@ func (n *Nuke) Scan() error {
 
 	queue := make(Queue, 0)
 
-	for _, regionName := range n.Config.Regions {
+	var regions []string
+	if n.Config.UseEnabledRegions {
+		regions = n.Account.EnabledRegions()
+		fmt.Printf("The 'use-enabled-regions' configuration flag is enabled, ignoring explicit region configuration.\n")
+		fmt.Printf("Nuking the following regions:\n")
+		for _, region := range regions {
+			fmt.Printf("  - %s\n", region)
+		}
+	} else {
+		regions = n.Config.Regions
+	}
+
+	for _, regionName := range regions {
 		region := NewRegion(regionName, n.Account.ResourceTypeToServiceType, n.Account.NewSession)
 
 		items := Scan(region, resourceTypes)
@@ -190,7 +202,6 @@ func (n *Nuke) Scan() error {
 }
 
 func (n *Nuke) Filter(item *Item) error {
-
 	checker, ok := item.Resource.(resources.Filter)
 	if ok {
 		err := checker.Filter()
@@ -260,7 +271,6 @@ func (n *Nuke) HandleQueue() {
 			n.HandleWait(item, listCache)
 			item.Print()
 		}
-
 	}
 
 	fmt.Println()
