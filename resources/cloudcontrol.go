@@ -26,7 +26,6 @@ func init() {
 	registerCloudControl("AWS::AppRunner::Service")
 	registerCloudControl("AWS::ApplicationInsights::Application")
 	registerCloudControl("AWS::Backup::Framework")
-	registerCloudControl("AWS::ECR::PublicRepository")
 	registerCloudControl("AWS::ECR::PullThroughCacheRule")
 	registerCloudControl("AWS::ECR::RegistryPolicy")
 	registerCloudControl("AWS::ECR::ReplicationConfiguration")
