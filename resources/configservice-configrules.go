@@ -27,6 +27,9 @@ func ListConfigServiceConfigRules(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, configRule := range output.ConfigRules {
+			if *configRule.CreatedBy == "config-conforms.amazonaws.com" {
+				continue
+			}
 			resources = append(resources, &ConfigServiceConfigRule{
 				svc:            svc,
 				configRuleName: configRule.ConfigRuleName,
