@@ -36,6 +36,7 @@ func (n *Nuke) Run() error {
 	if n.Parameters.ForceSleep < 3 && n.Parameters.NoDryRun {
 		return fmt.Errorf("Value for --force-sleep cannot be less than 3 seconds if --no-dry-run is set. This is for your own protection.")
 	}
+
 	forceSleep := time.Duration(n.Parameters.ForceSleep) * time.Second
 
 	fmt.Printf("aws-nuke version %s - %s - %s\n\n", BuildVersion, BuildDate, BuildHash)
@@ -88,13 +89,20 @@ func (n *Nuke) Run() error {
 
 	failCount := 0
 	waitingCount := 0
+	period, err := time.ParseDuration(n.Parameters.Period)
+	if err != nil {
+		return err
+	}
 
 	for {
 		n.HandleQueue()
 
-		if n.items.Count(ItemStatePending, ItemStateWaiting, ItemStateNew) == 0 && n.items.Count(ItemStateFailed) > 0 {
+		if n.items.Count(ItemStatePending, ItemStateWaiting, ItemStateNew) == 0 && n.items.Count(ItemStateFailed, ItemStatePostponed) > 0 {
+			if n.items.Count(ItemStateFailed) == 0 {
+				break
+			}
 			if failCount >= 2 {
-				logrus.Errorf("There are resources in failed state, but none are ready for deletion, anymore.")
+				logrus.Errorf("There are resources in failed or postponed state, but none are ready for deletion, anymore.")
 				fmt.Println()
 
 				for _, item := range n.items {
@@ -121,15 +129,15 @@ func (n *Nuke) Run() error {
 		} else {
 			waitingCount = 0
 		}
-		if n.items.Count(ItemStateNew, ItemStatePending, ItemStateFailed, ItemStateWaiting) == 0 {
+		if n.items.Count(ItemStateNew, ItemStatePending, ItemStateFailed, ItemStateWaiting, ItemStatePostponed) == 0 {
 			break
 		}
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(period)
 	}
 
-	fmt.Printf("Nuke complete: %d failed, %d skipped, %d finished.\n\n",
-		n.items.Count(ItemStateFailed), n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished))
+	fmt.Printf("Nuke complete: %d failed, %d postponed, %d skipped, %d finished.\n\n",
+		n.items.Count(ItemStateFailed), n.items.Count(ItemStatePostponed), n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished))
 
 	return nil
 }
@@ -259,21 +267,28 @@ func (n *Nuke) HandleQueue() {
 		case ItemStateWaiting:
 			n.HandleWait(item, listCache)
 			item.Print()
+		case ItemStatePostponed:
+			item.Print()
 		}
 
 	}
 
-	fmt.Println()
-	fmt.Printf("Removal requested: %d waiting, %d failed, %d skipped, %d finished\n\n",
+	fmt.Printf("\nRemoval requested: %d waiting, %d failed, %d skipped, %d finished, %d postponed\n\n",
 		n.items.Count(ItemStateWaiting, ItemStatePending), n.items.Count(ItemStateFailed),
-		n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished))
+		n.items.Count(ItemStateFiltered), n.items.Count(ItemStateFinished), n.items.Count(ItemStatePostponed))
 }
 
 func (n *Nuke) HandleRemove(item *Item) {
 	err := item.Resource.Remove()
 	if err != nil {
-		item.State = ItemStateFailed
-		item.Reason = err.Error()
+		switch err.(type) {
+		case *config.ItemPostponedError:
+			item.State = ItemStatePostponed
+			item.Reason = err.Error()
+		default:
+			item.State = ItemStateFailed
+			item.Reason = err.Error()
+		}
 		return
 	}
 
