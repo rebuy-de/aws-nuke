@@ -13,6 +13,7 @@ type ElasticacheReplicationGroup struct {
 	svc        *elasticache.ElastiCache
 	groupID    *string
 	createTime *time.Time
+	tags       []*elasticache.Tag
 }
 
 func init() {
@@ -32,6 +33,14 @@ func ListElasticacheReplicationGroups(sess *session.Session) ([]Resource, error)
 		}
 
 		for _, replicationGroup := range resp.ReplicationGroups {
+			tags, err := svc.ListTagsForResource(&elasticache.ListTagsForResourceInput{
+				ResourceName: replicationGroup.ARN,
+			})
+
+			if err != nil {
+				continue
+			}
+
 			resources = append(resources, &ElasticacheReplicationGroup{
 				svc:        svc,
 				groupID:    replicationGroup.ReplicationGroupId,
@@ -56,6 +65,10 @@ func (i *ElasticacheReplicationGroup) Properties() types.Properties {
 
 	if i.createTime != nil {
 		properties.Set("CreateTime", i.createTime.Format(time.RFC3339))
+	}
+
+	for _, tagValue := range i.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
 
 	return properties

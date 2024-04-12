@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elasticache"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type ElasticacheSubnetGroup struct {
@@ -43,6 +44,13 @@ func (i *ElasticacheSubnetGroup) Filter() error {
 		return fmt.Errorf("Cannot delete default subnet group")
 	}
 	return nil
+}
+
+func (i *ElasticacheSubnetGroup) Properties() types.Properties {
+	properties := types.NewProperties()
+	properties.Set("Name", i.name)
+
+	return properties
 }
 
 func (i *ElasticacheSubnetGroup) Remove() error {

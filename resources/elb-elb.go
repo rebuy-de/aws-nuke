@@ -80,7 +80,8 @@ func (e *ELBLoadBalancer) Remove() error {
 
 func (e *ELBLoadBalancer) Properties() types.Properties {
 	properties := types.NewProperties().
-		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339))
+		Set("CreatedTime", e.elb.CreatedTime.Format(time.RFC3339)).
+		Set("Name", e.elb.LoadBalancerName)
 
 	for _, tagValue := range e.tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
