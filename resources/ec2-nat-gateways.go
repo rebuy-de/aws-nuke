@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -59,6 +60,7 @@ func (n *EC2NATGateway) Remove() error {
 
 func (n *EC2NATGateway) Properties() types.Properties {
 	properties := types.NewProperties()
+	properties.Set("CreateTime", n.natgw.CreateTime.Format(time.RFC3339))
 	for _, tagValue := range n.natgw.Tags {
 		properties.SetTag(tagValue.Key, tagValue.Value)
 	}
