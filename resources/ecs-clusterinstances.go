@@ -2,6 +2,7 @@ package resources
 
 import (
 	"fmt"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -12,6 +13,7 @@ type ECSClusterInstance struct {
 	svc         *ecs.ECS
 	instanceARN *string
 	clusterARN  *string
+	tags        []*ecs.Tag
 }
 
 func init() {
@@ -58,10 +60,18 @@ func ListECSClusterInstances(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, instanceArn := range output.ContainerInstanceArns {
+			tagsResp, err := svc.ListTagsForResource(&ecs.ListTagsForResourceInput{
+				ResourceArn: instanceArn,
+			})
+			if err != nil {
+				return nil, err
+			}
+
 			resources = append(resources, &ECSClusterInstance{
 				svc:         svc,
 				instanceARN: instanceArn,
 				clusterARN:  clusterArn,
+				tags:        tagsResp.Tags,
 			})
 		}
 
@@ -84,6 +94,16 @@ func (f *ECSClusterInstance) Remove() error {
 	})
 
 	return err
+}
+
+func (f *ECSClusterInstance) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (f *ECSClusterInstance) String() string {
