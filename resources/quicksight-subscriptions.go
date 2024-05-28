@@ -63,7 +63,7 @@ func DescribeQuicksightSubscription(session *session.Session) ([]Resource, error
 }
 
 func (subscription *QuicksightSubscription) Remove() error {
-	terminateProtectionEnabled := true
+	terminateProtectionEnabled := false
 
 	describeSettingsOutput, err := subscription.svc.DescribeAccountSettings(&quicksight.DescribeAccountSettingsInput {
 		AwsAccountId: subscription.accountId,
