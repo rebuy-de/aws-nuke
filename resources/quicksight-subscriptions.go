@@ -35,30 +35,30 @@ func DescribeQuicksightSubscription(session *session.Session) ([]Resource, error
 
 	quicksightSvc := quicksight.New(session)
 
-	describeSubscriptionOutput, err := quicksightSvc.DescribeAccountSubscription(&quicksight.DescribeAccountSubscriptionInput {
+	describeSubscriptionOutput, err := quicksightSvc.DescribeAccountSubscription(&quicksight.DescribeAccountSubscriptionInput{
 		AwsAccountId: accountId,
 	})
 
-	if(err != nil) {
+	if err != nil {
 		var resoureceNotFoundException *quicksight.ResourceNotFoundException
-		if(!errors.As(err,&resoureceNotFoundException)) {
+		if !errors.As(err, &resoureceNotFoundException) {
 			return nil, err
 		}
 		return resources, nil
 	}
-	
+
 	//The account name is only available some time later after the Subscription creation.
 	//Since it is an important value to identify the resource, it will wait till it is available
-	if*describeSubscriptionOutput.AccountInfo.AccountSubscriptionStatus != activeSubscriptionStatus || describeSubscriptionOutput.AccountInfo.AccountName == nil {
+	if *describeSubscriptionOutput.AccountInfo.AccountSubscriptionStatus != activeSubscriptionStatus || describeSubscriptionOutput.AccountInfo.AccountName == nil {
 		return resources, nil
 	}
 
-	resources = append(resources, &QuicksightSubscription {
-		svc: quicksightSvc,
-		accountId: accountId,
-		subscriptionName: describeSubscriptionOutput.AccountInfo.AccountName,
+	resources = append(resources, &QuicksightSubscription{
+		svc:               quicksightSvc,
+		accountId:         accountId,
+		subscriptionName:  describeSubscriptionOutput.AccountInfo.AccountName,
 		notificationEmail: describeSubscriptionOutput.AccountInfo.NotificationEmail,
-		edition: describeSubscriptionOutput.AccountInfo.Edition,
+		edition:           describeSubscriptionOutput.AccountInfo.Edition,
 	})
 
 	return resources, nil
@@ -67,32 +67,32 @@ func DescribeQuicksightSubscription(session *session.Session) ([]Resource, error
 func (subscription *QuicksightSubscription) Remove() error {
 	terminateProtectionEnabled := false
 
-	describeSettingsOutput, err := subscription.svc.DescribeAccountSettings(&quicksight.DescribeAccountSettingsInput {
+	describeSettingsOutput, err := subscription.svc.DescribeAccountSettings(&quicksight.DescribeAccountSettingsInput{
 		AwsAccountId: subscription.accountId,
 	})
-	if(err != nil) {
+	if err != nil {
 		return err
 	}
 
-	if(*describeSettingsOutput.AccountSettings.TerminationProtectionEnabled) {
+	if *describeSettingsOutput.AccountSettings.TerminationProtectionEnabled {
 		updateSettingsInput := quicksight.UpdateAccountSettingsInput{
-			AwsAccountId: subscription.accountId,
-			DefaultNamespace: describeSettingsOutput.AccountSettings.DefaultNamespace,
-			NotificationEmail: describeSettingsOutput.AccountSettings.NotificationEmail,
+			AwsAccountId:                 subscription.accountId,
+			DefaultNamespace:             describeSettingsOutput.AccountSettings.DefaultNamespace,
+			NotificationEmail:            describeSettingsOutput.AccountSettings.NotificationEmail,
 			TerminationProtectionEnabled: &terminateProtectionEnabled,
 		}
 
 		_, err = subscription.svc.UpdateAccountSettings(&updateSettingsInput)
-		if(err != nil) {
+		if err != nil {
 			return err
 		}
 	}
 
-	_, err = subscription.svc.DeleteAccountSubscription(&quicksight.DeleteAccountSubscriptionInput {
+	_, err = subscription.svc.DeleteAccountSubscription(&quicksight.DeleteAccountSubscriptionInput{
 		AwsAccountId: subscription.accountId,
 	})
-	if(err != nil) {
-			return err
+	if err != nil {
+		return err
 	}
 
 	return nil
