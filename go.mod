@@ -3,8 +3,8 @@ module github.com/rebuy-de/aws-nuke/v2
 go 1.21
 
 require (
-	github.com/aws/aws-sdk-go v1.52.3
-	github.com/fatih/color v1.16.0
+	github.com/aws/aws-sdk-go v1.53.10
+	github.com/fatih/color v1.17.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/mb0/glob v0.0.0-20160210091149-1eb79d2de6c4
@@ -28,7 +28,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
