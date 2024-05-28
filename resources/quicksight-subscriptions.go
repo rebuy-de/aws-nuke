@@ -46,9 +46,10 @@ func DescribeQuicksightSubscription(session *session.Session) ([]Resource, error
 		}
 		return resources, nil
 	}
+	
 	//The account name is only available some time later after the Subscription creation.
 	//Since it is an important value to identify the resource, it will wait till it is available
-	if(*describeSubscriptionOutput.AccountInfo.AccountSubscriptionStatus != activeSubscriptionStatus && describeSubscriptionOutput.AccountInfo.AccountName != nil) {
+	if*describeSubscriptionOutput.AccountInfo.AccountSubscriptionStatus != activeSubscriptionStatus || describeSubscriptionOutput.AccountInfo.AccountName == nil {
 		return resources, nil
 	}
 
