@@ -5,15 +5,37 @@ on:
     types: [created]
 
 jobs:
+  update_readme:
+    name: Update Readme
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: main
+    - name: Update versions in readme
+      run: |
+        sed -r -i "s/aws-nuke:v[0-9]+\.[0-9]+\.[0-9]+/aws-nuke:${{ github.ref_name }}/" README.md
+        sed -r -i "s/aws-nuke-v[0-9]+\.[0-9]+\.[0-9]+/aws-nuke-${{ github.ref_name }}/" README.md
+        sed -r -i "s/\/v[0-9]+\.[0-9]+\.[0-9]+\//\/${{ github.ref_name }}\//" README.md
+    - uses: peter-evans/create-pull-request@v6
+      name: Create Pull Request
+      with:
+        title: Update readme for ${{ github.ref_name }} release
+        commit-message: Update readme for ${{ github.ref_name }} release
+        body: Updating version references in the readme to ${{ github.ref_name }}
+        branch: update-readme-${{ github.ref_name }}
+        delete-branch: true
 
   release:
     name: Publish binaries
     runs-on: ubuntu-22.04
     steps:
     - name: Setup Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
-        go-version: '1.21'
+        go-version: '1.22'
     - name: Checkout code
       uses: actions/checkout@v4
       with:
