@@ -38,7 +38,7 @@ func ListGlueSecurityConfigurations(sess *session.Session) ([]Resource, error) {
 		}
 
 		// Check if there are more security configurations to fetch
-		if output.NextToken == nil || *output.NextToken == ""{
+		if output.NextToken == nil || *output.NextToken == "" {
 			break
 		}
 
