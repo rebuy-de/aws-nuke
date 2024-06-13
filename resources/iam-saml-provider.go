@@ -3,6 +3,7 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type IAMSAMLProvider struct {
@@ -43,6 +44,11 @@ func (e *IAMSAMLProvider) Remove() error {
 	}
 
 	return nil
+}
+
+func (e *IAMSAMLProvider) Properties() types.Properties {
+	properties := types.NewProperties()
+	return properties
 }
 
 func (e *IAMSAMLProvider) String() string {

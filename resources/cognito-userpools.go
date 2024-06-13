@@ -4,12 +4,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type CognitoUserPool struct {
 	svc  *cognitoidentityprovider.CognitoIdentityProvider
 	name *string
 	id   *string
+	tags map[string]*string
 }
 
 func init() {
@@ -31,10 +33,19 @@ func ListCognitoUserPools(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, pool := range output.UserPools {
+			poolOutput, err := svc.DescribeUserPool(&cognitoidentityprovider.DescribeUserPoolInput{
+				UserPoolId: pool.Id,
+			})
+
+			if err != nil {
+				return nil, err
+			}
+
 			resources = append(resources, &CognitoUserPool{
 				svc:  svc,
 				name: pool.Name,
 				id:   pool.Id,
+				tags: poolOutput.UserPool.UserPoolTags,
 			})
 		}
 
@@ -55,6 +66,17 @@ func (f *CognitoUserPool) Remove() error {
 	})
 
 	return err
+}
+
+func (f *CognitoUserPool) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("Name", f.name)
+
+	for tagKey, tagValue := range f.tags {
+		properties.SetTag(&tagKey, tagValue)
+	}
+	return properties
 }
 
 func (f *CognitoUserPool) String() string {

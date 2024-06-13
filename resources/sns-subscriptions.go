@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 func init() {
@@ -24,6 +25,7 @@ func ListSNSSubscriptions(sess *session.Session) ([]Resource, error) {
 		}
 		for _, subscription := range resp.Subscriptions {
 			if *subscription.SubscriptionArn != "PendingConfirmation" {
+
 				resources = append(resources, &SNSSubscription{
 					svc:  svc,
 					id:   subscription.SubscriptionArn,
@@ -54,6 +56,15 @@ func (subs *SNSSubscription) Remove() error {
 		SubscriptionArn: subs.id,
 	})
 	return err
+}
+
+func (subs *SNSSubscription) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("Id", subs.id)
+	properties.Set("Name", subs.name)
+
+	return properties
 }
 
 func (subs *SNSSubscription) String() string {
