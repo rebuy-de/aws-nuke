@@ -48,8 +48,8 @@ func ListDatabaseMigrationServiceCertificates(sess *session.Session) ([]Resource
 
 func (f *DatabaseMigrationServiceCertificate) Remove() error {
 
-	_, err := f.svc.DeleteEndpoint(&databasemigrationservice.DeleteEndpointInput{
-		EndpointArn: f.ARN,
+	_, err := f.svc.DeleteCertificate(&databasemigrationservice.DeleteCertificateInput{
+		CertificateArn: f.ARN,
 	})
 
 	return err
