@@ -89,6 +89,8 @@ func (f *CloudWatchLogsLogGroup) Remove() error {
 	return err
 }
 
+func (f *CloudWatchLogsLogGroup) revenant() {}
+
 func (f *CloudWatchLogsLogGroup) String() string {
 	return *f.logGroup.LogGroupName
 }

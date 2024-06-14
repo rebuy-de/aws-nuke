@@ -16,6 +16,7 @@ const (
 	ItemStateFailed
 	ItemStateFiltered
 	ItemStateFinished
+	ItemStateRevenant
 )
 
 // An Item describes an actual AWS resource entity with the current state and
