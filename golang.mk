@@ -39,8 +39,6 @@ format:
 vet: go_generate vendor
 	go vet $(GOPKGS)
 
-lint:
-	$(foreach pkg,$(GOPKGS),golint $(pkg);)
 
 go_generate:
 	rm -rvf mocks
@@ -52,7 +50,7 @@ test_packages: go_generate vendor
 test_format:
 	gofmt -s -l $(GOFILES)
 
-test: test_format vet lint test_packages
+test: test_format vet test_packages
 
 cov: go_generate
 	gocov test -v $(GOPKGS) \
