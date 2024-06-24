@@ -4,13 +4,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type DynamoDBTable struct {
-	svc  *dynamodb.DynamoDB
-	id   string
-	tags []*dynamodb.Tag
+	svc                *dynamodb.DynamoDB
+	id                 string
+	deletionProtection bool
+	tags               []*dynamodb.Tag
+
+	featureFlags config.FeatureFlags
 }
 
 func init() {
@@ -27,16 +31,17 @@ func ListDynamoDBTables(sess *session.Session) ([]Resource, error) {
 
 	resources := make([]Resource, 0)
 	for _, tableName := range resp.TableNames {
-		tags, err := GetTableTags(svc, tableName)
+		table, tags, err := GetDynamoDBTable(svc, tableName)
 
 		if err != nil {
 			continue
 		}
 
 		resources = append(resources, &DynamoDBTable{
-			svc:  svc,
-			id:   *tableName,
-			tags: tags,
+			svc:                svc,
+			id:                 *tableName,
+			deletionProtection: *table.DeletionProtectionEnabled,
+			tags:               tags,
 		})
 	}
 
@@ -44,6 +49,17 @@ func ListDynamoDBTables(sess *session.Session) ([]Resource, error) {
 }
 
 func (i *DynamoDBTable) Remove() error {
+	if i.deletionProtection && i.featureFlags.DisableDeletionProtection.DynamoDBTable {
+		modifyParams := &dynamodb.UpdateTableInput{
+			TableName:                 aws.String(i.id),
+			DeletionProtectionEnabled: aws.Bool(false),
+		}
+		_, err := i.svc.UpdateTable(modifyParams)
+		if err != nil {
+			return err
+		}
+	}
+
 	params := &dynamodb.DeleteTableInput{
 		TableName: aws.String(i.id),
 	}
@@ -56,13 +72,13 @@ func (i *DynamoDBTable) Remove() error {
 	return nil
 }
 
-func GetTableTags(svc *dynamodb.DynamoDB, tableName *string) ([]*dynamodb.Tag, error) {
+func GetDynamoDBTable(svc *dynamodb.DynamoDB, tableName *string) (*dynamodb.TableDescription, []*dynamodb.Tag, error) {
 	result, err := svc.DescribeTable(&dynamodb.DescribeTableInput{
 		TableName: aws.String(*tableName),
 	})
 
 	if err != nil {
-		return make([]*dynamodb.Tag, 0), err
+		return nil, make([]*dynamodb.Tag, 0), err
 	}
 
 	tags, err := svc.ListTagsOfResource(&dynamodb.ListTagsOfResourceInput{
@@ -70,15 +86,16 @@ func GetTableTags(svc *dynamodb.DynamoDB, tableName *string) ([]*dynamodb.Tag, e
 	})
 
 	if err != nil {
-		return make([]*dynamodb.Tag, 0), err
+		return nil, make([]*dynamodb.Tag, 0), err
 	}
 
-	return tags.Tags, nil
+	return result.Table, tags.Tags, nil
 }
 
 func (i *DynamoDBTable) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Identifier", i.id)
+	properties.Set("Deletion Protection", i.deletionProtection)
 
 	for _, tag := range i.tags {
 		properties.SetTag(tag.Key, tag.Value)

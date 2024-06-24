@@ -48,6 +48,7 @@ type DisableDeletionProtection struct {
 	CloudformationStack bool `yaml:"CloudformationStack"`
 	ELBv2               bool `yaml:"ELBv2"`
 	QLDBLedger          bool `yaml:"QLDBLedger"`
+	DynamoDBTable       bool `yaml:"DynamoDBTable"`
 }
 
 type PresetDefinitions struct {
