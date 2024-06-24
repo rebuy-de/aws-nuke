@@ -92,6 +92,10 @@ func GetDynamoDBTable(svc *dynamodb.DynamoDB, tableName *string) (*dynamodb.Tabl
 	return result.Table, tags.Tags, nil
 }
 
+func (i *DynamoDBTable) FeatureFlags(ff config.FeatureFlags) {
+	i.featureFlags = ff
+}
+
 func (i *DynamoDBTable) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Identifier", i.id)
