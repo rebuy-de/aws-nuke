@@ -11,6 +11,7 @@ type EC2VPCEndpointServiceConfiguration struct {
 	svc  *ec2.EC2
 	id   *string
 	name *string
+	tags []*ec2.Tag
 }
 
 func init() {
@@ -36,6 +37,7 @@ func ListEC2VPCEndpointServiceConfigurations(sess *session.Session) ([]Resource,
 				svc:  svc,
 				id:   serviceConfig.ServiceId,
 				name: serviceConfig.ServiceName,
+				tags: serviceConfig.Tags,
 			})
 		}
 
@@ -64,6 +66,9 @@ func (e *EC2VPCEndpointServiceConfiguration) Remove() error {
 func (e *EC2VPCEndpointServiceConfiguration) Properties() types.Properties {
 	properties := types.NewProperties()
 	properties.Set("Name", e.name)
+	for _, tagValue := range e.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
 	return properties
 }
 
