@@ -3,7 +3,7 @@ module github.com/rebuy-de/aws-nuke/v2
 go 1.21
 
 require (
-	github.com/aws/aws-sdk-go v1.53.15
+	github.com/aws/aws-sdk-go v1.54.7
 	github.com/fatih/color v1.17.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
@@ -11,7 +11,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rebuy-de/rebuy-go-sdk/v4 v4.5.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
