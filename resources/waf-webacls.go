@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/waf"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type WAFWebACL struct {
-	svc *waf.WAF
-	ID  *string
+	svc  *waf.WAF
+	ID   *string
+	tags []*waf.Tag
 }
 
 func init() {
@@ -30,9 +32,23 @@ func ListWAFWebACLs(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, webACL := range resp.WebACLs {
+			acl, err := svc.GetWebACL(&waf.GetWebACLInput{
+				WebACLId: webACL.WebACLId,
+			})
+			if err != nil {
+				return nil, err
+			}
+			tags, err := svc.ListTagsForResource(&waf.ListTagsForResourceInput{
+				ResourceARN: acl.WebACL.WebACLArn,
+			})
+			if err != nil {
+				return nil, err
+			}
+
 			resources = append(resources, &WAFWebACL{
-				svc: svc,
-				ID:  webACL.WebACLId,
+				svc:  svc,
+				ID:   webACL.WebACLId,
+				tags: tags.TagInfoForResource.TagList,
 			})
 		}
 
@@ -59,6 +75,16 @@ func (f *WAFWebACL) Remove() error {
 	})
 
 	return err
+}
+
+func (f *WAFWebACL) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (f *WAFWebACL) String() string {

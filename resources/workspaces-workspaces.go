@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/workspaces"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type WorkSpacesWorkspace struct {
 	svc         *workspaces.WorkSpaces
 	workspaceID *string
+	tags        []*workspaces.Tag
 }
 
 func init() {
@@ -30,9 +32,17 @@ func ListWorkSpacesWorkspaces(sess *session.Session) ([]Resource, error) {
 		}
 
 		for _, workspace := range output.Workspaces {
+			tagsResp, err := svc.DescribeTags(&workspaces.DescribeTagsInput{
+				ResourceId: workspace.WorkspaceId,
+			})
+			if err != nil {
+				return nil, err
+			}
+
 			resources = append(resources, &WorkSpacesWorkspace{
 				svc:         svc,
 				workspaceID: workspace.WorkspaceId,
+				tags:        tagsResp.TagList,
 			})
 		}
 
@@ -65,6 +75,16 @@ func (f *WorkSpacesWorkspace) Remove() error {
 	})
 
 	return err
+}
+
+func (f *WorkSpacesWorkspace) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	for _, tag := range f.tags {
+		properties.SetTag(tag.Key, tag.Value)
+	}
+
+	return properties
 }
 
 func (f *WorkSpacesWorkspace) String() string {
