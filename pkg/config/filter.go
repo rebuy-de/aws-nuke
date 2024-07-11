@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mb0/glob"
+	log "github.com/sirupsen/logrus"
 )
 
 type FilterType string
@@ -63,11 +64,13 @@ func (f Filter) Match(o string) (bool, error) {
 		}
 		duration, err := time.ParseDuration(f.Value)
 		if err != nil {
-			return false, err
+			log.Warnf("Failed to parse duration %s: %s", o, err)
+			return false, nil
 		}
 		fieldTime, err := parseDate(o)
 		if err != nil {
-			return false, err
+			log.Warnf("Failed to parse date %s: %s", o, err)
+			return false, nil
 		}
 		fieldTimeWithOffset := fieldTime.Add(duration)
 
