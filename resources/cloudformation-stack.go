@@ -2,6 +2,8 @@ package resources
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"github.com/aws/aws-sdk-go/service/cloudformation/cloudformationiface"
+	"github.com/aws/aws-sdk-go/service/configservice"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 	"github.com/sirupsen/logrus"
@@ -21,8 +24,36 @@ func init() {
 	register("CloudFormationStack", ListCloudFormationStacks)
 }
 
+func fetchConformancePackName(stack_name string) string {
+	prefix := "awsconfigconforms-"
+	suffix := "-conformance-pack-"
+
+	regexPattern := fmt.Sprintf("%s(.+)%s", prefix, suffix)
+
+	re := regexp.MustCompile(regexPattern)
+
+	match := re.FindStringSubmatch(stack_name)
+
+	if len(match) > 1 {
+		return match[1]
+	}
+	return ""
+}
+
+func doesConformancePackExist(pack_name string, config_svc *configservice.ConfigService) bool {
+	pack_names_array := []*string{}
+	pack_names_array = append(pack_names_array, &pack_name)
+
+	params := &configservice.DescribeConformancePacksInput{
+		ConformancePackNames: pack_names_array,
+	}
+	_, err := config_svc.DescribeConformancePacks(params)
+	return err == nil
+}
+
 func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 	svc := cloudformation.New(sess)
+	config_svc := configservice.New(sess)
 
 	params := &cloudformation.DescribeStacksInput{}
 	resources := make([]Resource, 0)
@@ -40,6 +71,7 @@ func ListCloudFormationStacks(sess *session.Session) ([]Resource, error) {
 				svc:               svc,
 				stack:             stack,
 				maxDeleteAttempts: CLOUDFORMATION_MAX_DELETE_ATTEMPT,
+				config_svc:        config_svc,
 			})
 		}
 
@@ -58,6 +90,7 @@ type CloudFormationStack struct {
 	stack             *cloudformation.Stack
 	maxDeleteAttempts int
 	featureFlags      config.FeatureFlags
+	config_svc        *configservice.ConfigService
 }
 
 func (cfs *CloudFormationStack) FeatureFlags(ff config.FeatureFlags) {
@@ -99,6 +132,10 @@ func (cfs *CloudFormationStack) removeWithAttempts(attempt int) error {
 }
 
 func (cfs *CloudFormationStack) doRemove() error {
+	conformance_pack_name := fetchConformancePackName(*cfs.stack.StackName)
+	if conformance_pack_name != "" && doesConformancePackExist(conformance_pack_name, cfs.config_svc) {
+		return nil
+	}
 	o, err := cfs.svc.DescribeStacks(&cloudformation.DescribeStacksInput{
 		StackName: cfs.stack.StackName,
 	})
