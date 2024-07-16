@@ -161,6 +161,9 @@ func NewRootCommand() *cobra.Command {
 	command.PersistentFlags().BoolVarP(
 		&params.Quiet, "quiet", "q", false,
 		"Don't show filtered resources.")
+	command.PersistentFlags().StringVarP(
+		&params.Period, "period", "p", "5s",
+		"Period of loop iteration.")
 
 	command.AddCommand(NewVersionCommand())
 	command.AddCommand(NewResourceTypesCommand())
