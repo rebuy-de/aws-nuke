@@ -58,6 +58,11 @@ func ListMGNSourceServers(sess *session.Session) ([]Resource, error) {
 
 func (f *MGNSourceServer) Remove() error {
 
+	// Disconnect source server from service
+	f.svc.DisconnectFromService(&mgn.DisconnectFromServiceInput{
+		SourceServerID: f.sourceServerID,
+	})
+
 	_, err := f.svc.DeleteSourceServer(&mgn.DeleteSourceServerInput{
 		SourceServerID: f.sourceServerID,
 	})
