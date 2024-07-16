@@ -20,20 +20,20 @@ func init() {
 
 func ListKMSAliases(sess *session.Session) ([]Resource, error) {
 	svc := kms.New(sess)
+	resources := make([]Resource, 0)
+	err := svc.ListAliasesPages(nil, func(page *kms.ListAliasesOutput, lastPage bool) bool {
+		for _, alias := range page.Aliases {
+			resources = append(resources, &KMSAlias{
+				svc:  svc,
+				name: *alias.AliasName,
+			})
+		}
+		return true
+	})
 
-	resp, err := svc.ListAliases(nil)
 	if err != nil {
 		return nil, err
 	}
-
-	resources := make([]Resource, 0)
-	for _, alias := range resp.Aliases {
-		resources = append(resources, &KMSAlias{
-			svc:  svc,
-			name: *alias.AliasName,
-		})
-	}
-
 	return resources, nil
 }
 
