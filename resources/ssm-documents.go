@@ -4,11 +4,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
 type SSMDocument struct {
 	svc  *ssm.SSM
 	name *string
+	tags []*ssm.Tag
 }
 
 func init() {
@@ -41,6 +43,7 @@ func ListSSMDocuments(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &SSMDocument{
 				svc:  svc,
 				name: documentIdentifier.Name,
+				tags: documentIdentifier.Tags,
 			})
 		}
 
@@ -61,6 +64,18 @@ func (f *SSMDocument) Remove() error {
 	})
 
 	return err
+}
+
+func (f *SSMDocument) Properties() types.Properties {
+	properties := types.NewProperties()
+
+	properties.Set("Name", f.name)
+
+	for _, tagValue := range f.tags {
+		properties.SetTag(tagValue.Key, tagValue.Value)
+	}
+
+	return properties
 }
 
 func (f *SSMDocument) String() string {
