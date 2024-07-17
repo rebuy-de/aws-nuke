@@ -52,7 +52,7 @@ func TestLoadExampleConfig(t *testing.T) {
 	}
 
 	expect := Nuke{
-		AccountBlocklist: []string{"1234567890"},
+		AccountBlocklist: []string{"1234567890", "123455566", "123455577"},
 		Regions:          []string{"eu-west-1", "stratoscale"},
 		Accounts: map[string]Account{
 			"555133742": {
@@ -69,6 +69,8 @@ func TestLoadExampleConfig(t *testing.T) {
 					Targets: types.Collection{"S3Bucket"},
 				},
 			},
+			"123455588": {},
+			"123455599": {},
 		},
 		ResourceTypes: ResourceTypes{
 			Targets:  types.Collection{"DynamoDBTable", "S3Bucket", "S3Object"},
@@ -212,9 +214,20 @@ func TestConfigValidation(t *testing.T) {
 		{ID: "555133742", Aliases: []string{"staging"}, ShouldFail: false},
 		{ID: "1234567890", Aliases: []string{"staging"}, ShouldFail: true},
 		{ID: "1111111111", Aliases: []string{"staging"}, ShouldFail: true},
-		{ID: "555133742", Aliases: []string{"production"}, ShouldFail: true},
+		{ID: "555133742", Aliases: []string{"production"}, ShouldFail: false},
 		{ID: "555133742", Aliases: []string{}, ShouldFail: true},
-		{ID: "555133742", Aliases: []string{"staging", "prod"}, ShouldFail: true},
+		{ID: "555133742", Aliases: []string{"staging", "prod"}, ShouldFail: false},
+		// Production accounts in blocklist
+		{ID: "123455566", Aliases: []string{"staging", "prod"}, ShouldFail: true},
+		{ID: "123455577", Aliases: []string{"production"}, ShouldFail: true},
+		// Production accounts not in blocklist
+		{ID: "123455588", Aliases: []string{"staging", "prod"}, ShouldFail: false},
+		{ID: "123455599", Aliases: []string{"production"}, ShouldFail: false},
+		// Production account in blocklist and not added to accounts
+		{ID: "123457755", Aliases: []string{"staging", "prod"}, ShouldFail: true},
+		{ID: "123457788", Aliases: []string{"production"}, ShouldFail: true},
+		// Denied account alias substrings
+		{ID: "123432223", Aliases: []string{"some-accont-with-my-denied-sub-string-oh-yeah"}, ShouldFail: true},
 	}
 
 	for i, tc := range cases {

@@ -5,6 +5,8 @@ regions:
 
 account-blocklist:
 - 1234567890
+- 123455566
+- 123455577
 
 endpoints:
 - region: stratoscale
@@ -24,6 +26,9 @@ resource-types:
   excludes:
   - IAMRole
 
+denied_account_alias_sub_strings:
+  - "my-denied-sub-string"
+
 accounts:
   555133742:
     presets:
@@ -36,6 +41,10 @@ accounts:
       - "uber.admin"
       IAMRolePolicyAttachment:
       - "uber.admin -> AdministratorAccess"
+  123455588: {}
+  123455599: {}
+  # Account that should be denied because of denied_account_alias_sub_strings
+  123432223: {}
 
 presets:
   terraform:
