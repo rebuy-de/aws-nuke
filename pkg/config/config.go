@@ -40,6 +40,7 @@ type FeatureFlags struct {
 	DisableDeletionProtection        DisableDeletionProtection `yaml:"disable-deletion-protection"`
 	DisableEC2InstanceStopProtection bool                      `yaml:"disable-ec2-instance-stop-protection"`
 	ForceDeleteLightsailAddOns       bool                      `yaml:"force-delete-lightsail-addons"`
+	NukeOnDateParseError             bool                      `yaml:"nuke-on-date-parse-error"`
 }
 
 type DisableDeletionProtection struct {

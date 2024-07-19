@@ -37,7 +37,7 @@ type Filter struct {
 	Invert   string
 }
 
-func (f Filter) Match(o string) (bool, error) {
+func (f Filter) Match(o string, c *Nuke) (bool, error) {
 	switch f.Type {
 	case FilterTypeEmpty:
 		fallthrough
@@ -64,13 +64,21 @@ func (f Filter) Match(o string) (bool, error) {
 		}
 		duration, err := time.ParseDuration(f.Value)
 		if err != nil {
-			log.Warnf("Failed to parse duration %s: %s", o, err)
-			return false, nil
+			if c.FeatureFlags.NukeOnDateParseError {
+				log.Warnf("Failed to parse duration %s: %s", o, err)
+				return false, nil
+			} else {
+				return false, err
+			}
 		}
 		fieldTime, err := parseDate(o)
 		if err != nil {
-			log.Warnf("Failed to parse date %s: %s", o, err)
-			return false, nil
+			if c.FeatureFlags.NukeOnDateParseError {
+				log.Warnf("Failed to parse date %s: %s", o, err)
+				return false, nil
+			} else {
+				return false, err
+			}
 		}
 		fieldTimeWithOffset := fieldTime.Add(duration)
 
