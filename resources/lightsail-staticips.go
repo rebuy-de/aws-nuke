@@ -3,11 +3,14 @@ package resources
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lightsail"
+	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"time"
 )
 
 type LightsailStaticIP struct {
 	svc          *lightsail.Lightsail
 	staticIPName *string
+	createdAt    *time.Time
 }
 
 func init() {
@@ -30,6 +33,7 @@ func ListLightsailStaticIPs(sess *session.Session) ([]Resource, error) {
 			resources = append(resources, &LightsailStaticIP{
 				svc:          svc,
 				staticIPName: staticIP.Name,
+				createdAt:    staticIP.CreatedAt,
 			})
 		}
 
@@ -50,6 +54,11 @@ func (f *LightsailStaticIP) Remove() error {
 	})
 
 	return err
+}
+
+func (f *LightsailStaticIP) Properties() types.Properties {
+	return types.NewProperties().
+		Set("CreatedAt", f.createdAt.Format(time.RFC3339))
 }
 
 func (f *LightsailStaticIP) String() string {

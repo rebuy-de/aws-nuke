@@ -13,6 +13,7 @@ type OSDomain struct {
 	domainName      *string
 	lastUpdatedTime *time.Time
 	tagList         []*opensearchservice.Tag
+	creationDate    *time.Time
 }
 
 func init() {
@@ -61,6 +62,7 @@ func ListOSDomains(sess *session.Session) ([]Resource, error) {
 			svc:             svc,
 			domainName:      domain.DomainName,
 			lastUpdatedTime: configResp.DomainConfig.ClusterConfig.Status.UpdateDate,
+			creationDate:    configResp.DomainConfig.ClusterConfig.Status.CreationDate,
 			tagList:         lto.TagList,
 		})
 	}
@@ -78,7 +80,8 @@ func (o *OSDomain) Remove() error {
 
 func (o *OSDomain) Properties() types.Properties {
 	properties := types.NewProperties().
-		Set("LastUpdatedTime", o.lastUpdatedTime.Format(time.RFC3339))
+		Set("LastUpdatedTime", o.lastUpdatedTime.Format(time.RFC3339)).
+		Set("CreationDate", o.creationDate.Format(time.RFC3339))
 	for _, t := range o.tagList {
 		properties.SetTag(t.Key, t.Value)
 	}

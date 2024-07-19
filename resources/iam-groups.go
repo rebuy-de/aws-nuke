@@ -4,13 +4,15 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
+	"time"
 )
 
 type IAMGroup struct {
-	svc  *iam.IAM
-	id   string
-	name string
-	path string
+	svc        *iam.IAM
+	id         string
+	name       string
+	path       string
+	createDate time.Time
 }
 
 func init() {
@@ -24,10 +26,11 @@ func ListIAMGroups(sess *session.Session) ([]Resource, error) {
 	err := svc.ListGroupsPages(nil, func(page *iam.ListGroupsOutput, lastPage bool) bool {
 		for _, out := range page.Groups {
 			resources = append(resources, &IAMGroup{
-				svc:  svc,
-				id:   *out.GroupId,
-				name: *out.GroupName,
-				path: *out.Path,
+				svc:        svc,
+				id:         *out.GroupId,
+				name:       *out.GroupName,
+				path:       *out.Path,
+				createDate: *out.CreateDate,
 			})
 		}
 		return true
@@ -58,5 +61,6 @@ func (e *IAMGroup) Properties() types.Properties {
 	return types.NewProperties().
 		Set("Name", e.name).
 		Set("Path", e.path).
-		Set("ID", e.id)
+		Set("ID", e.id).
+		Set("CreateDate", e.createDate.Format(time.RFC3339))
 }
