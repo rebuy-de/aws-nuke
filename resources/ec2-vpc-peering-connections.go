@@ -21,7 +21,7 @@ func ListEC2VPCPeeringConnections(sess *session.Session) ([]Resource, error) {
 	svc := ec2.New(sess)
 	resources := make([]Resource, 0)
 
-	// filter should be set as deleted vpc connetions are returned
+	// filter should be set as deleted vpc connections are returned
 	params := &ec2.DescribeVpcPeeringConnectionsInput{}
 
 	resp, err := svc.DescribeVpcPeeringConnections(params)
