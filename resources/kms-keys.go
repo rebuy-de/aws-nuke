@@ -1,11 +1,15 @@
 package resources
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/sirupsen/logrus"
+
 	"github.com/rebuy-de/aws-nuke/v2/pkg/types"
 )
 
@@ -32,6 +36,12 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 				KeyId: key.KeyId,
 			})
 			if err != nil {
+				var ae awserr.Error
+				if errors.As(err, &ae) && ae.Code() == "AccessDeniedException" {
+					logrus.Warnf("access denied when running DescribeKey on %s, skipping", *key.KeyId)
+					continue
+				}
+
 				innerErr = err
 				return false
 			}
@@ -55,6 +65,12 @@ func ListKMSKeys(sess *session.Session) ([]Resource, error) {
 				KeyId: key.KeyId,
 			})
 			if err != nil {
+				var ae awserr.Error
+				if errors.As(err, &ae) && ae.Code() == "AccessDeniedException" {
+					logrus.Warnf("access denied when running ListResourceTags on %s, skipping", *key.KeyId)
+					continue
+				}
+
 				innerErr = err
 				return false
 			}
