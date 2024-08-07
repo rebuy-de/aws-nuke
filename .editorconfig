@@ -1,0 +1,132 @@
+# Distributed via https://github.com/rebuy-de/terraform-cluster-config
+# Modify only there, changes in project repos will be overwritten
+
+root = true
+
+[openapi-spec.yaml]
+ij_formatter_enabled = false
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+tab_width = 4
+trim_trailing_whitespace = true
+ij_continuation_indent_size = 8
+ij_formatter_off_tag = @formatter:off
+ij_formatter_on_tag = @formatter:on
+ij_formatter_tags_enabled = true
+ij_smart_tabs = false
+ij_visual_guides =
+ij_wrap_on_typing = false
+
+[{*.htm,*.html,*.sht,*.shtm,*.shtml}]
+ij_html_attribute_wrap = off
+ij_html_do_not_indent_children_of_tags =
+ij_html_keep_blank_lines = 1
+ij_html_text_wrap = off
+
+[{*.cjs,*.js}]
+ij_javascript_do_while_brace_force = always
+ij_javascript_for_brace_force = always
+ij_javascript_if_brace_force = always
+ij_javascript_keep_blank_lines_in_code = 1
+ij_javascript_use_double_quotes = false
+ij_javascript_while_brace_force = always
+
+[{*.ats,*.cts,*.mts,*.ts}]
+ij_typescript_do_while_brace_force = always
+ij_typescript_for_brace_force = always
+ij_typescript_if_brace_force = always
+ij_typescript_import_prefer_absolute_path = true
+ij_typescript_keep_blank_lines_in_code = 1
+ij_typescript_space_before_function_left_parenth = false
+ij_typescript_use_double_quotes = false
+ij_typescript_while_brace_force = always
+
+[*.coffee]
+indent_size = 2
+
+[*.java]
+ij_continuation_indent_size = 4
+ij_java_blank_lines_around_field = 1
+ij_java_blank_lines_around_initializer = 0
+ij_java_class_brace_style = next_line
+ij_java_class_count_to_use_import_on_demand = 99
+ij_java_do_while_brace_force = always
+ij_java_doc_add_blank_line_after_param_comments = true
+ij_java_doc_add_blank_line_after_return = true
+ij_java_for_brace_force = always
+ij_java_if_brace_force = always
+ij_java_keep_blank_lines_before_right_brace = 0
+ij_java_keep_blank_lines_in_code = 1
+ij_java_keep_blank_lines_in_declarations = 0
+ij_java_keep_simple_classes_in_one_line = true
+ij_java_keep_simple_lambdas_in_one_line = true
+ij_java_method_brace_style = next_line
+ij_java_names_count_to_use_import_on_demand = 99
+ij_java_new_line_after_lparen_in_record_header = true
+ij_java_packages_to_use_import_on_demand =
+ij_java_record_components_wrap = on_every_item
+ij_java_rparen_on_new_line_in_record_header = true
+ij_java_while_brace_force = always
+
+[{*.kt,*.kts}]
+ij_continuation_indent_size = 4
+ij_kotlin_code_style_defaults = KOTLIN_OFFICIAL
+ij_kotlin_name_count_to_use_star_import = 2147483647
+ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
+ij_kotlin_packages_to_use_import_on_demand =
+
+[{*.ctp,*.hphp,*.inc,*.module,*.php,*.php4,*.php5,*.phtml}]
+ij_php_align_multiline_parameters = false
+ij_php_blank_lines_around_field = 1
+ij_php_blank_lines_before_return_statement = 1
+ij_php_comma_after_last_array_element = true
+ij_php_force_short_declaration_array_style = true
+ij_php_keep_blank_lines_before_right_brace = 0
+ij_php_keep_blank_lines_in_code = 1
+ij_php_keep_blank_lines_in_declarations = 0
+ij_php_keep_rparen_and_lbrace_on_one_line = true
+ij_php_lower_case_boolean_const = true
+ij_php_lower_case_null_const = true
+ij_php_method_parameters_new_line_after_left_paren = true
+ij_php_method_parameters_right_paren_on_new_line = true
+ij_php_phpdoc_blank_line_before_tags = true
+ij_php_phpdoc_blank_lines_around_parameters = true
+ij_php_space_after_type_cast = true
+ij_php_space_before_short_closure_left_parenthesis = true
+
+[{*.ant,*.fxml,*.jhm,*.jnlp,*.jrxml,*.pom,*.rng,*.tld,*.wadl,*.wsdl,*.xml,*.xsd,*.xsl,*.xslt,*.xul,phpunit.xml.dist}]
+ij_xml_space_inside_empty_tag = true
+
+[{*.tf,*.tfvars,*.hcl}]
+tab_width = 2
+ij_continuation_indent_size = 4
+
+[*.less]
+tab_width = 2
+ij_continuation_indent_size = 2
+
+[*.sass]
+tab_width = 2
+ij_continuation_indent_size = 2
+
+[*.scala]
+ij_scala_do_while_brace_force = always
+ij_scala_for_brace_force = always
+ij_scala_if_brace_force = always
+ij_scala_keep_blank_lines_before_right_brace = 0
+ij_scala_keep_blank_lines_in_code = 0
+ij_scala_keep_blank_lines_in_declarations = 0
+ij_scala_multiline_string_closing_quotes_on_new_line = false
+
+[*.scss]
+ij_continuation_indent_size = 4
+
+[{*.yaml,*.yml}]
+ij_yaml_spaces_within_braces = false
+ij_yaml_spaces_within_brackets = false
