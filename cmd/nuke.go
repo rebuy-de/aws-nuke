@@ -221,7 +221,7 @@ func (n *Nuke) Filter(item *Item) error {
 			logrus.Warnf(err.Error())
 			continue
 		}
-		match, err := filter.Match(prop)
+		match, err := filter.Match(prop, n.Config)
 		if err != nil {
 			return err
 		}

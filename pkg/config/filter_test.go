@@ -61,7 +61,7 @@ func TestUnmarshalFilter(t *testing.T) {
 				"",
 				strconv.Itoa(int(past.Unix())),
 				past.Format("2006-01-02"),
-				past.Format("2006/01/02"),
+				past.Format("2006/01/03"),
 				past.Format("2006-01-02T15:04:05Z"),
 				past.Format("2006-01-02 15:04:05.14 -0700 MST"),
 				past.Format(time.RFC3339Nano),
@@ -79,8 +79,10 @@ func TestUnmarshalFilter(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			cfg := config.Nuke{}
+
 			for _, o := range tc.match {
-				match, err := filter.Match(o)
+				match, err := filter.Match(o, &cfg)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -91,7 +93,7 @@ func TestUnmarshalFilter(t *testing.T) {
 			}
 
 			for _, o := range tc.mismatch {
-				match, err := filter.Match(o)
+				match, err := filter.Match(o, &cfg)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -102,4 +104,39 @@ func TestUnmarshalFilter(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDateParseErrors(t *testing.T) {
+	t.Run("NukeOnDateParseError: false (default)", func(t *testing.T) {
+		filter := config.Filter{
+			Type:  config.FilterTypeDateOlderThan,
+			Value: "0",
+		}
+		cfg := config.Nuke{}
+		match, err := filter.Match("IAmNotADate", &cfg)
+		// should error by default
+		if err == nil {
+			t.Fatal(err)
+		}
+		if match != false {
+			t.Fatal("match should be false")
+		}
+	})
+
+	t.Run("NukeOnDateParseError: true", func(t *testing.T) {
+		filter := config.Filter{
+			Type:  config.FilterTypeDateOlderThan,
+			Value: "0",
+		}
+		cfg := config.Nuke{}
+		cfg.FeatureFlags.NukeOnDateParseError = true
+		match, err := filter.Match("IAmNotADate", &cfg)
+		// should not error when configured
+		if err != nil {
+			t.Fatal(err)
+		}
+		if match != false {
+			t.Fatal("match should be false")
+		}
+	})
 }
