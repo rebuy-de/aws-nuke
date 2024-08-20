@@ -51,7 +51,6 @@ ij_typescript_while_brace_force = always
 indent_size = 2
 
 [*.java]
-ij_continuation_indent_size = 4
 ij_java_blank_lines_around_field = 1
 ij_java_blank_lines_around_initializer = 0
 ij_java_class_brace_style = next_line
@@ -75,7 +74,6 @@ ij_java_rparen_on_new_line_in_record_header = true
 ij_java_while_brace_force = always
 
 [{*.kt,*.kts}]
-ij_continuation_indent_size = 4
 ij_kotlin_code_style_defaults = KOTLIN_OFFICIAL
 ij_kotlin_name_count_to_use_star_import = 2147483647
 ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
@@ -105,7 +103,7 @@ ij_xml_space_inside_empty_tag = true
 
 [{*.tf,*.tfvars,*.hcl}]
 tab_width = 2
-ij_continuation_indent_size = 4
+ij_continuation_indent_size = 2
 
 [*.less]
 tab_width = 2
@@ -123,9 +121,6 @@ ij_scala_keep_blank_lines_before_right_brace = 0
 ij_scala_keep_blank_lines_in_code = 0
 ij_scala_keep_blank_lines_in_declarations = 0
 ij_scala_multiline_string_closing_quotes_on_new_line = false
-
-[*.scss]
-ij_continuation_indent_size = 4
 
 [{*.yaml,*.yml}]
 ij_yaml_spaces_within_braces = false
