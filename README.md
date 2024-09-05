@@ -1,3 +1,10 @@
+> [!CAUTION]
+> This repository for aws-nuke is no longer being actively maintained. We recommend users to switch to the actively maintained fork of this project at [ekristen/aws-nuke](https://github.com/ekristen/aws-nuke).
+> We appreciate all the support and contributions we've received throughout the life of this project. We believe that the fork will continue to provide the functionality and support that you have come to expect from aws-nuke.
+> Please note that this deprecation means we will not be addressing issues, accepting pull requests, or making future releases from this repository.
+> Thank you for your understanding and support.
+
+
 # aws-nuke
 
 ![Build Status](https://github.com/rebuy-de/aws-nuke/workflows/Golang%20CI/badge.svg?branch=main)
