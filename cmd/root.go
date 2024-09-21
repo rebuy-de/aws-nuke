@@ -1,16 +1,17 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"os"
-	"sort"
-
+	awsSDKConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/awsutil"
 	"github.com/rebuy-de/aws-nuke/v2/pkg/config"
 	"github.com/rebuy-de/aws-nuke/v2/resources"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"os"
+	"sort"
 )
 
 func NewRootCommand() *cobra.Command {
@@ -45,7 +46,25 @@ func NewRootCommand() *cobra.Command {
 			return err
 		}
 
-		if !creds.HasKeys() && !creds.HasProfile() && defaultRegion != "" {
+		if params.Profile != "" {
+			cfg, err := awsSDKConfig.LoadDefaultConfig(context.TODO(), awsSDKConfig.WithSharedConfigProfile(params.Profile))
+			if err != nil {
+				log.Fatalf("unable to load SDK config, %v", err)
+			}
+			log.Infof("using profile %v", params.Profile)
+			/// Extract credentials from the configuration
+			cred, err := cfg.Credentials.Retrieve(context.TODO())
+			if err != nil {
+				log.Fatalf("unable to retrieve credentials, %v", err)
+			}
+
+			log.Info(" Received AccessKeyID: %s", cred.AccessKeyID)
+			creds.AccessKeyID = cred.AccessKeyID
+			creds.SecretAccessKey = cred.SecretAccessKey
+			defaultRegion = cfg.Region
+		}
+
+		if !creds.HasKeys() && !creds.HasProfile() {
 			creds.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
 			creds.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 		}
@@ -71,6 +90,9 @@ func NewRootCommand() *cobra.Command {
 				awsutil.DefaultAWSPartitionID = endpoints.AwsUsGovPartitionID
 			case endpoints.CnNorth1RegionID, endpoints.CnNorthwest1RegionID:
 				awsutil.DefaultAWSPartitionID = endpoints.AwsCnPartitionID
+			case endpoints.EuWest1RegionID, endpoints.EuWest2RegionID:
+				awsutil.DefaultAWSPartitionID = endpoints.AwsPartitionID
+
 			default:
 				if config.CustomEndpoints.GetRegion(defaultRegion) == nil {
 					err = fmt.Errorf("The custom region '%s' must be specified in the configuration 'endpoints'", defaultRegion)
@@ -101,7 +123,7 @@ func NewRootCommand() *cobra.Command {
 		"(required) Path to the nuke config file.")
 
 	command.PersistentFlags().StringVar(
-		&creds.Profile, "profile", "",
+		&params.Profile, "profile", "",
 		"Name of the AWS profile name for accessing the AWS API. "+
 			"Cannot be used together with --access-key-id and --secret-access-key.")
 	command.PersistentFlags().StringVar(

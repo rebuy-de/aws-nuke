@@ -13,6 +13,7 @@ type NukeParameters struct {
 	CloudControl []string
 
 	NoDryRun   bool
+	Profile    string
 	Force      bool
 	ForceSleep int
 	Quiet      bool

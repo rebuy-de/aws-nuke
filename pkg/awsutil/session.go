@@ -59,7 +59,7 @@ func (c *Credentials) HasKeys() bool {
 }
 
 func (c *Credentials) Validate() error {
-	if c.HasProfile() && c.HasKeys() {
+	if !c.HasKeys() {
 		return fmt.Errorf("You have to specify either the --profile flag or " +
 			"--access-key-id with --secret-access-key and optionally " +
 			"--session-token.\n")
